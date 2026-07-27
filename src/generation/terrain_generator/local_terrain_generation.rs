@@ -7,6 +7,8 @@ use crate::world::enums::biome::BiomeType::{LargeElf, LargeGnome, LargeHuman, Me
 use crate::world::enums::races::FantasyRace;
 use crate::world::terrain_map::{GlobalTerrainMap, TerrainMap};
 
+const CAPITAL_SMALL_BIOME_RADIUS: f64 = 0.05;
+
 impl TerrainMap {
     pub fn new(
         config: &TerrainConfig,
@@ -52,8 +54,6 @@ fn apply_local_biomes(
         let row = tile_index / size;
         let col = tile_index % size;
 
-        let is_capital = row == cell.capital.0 && col == cell.capital.1;
-
         let nx = ((col as f64 - cell.capital.1 as f64) / size as f64) * config.local_frequency
             + seed_offset;
         let ny = ((row as f64 - cell.capital.0 as f64) / size as f64) * config.local_frequency
@@ -68,16 +68,31 @@ fn apply_local_biomes(
             config.local_lacunarity,
         ));
 
-        map[tile_index] = choose_local_biome(value, config, cell.fantasy_race, is_capital);
+        let value = (value - capital_small_biome_bias(row, col, cell.capital, size)).clamp(0.0, 1.0);
+
+        map[tile_index] = choose_local_biome(value, config, cell.fantasy_race);
     }
 }
 
-fn choose_local_biome(value: f64, config: &TerrainConfig, fantasy_race: FantasyRace, is_capital: bool) -> BiomeType {
+fn capital_small_biome_bias(
+    row: usize,
+    col: usize,
+    capital: (usize, usize),
+    terrain_size: usize,
+) -> f64 {
+    let dx = col as f64 - capital.1 as f64;
+    let dy = row as f64 - capital.0 as f64;
+    let d = dx.hypot(dy) / terrain_size as f64;
+
+    (1.0 - d / CAPITAL_SMALL_BIOME_RADIUS).clamp(0.0, 1.0)
+}
+
+fn choose_local_biome(value: f64, config: &TerrainConfig, fantasy_race: FantasyRace) -> BiomeType {
     use FantasyRace::*;
     
     match fantasy_race {
         FireMages => {
-            if value <= config.local_small_threshold || is_capital {
+            if value <= config.local_small_threshold {
                 SmallHuman
             } else if value <= config.local_middle_threshold {
                 MediumHuman
@@ -86,7 +101,7 @@ fn choose_local_biome(value: f64, config: &TerrainConfig, fantasy_race: FantasyR
             }
         }
         WaterMages => {
-            if value <= config.local_small_threshold || is_capital {
+            if value <= config.local_small_threshold {
                 SmallElf
             } else if value <= config.local_middle_threshold {
                 MediumElf
@@ -95,13 +110,13 @@ fn choose_local_biome(value: f64, config: &TerrainConfig, fantasy_race: FantasyR
             }
         }
         StoneMages => {
-            if value <= config.local_small_threshold || is_capital {
+            if value <= config.local_small_threshold {
                 SmallGnome
             } else if value <= config.local_middle_threshold {
                 MediumGnome
             } else {
                 LargeGnome
             }
-        },
+        }
     }
 }
