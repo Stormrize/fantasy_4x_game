@@ -1,6 +1,6 @@
 use crate::world::enums::biome::BiomeType;
 use crate::world::enums::buildings::BuildingType;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use bevy::prelude::Resource;
 use crate::generation::races_generation::players_or_bots::generate_players_positions::PlayerTerrainData;
 use crate::world::buildings_map::BuildingMap;

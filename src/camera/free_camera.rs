@@ -1,4 +1,4 @@
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use bevy::camera::ScalingMode;
 use bevy::input::mouse::{MouseMotion, MouseScrollUnit, MouseWheel};
 use bevy::prelude::*;

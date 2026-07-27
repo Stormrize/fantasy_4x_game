@@ -5,7 +5,7 @@ use crate::generation::terrain_generator::PerlinPlaceholder;
 use crate::world::buildings_map::BuildingMap;
 use crate::world::fog_map::FogMap;
 use crate::world::resource_map::ResourceMap;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use crate::world::terrain_map::{GlobalTerrainMap, TerrainMap};
 use crate::world::unit_map::UnitsMap;
 
@@ -26,7 +26,7 @@ pub fn insert_map_resources(mut commands: Commands) {
     let terrain = TerrainMap::new(&config, &perlin, &global_terrain, &influence_map);
     let resources = ResourceMap::new(&config, &terrain);
     let cities = BuildingMap::new(&config, &capital_coords, &terrain);
-    let units = UnitsMap::new(&config);
+    let units = UnitsMap::new(&config, &capital_coords);
     let fog = FogMap::new(&config);
 
     commands.insert_resource(config);

@@ -8,7 +8,7 @@ use crate::world::enums::resources::ResourceType;
 use crate::world::enums::units::Unit;
 use crate::world::fog_map::FogMap;
 use crate::world::resource_map::ResourceMap;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use crate::world::terrain_map::TerrainMap;
 use crate::world::unit_map::UnitsMap;
 

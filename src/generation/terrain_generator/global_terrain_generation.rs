@@ -1,7 +1,7 @@
 use bevy::tasks::{ComputeTaskPool, ParallelSlice, ParallelSliceMut};
 use super::noise::{fbm, normalise, sample};
 use crate::world::enums::biome::BiomeType;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use crate::generation::terrain_generator::PerlinPlaceholder;
 use crate::world::terrain_map::GlobalTerrainMap;
 impl GlobalTerrainMap {

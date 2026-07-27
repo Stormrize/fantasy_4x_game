@@ -1,5 +1,5 @@
 use crate::world::enums::biome::BiomeType;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use bevy::asset::RenderAssetUsages;
 use bevy::math::IVec2;
 use bevy::mesh::{Indices, PrimitiveTopology};

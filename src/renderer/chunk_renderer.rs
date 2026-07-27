@@ -3,7 +3,7 @@ use crate::renderer::buildings_renderer::{despawn_buildings_meshes, spawn_buildi
 use crate::renderer::resource_renderer::{despawn_resource_meshes, spawn_resource_meshes, ResourceAssets};
 use crate::renderer::terrain_renderer::{despawn_terrain_meshes, spawn_terrain_meshes, TerrainAssets};
 use crate::renderer::Rendered;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use bevy::asset::Assets;
 use bevy::camera::Projection;
 use bevy::math::IVec2;

@@ -1,4 +1,4 @@
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use bevy::camera::{OrthographicProjection, Projection, ScalingMode};
 use bevy::math::{IVec2, Vec3};
 use bevy::prelude::{Transform, Window};

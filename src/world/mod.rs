@@ -4,4 +4,4 @@ pub mod resource_map;
 pub mod unit_map;
 pub mod buildings_map;
 pub mod enums;
-pub mod terrain_config;
+pub mod game_config;

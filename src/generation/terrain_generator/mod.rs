@@ -1,6 +1,6 @@
 use ::noise::Perlin;
 use bevy::prelude::Resource;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 
 mod local_terrain_generation;
 mod global_terrain_generation;

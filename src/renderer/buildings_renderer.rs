@@ -1,5 +1,5 @@
 use crate::world::enums::buildings::BuildingType;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use bevy::math::IVec2;
 use bevy::pbr::MeshMaterial3d;
 use bevy::prelude::{

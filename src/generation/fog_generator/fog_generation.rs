@@ -1,5 +1,5 @@
 use crate::world::fog_map::FogMap;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 
 impl FogMap {
     pub fn new(config: &TerrainConfig) -> Self {

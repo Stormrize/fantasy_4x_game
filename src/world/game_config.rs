@@ -1,4 +1,4 @@
-use crate::world::terrain_config::TerrainShape::Jagged;
+use crate::world::game_config::TerrainShape::Jagged;
 use bevy::prelude::Resource;
 use crate::world::enums::races::FantasyRace;
 

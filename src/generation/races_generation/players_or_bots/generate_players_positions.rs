@@ -1,5 +1,5 @@
 use crate::world::enums::biome::BiomeType;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use rand::{RngExt, SeedableRng};
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;

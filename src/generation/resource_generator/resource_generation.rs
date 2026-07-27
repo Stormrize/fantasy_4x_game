@@ -1,6 +1,6 @@
 use crate::world::enums::biome::BiomeType;
 use crate::world::enums::resources::ResourceType;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use bevy::prelude::Resource;
 use rand::{RngExt, SeedableRng};
 use rand_chacha::ChaCha8Rng;

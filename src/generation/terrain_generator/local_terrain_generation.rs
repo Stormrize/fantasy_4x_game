@@ -1,5 +1,5 @@
 use crate::world::enums::biome::BiomeType;
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use crate::generation::races_generation::players_or_bots::voronoi_diagram::{PlayerInfluenceCell, PlayerInfluenceMap};
 use crate::generation::terrain_generator::noise::{fbm, normalise};
 use crate::generation::terrain_generator::PerlinPlaceholder;

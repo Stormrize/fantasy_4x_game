@@ -1,5 +1,5 @@
 use crate::input::events::{handle_input, RegenerateWorldEvent};
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use crate::ui::menus::AppState;
 use bevy::app::{App, FixedUpdate, Startup, Update};
 use bevy::asset::Assets;

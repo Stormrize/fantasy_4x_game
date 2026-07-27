@@ -1,4 +1,4 @@
-use crate::world::terrain_config::TerrainConfig;
+use crate::world::game_config::TerrainConfig;
 use bevy::prelude::*;
 use noise::Perlin;
 use crate::generation::terrain_generator::PerlinPlaceholder;
