@@ -1,3 +1,5 @@
+mod mini_interactive_ui;
+
 use bevy::app::App;
 use bevy::prelude::Plugin;
 

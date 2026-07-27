@@ -1,13 +1,13 @@
 //! Ортографическая камера для чанкового мира.
 
-use bevy::{camera::ScalingMode, prelude::*};
+use crate::ui::menus::AppState;
 use bevy::image::{ImageAddressMode, ImageLoaderSettings, ImageSampler, ImageSamplerDescriptor};
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::math::Affine2;
 use bevy::math::ops::sqrt;
 use bevy::mesh::PlaneMeshBuilder;
 use bevy::render::render_resource::BindlessResourceType::Texture3d;
-use crate::ui::menus::AppState;
+use bevy::{camera::ScalingMode, prelude::*};
 
 #[derive(Resource)]
 pub struct CameraZoom {
@@ -20,7 +20,12 @@ impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(CameraZoom { zoom: 1.0 })
             .add_systems(OnEnter(AppState::InGameMenu), setup_camera)
-            .add_systems(Update, (camera_movement, apply_zoom_smoothing).chain().run_if(in_state(AppState::InGameMenu)));
+            .add_systems(
+                Update,
+                (camera_movement, apply_zoom_smoothing)
+                    .chain()
+                    .run_if(in_state(AppState::InGameMenu)),
+            );
     }
 }
 
@@ -34,7 +39,6 @@ struct SpaceBackground;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-
 fn setup_background(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -44,7 +48,6 @@ fn setup_background(
     // 1. Загружаем текстуру космоса с повторением (как у вас)
     let texture_handle = asset_server.load_with_settings(
         "space_background_4.png",
-
         |settings: &mut ImageLoaderSettings| {
             settings.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
                 address_mode_u: ImageAddressMode::Repeat,
@@ -155,11 +158,9 @@ fn camera_movement(
         transform.translation -= iso_right * pan_speed;
     }
 
-    let zoom_speed = 0.3;
+    let zoom_speed = 0.2;
     if let Projection::Orthographic(ref mut ortho) = *projection {
-
         for mouse_wheel in mouse_wheel_reader.read() {
-
             let scroll = match mouse_wheel.unit {
                 MouseScrollUnit::Line => mouse_wheel.y * zoom_speed,
                 MouseScrollUnit::Pixel => mouse_wheel.y * zoom_speed * 0.05,
@@ -184,6 +185,5 @@ fn apply_zoom_smoothing(
 
     let smoothness = 8.0;
     let t = 1.0 - (-smoothness * time.delta_secs()).exp();
-
     ortho.scale = ortho.scale.lerp(target_zoom.zoom, t);
 }

@@ -1,7 +1,7 @@
+use crate::world::terrain_config::TerrainConfig;
 use bevy::camera::ScalingMode;
 use bevy::input::mouse::{MouseMotion, MouseScrollUnit, MouseWheel};
 use bevy::prelude::*;
-use crate::terrain::terrain_config::TerrainConfig;
 
 pub struct FreeCameraPlugin;
 
@@ -87,7 +87,7 @@ fn camera_movement(
     mut target_zoom: ResMut<CameraZoom>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
-    let Ok((mut transform,mut projection, mut free_camera)) = camera_q.single_mut() else {
+    let Ok((mut transform, mut projection, mut free_camera)) = camera_q.single_mut() else {
         return;
     };
 

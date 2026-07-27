@@ -4,6 +4,8 @@ use bevy::prelude::States;
 pub enum AppState {
     #[default]
     MainMenu,
+    GameSetupMenu,
+    MultiplayerSetupMenu,
     InGameMenu,
     SettingsMenu,
     AboutUsMenu,
