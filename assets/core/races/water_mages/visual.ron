@@ -1,0 +1,21 @@
+(
+    //biome
+    small_biome: "0.0, 0.99, 0.0",
+    medium_biome: "0.0, 0.66, 0.0",
+    large_biome: "0.0, 0.33, 0.0",
+
+    //resource
+    small_resource: "0.0, 0.33, 0.0",
+    medium_resource: "0.0, 0.66, 0.0",
+    large_resource: "0.0, 0.99, 0.0",
+
+    //building
+    capital: "0.0, 1.0, 0.0",
+    empty_cities: "0.0, 0.0, 1.0",
+    empty_city_colonized: "0.0, 0.0, 0.0",
+    medium_building: "0.0, 0.0, 0.0",
+    large_building: "0.0, 0.0, 0.0",
+    spawning_building: "0.0, 0.0, 0.0",
+    house: "0.0, 0.0, 0.0",
+    research_center: "0.0, 0.0, 0.0",
+)

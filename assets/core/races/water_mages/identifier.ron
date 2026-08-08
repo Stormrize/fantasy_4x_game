@@ -1,0 +1,6 @@
+(
+    id: "WaterMages",
+    description: "",
+    ui_icon_path: "water_mage_icon.png",
+    visual_path: "assets/core/races/water_mages/visual.ron"
+)

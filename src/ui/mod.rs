@@ -8,6 +8,7 @@ mod main_menu;
 pub mod menus;
 mod settings_menu;
 mod game_setup_menu;
+mod loading;
 
 pub struct UiPlugin;
 

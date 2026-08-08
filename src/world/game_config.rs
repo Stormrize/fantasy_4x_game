@@ -1,11 +1,10 @@
 use crate::world::game_config::TerrainShape::Jagged;
 use bevy::prelude::Resource;
-use crate::world::enums::races::FantasyRace;
 
 #[derive(Resource)]
-pub struct TerrainConfig {
+pub struct GameConfig {
     pub seed: u32,                      //4
-    pub players: Vec<(u8, FantasyRace)>,//?
+    //pub current_players: Vec<(u8, FantasyRace)>,//?
     pub terrain_size: usize,            //8
     pub chunk_size: usize,              //8
     pub tile_size: f32,                 //4
@@ -33,12 +32,12 @@ pub struct TerrainConfig {
     pub noise_strength: f32,
 }
 
-impl Default for TerrainConfig {
+impl Default for GameConfig {
     fn default() -> Self {
         Self {
             //seed + players
             seed: 33,
-            players: vec![(0, FantasyRace::WaterMages), (1, FantasyRace::FireMages), (2, FantasyRace::StoneMages)],
+            //players: vec![(0, FantasyRace::WaterMages), (1, FantasyRace::FireMages), (2, FantasyRace::StoneMages)],
 
             //terrain
             terrain_size: 32,
@@ -82,7 +81,7 @@ impl Default for TerrainConfig {
     }
 }
 
-impl TerrainConfig {
+impl GameConfig {
     pub fn with_seed(seed: u32) -> Self {
         Self {
             seed,

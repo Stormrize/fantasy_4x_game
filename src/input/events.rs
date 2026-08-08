@@ -1,4 +1,4 @@
-use crate::world::game_config::TerrainConfig;
+use crate::world::game_config::GameConfig;
 use bevy::prelude::*;
 use noise::Perlin;
 use crate::generation::terrain_generator::PerlinPlaceholder;
@@ -10,7 +10,7 @@ pub struct RegenerateWorldEvent;
 pub fn handle_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut events: MessageWriter<RegenerateWorldEvent>,
-    mut config: ResMut<TerrainConfig>,
+    mut config: ResMut<GameConfig>,
 ) {
     if keyboard.just_pressed(KeyCode::KeyR) {
         config.seed = config
