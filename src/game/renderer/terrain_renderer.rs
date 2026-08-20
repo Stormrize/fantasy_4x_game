@@ -1,15 +1,11 @@
-use crate::world::enums::biome::BiomeType;
 use crate::world::game_config::GameConfig;
-use bevy::asset::RenderAssetUsages;
-use bevy::math::IVec2;
-use bevy::mesh::{Indices, PrimitiveTopology};
-use bevy::pbr::MeshMaterial3d;
+use crate::world::game_resources::data::biome::BiomeType;
+use crate::world::game_resources::terrain_map::{GlobalTerrainMap, TerrainMap};
+use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
 use bevy::prelude::{
-    default, Assets, Commands, Component, Entity, Handle, Mesh, Mesh3d, Plane3d, ResMut, Resource,
-    StandardMaterial, Transform, UVec2, Vec3,
+    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Plane3d,
+    StandardMaterial, Transform,
 };
-use bevy::reflect::List;
-use crate::world::terrain_map::{GlobalTerrainMap, TerrainMap};
 
 #[derive(Component)]
 pub struct TerrainMesh {
@@ -17,42 +13,9 @@ pub struct TerrainMesh {
     pub biome: BiomeType,
 }
 
-#[derive(Resource)]
-pub struct TerrainAssets {
-    pub materials: [Handle<StandardMaterial>; 10],
-}
-
 pub struct SpawnedTerrainMeshes {
     pub entities: Vec<Entity>,
     pub mesh_handles: Vec<Handle<Mesh>>,
-}
-
-impl TerrainAssets {
-    pub fn build(materials: &mut Assets<StandardMaterial>) -> Self {
-        let mat_handles: Vec<Handle<StandardMaterial>> = BiomeType::ALL
-            .iter()
-            .map(|biome| {
-                materials.add(StandardMaterial {
-                    base_color: biome.clone().color(),
-                    perceptual_roughness: match biome {
-                        BiomeType::Water => 0.08,
-                        _ => 0.9,
-                    },
-                    metallic: 0.0,
-                    ..default()
-                })
-            })
-            .collect();
-
-        Self {
-            materials: mat_handles.try_into().expect("Check BiomeType::ALL"),
-        }
-    }
-
-    #[inline]
-    pub fn material_for(&self, biome: BiomeType) -> Handle<StandardMaterial> {
-        self.materials[biome.index()].clone()
-    }
 }
 
 #[allow(dead_code)]
@@ -102,7 +65,7 @@ pub fn spawn_terrain_meshes(
     config: &GameConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    assets: &TerrainAssets,
+    assets: &VisualRacesData,
     terrain: &TerrainMap,
 ) -> SpawnedTerrainMeshes {
     // TODO можно поменять тайлы на гексагоны изза боевки
@@ -122,7 +85,15 @@ pub fn spawn_terrain_meshes(
 
     for row in min_x..max_x {
         for col in min_y..max_y {
-            let terrain = terrain.get(row as usize, col as usize);
+            let biome = terrain.get(row as usize, col as usize);
+
+            let player_race = biome.inside();
+
+            if player_race.is_none() {
+                continue;
+            }
+
+            let handle = &assets.0[player_race.unwrap()].get_biome(biome.index());
 
             let mesh_handle = meshes.add(Plane3d::default());
 
@@ -130,7 +101,7 @@ pub fn spawn_terrain_meshes(
                 .spawn((
                     Transform::from_xyz(row as f32 * tile_size, 0.0, col as f32 * tile_size),
                     Mesh3d(mesh_handle.clone()),
-                    MeshMaterial3d(assets.material_for(terrain)),
+                    MeshMaterial3d(handle.clone()),
                 ))
                 .id();
 
@@ -156,6 +127,7 @@ pub fn despawn_terrain_meshes(
 }
 
 #[allow(dead_code)]
+#[cfg(false)]
 fn build_biome_surface_mesh(
     biome: BiomeType,
     coord: IVec2,

@@ -1,0 +1,6 @@
+(
+    id: "StoneMages",
+    description: "",
+    ui_icon_path: "stone_mage_icon.png",
+    visual_path: "core/races/stone_mages/visual.ron"
+)

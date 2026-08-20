@@ -1,29 +1,28 @@
-use bevy::prelude::{Commands, Res, ResMut};
-use crate::generation::races_generation::players_or_bots::generate_players_positions::PlayerTerrainData;
-use crate::generation::races_generation::players_or_bots::voronoi_diagram::PlayerInfluenceMap;
-use crate::generation::terrain_generator::PerlinPlaceholder;
-use crate::world::buildings_map::BuildingMap;
-use crate::world::fog_map::FogMap;
-use crate::world::resource_map::ResourceMap;
+use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
+use crate::game::generation::races_generation::players_or_bots::voronoi_diagram::PlayerInfluenceMap;
+use crate::game::generation::terrain_generator::PerlinPlaceholder;
 use crate::world::game_config::GameConfig;
-use crate::world::terrain_map::{GlobalTerrainMap, TerrainMap};
-use crate::world::unit_map::UnitsMap;
+use crate::world::game_resources::buildings_map::BuildingMap;
+use crate::world::game_resources::fog_map::FogMap;
+use crate::world::game_resources::resource_map::ResourceMap;
+use crate::world::game_resources::terrain_map::{GlobalTerrainMap, TerrainMap};
+use crate::world::game_resources::unit_map::UnitsMap;
+use bevy::prelude::{Commands, Res, ResMut};
 
-pub mod terrain_generator;
-pub mod resource_generator;
-pub mod races_generation;
 mod fog_generator;
+pub mod races_generation;
+pub mod resource_generator;
+pub mod terrain_generator;
 mod units_generator;
 
-pub fn insert_map_resources(mut commands: Commands) {
-
-// TODO можно тут типа инициализировать struct для разных цивилизаций и потом откинуть так не нужны больше в рам
+pub fn insert_map_resources(commands: &mut Commands) {
+    // TODO можно тут типа инициализировать struct для разных цивилизаций и потом откинуть так не нужны больше в рам
 
     let config = GameConfig::default();
     let perlin = PerlinPlaceholder::new(&config);
     let global_terrain = GlobalTerrainMap::new(&config, &perlin);
     let capital_coords =
-        PlayerTerrainData::calculate_player_positions(&config, &global_terrain).unwrap();
+        PlayersTerrainData::calculate_player_positions(&config, &global_terrain).unwrap();
     let influence_map =
         PlayerInfluenceMap::voronoi_diagram_for_players(&config, &capital_coords, &perlin);
     let terrain = TerrainMap::new(&config, &perlin, &global_terrain, &influence_map);
@@ -49,7 +48,7 @@ pub fn regenerate_map(
     let next_perlin = PerlinPlaceholder::new(&config);
     let next_global_terrain = GlobalTerrainMap::new(&config, &next_perlin);
     let next_capital_coords =
-        PlayerTerrainData::calculate_player_positions(&config, &next_global_terrain).unwrap();
+        PlayersTerrainData::calculate_player_positions(&config, &next_global_terrain).unwrap();
     let next_influence_map = PlayerInfluenceMap::voronoi_diagram_for_players(
         &config,
         &next_capital_coords,

@@ -1,18 +1,30 @@
-use rand::prelude::{IndexedRandom, SliceRandom};
+use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
+use crate::world::game_config::PlayerRace;
+use crate::world::{
+    game_config::GameConfig,
+    game_resources::{data::units::Unit, unit_map::UnitsMap},
+};
 use rand::SeedableRng;
+use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
-use crate::generation::races_generation::players_or_bots::generate_players_positions::PlayerTerrainData;
-use crate::world::enums::units::Unit;
-use crate::world::game_config::GameConfig;
-use crate::world::unit_map::UnitsMap;
+use smol_str::SmolStr;
 
 impl UnitsMap {
-    pub fn new(config: &GameConfig, capital_coord: &PlayerTerrainData) -> Self {
+    pub fn new(config: &GameConfig, capital_coord: &PlayersTerrainData) -> Self {
         let terrain_size = config.terrain_size;
         let mut data = vec![Unit::default(); terrain_size * terrain_size];
         let map = &capital_coord.data;
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
-        let mut possible_positions: [(i32, i32); 8] = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, -1), (-1, 0), (1, 1)];
+        let mut possible_positions: [(i32, i32); 8] = [
+            (-1, 0),
+            (1, 0),
+            (0, -1),
+            (0, 1),
+            (-1, -1),
+            (1, -1),
+            (-1, 0),
+            (1, 1),
+        ];
 
         for coord in map {
             possible_positions.shuffle(&mut rng);
@@ -21,8 +33,8 @@ impl UnitsMap {
                 let y = (coord.1.1 as i32 + possible_positions[i].1) as usize;
 
                 let index = x * terrain_size + y;
-
-                data[index] = Unit::ResourceGatherer;
+                //todo
+                data[index] = Unit::ResourceGatherer(PlayerRace::new(SmolStr::new("sfds")));
             }
         }
 
@@ -33,11 +45,10 @@ impl UnitsMap {
     }
 
     #[inline]
-    pub fn get(&self, row: usize, col: usize) -> Unit {
+    pub fn get(&self, row: usize, col: usize) -> &Unit {
         debug_assert!(row < self.size);
         debug_assert!(col < self.size);
 
-        let index = row * self.size + col;
-        self.units[index]
+        &self.units[row * self.size + col]
     }
 }

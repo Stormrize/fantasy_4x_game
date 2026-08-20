@@ -1,9 +1,19 @@
-use crate::world::enums::biome::BiomeType;
-use crate::world::game_config::GameConfig;
-use crate::generation::races_generation::players_or_bots::voronoi_diagram::{PlayerInfluenceCell, PlayerInfluenceMap};
-use crate::generation::terrain_generator::noise::{fbm, normalise};
-use crate::generation::terrain_generator::PerlinPlaceholder;
-use crate::world::terrain_map::{GlobalTerrainMap, TerrainMap};
+use crate::world::{
+    game_config::GameConfig,
+    game_resources::{
+        data::biome::BiomeType,
+        terrain_map::{GlobalTerrainMap, TerrainMap},
+    },
+};
+
+use crate::game::generation::races_generation::players_or_bots::generate_players_positions::CapitalCoord;
+use crate::game::generation::terrain_generator::noise::{fbm, normalise};
+use crate::game::generation::{
+    races_generation::players_or_bots::voronoi_diagram::{PlayerInfluenceCell, PlayerInfluenceMap},
+    terrain_generator::PerlinPlaceholder,
+};
+use crate::world::game_config::PlayerRace;
+use crate::world::game_resources::data::biome::BiomeType::{LargeBiome, MediumBiome, SmallBiome, Water};
 
 const CAPITAL_SMALL_BIOME_RADIUS: f64 = 0.05;
 
@@ -18,20 +28,28 @@ impl TerrainMap {
         let size = config.terrain_size;
         let mut map = global_terrain.map.clone();
 
+        let mut counter = 0;
         for cell in &influence_map.cells {
-            apply_local_biomes(config, perlin_placeholder, global_terrain, &mut map, cell);
+            apply_local_biomes(
+                config,
+                perlin_placeholder,
+                global_terrain,
+                &mut map,
+                cell,
+                counter,
+            );
+            counter += 1;
         }
 
         Self { map, size }
     }
 
     #[inline]
-    pub fn get(&self, row: usize, col: usize) -> BiomeType {
+    pub fn get(&self, row: usize, col: usize) -> &BiomeType {
         debug_assert!(row < self.size);
         debug_assert!(col < self.size);
 
-        let index = row * self.size + col;
-        self.map[index].clone()
+        &self.map[row * self.size + col]
     }
 }
 
@@ -41,21 +59,26 @@ fn apply_local_biomes(
     global_terrain: &GlobalTerrainMap,
     map: &mut Vec<BiomeType>,
     cell: &PlayerInfluenceCell,
+    seed_offset: u8,
 ) {
     let size = config.terrain_size;
-    let seed_offset = (cell.fantasy_race as u8 as f64 + 1.0) * config.local_seed_offset;
+    let seed_offset = (seed_offset as f64 + 1.0) * config.local_seed_offset;
 
     for &tile_index in &cell.tile_indices {
-        if global_terrain.map[tile_index] == BiomeType::Water {
-            map[tile_index] = BiomeType::Water;
-            continue;
-        }
         let row = tile_index / size;
         let col = tile_index % size;
 
-        let nx = ((col as f64 - cell.capital.1 as f64) / size as f64) * config.local_frequency
+        match global_terrain.get(row, col) {
+            Water(_) => {
+                map[tile_index] = Water(cell.player_race.clone());
+                continue;
+            },
+            _ => ()
+        }
+
+        let nx = ((row as f64 - cell.capital.1 as f64) / size as f64) * config.local_frequency
             + seed_offset;
-        let ny = ((row as f64 - cell.capital.0 as f64) / size as f64) * config.local_frequency
+        let ny = ((col as f64 - cell.capital.0 as f64) / size as f64) * config.local_frequency
             + seed_offset;
 
         let value = normalise(fbm(
@@ -67,16 +90,19 @@ fn apply_local_biomes(
             config.local_lacunarity,
         ));
 
-        let value = (value - capital_small_biome_bias(row, col, cell.capital, size)).clamp(0.0, 1.0);
+        // добавляем small_biome возле столицы
+        let value =
+            ((value - capital_small_biome_bias(row, col, cell.capital, size)).clamp(0.0, 1.0) * 255.0) as u8;
 
-        map[tile_index] = choose_local_biome(value, config, cell.fantasy_race);
+
+        map[tile_index] = choose_local_biome(value, config, cell.player_race.clone());
     }
 }
 
 fn capital_small_biome_bias(
     row: usize,
     col: usize,
-    capital: (usize, usize),
+    capital: CapitalCoord,
     terrain_size: usize,
 ) -> f64 {
     let dx = col as f64 - capital.1 as f64;
@@ -86,36 +112,12 @@ fn capital_small_biome_bias(
     (1.0 - d / CAPITAL_SMALL_BIOME_RADIUS).clamp(0.0, 1.0)
 }
 
-fn choose_local_biome(value: f64, config: &GameConfig, fantasy_race: FantasyRace) -> BiomeType {
-    use FantasyRace::*;
-    
-    match fantasy_race {
-        FireMages => {
-            if value <= config.local_small_threshold {
-                SmallHuman
-            } else if value <= config.local_middle_threshold {
-                MediumHuman
-            } else {
-                LargeHuman
-            }
-        }
-        WaterMages => {
-            if value <= config.local_small_threshold {
-                SmallElf
-            } else if value <= config.local_middle_threshold {
-                MediumElf
-            } else {
-                LargeElf
-            }
-        }
-        StoneMages => {
-            if value <= config.local_small_threshold {
-                SmallGnome
-            } else if value <= config.local_middle_threshold {
-                MediumGnome
-            } else {
-                LargeGnome
-            }
-        }
+fn choose_local_biome(value: u8, config: &GameConfig, player_race: PlayerRace) -> BiomeType {
+    if value <= config.local_small_threshold {
+        SmallBiome(player_race)
+    } else if value <= config.local_middle_threshold {
+        MediumBiome(player_race)
+    } else {
+        LargeBiome(player_race)
     }
 }

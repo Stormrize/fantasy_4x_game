@@ -7,7 +7,7 @@ use bevy::prelude::{IntoScheduleConfigs, OnEnter, Plugin, in_state};
 mod button_system;
 mod spawn_start_menu;
 
-pub struct MainMenuPlugin;
+pub(super) struct MainMenuPlugin;
 
 impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {

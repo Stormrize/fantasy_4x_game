@@ -1,3 +1,3 @@
 pub mod game_config;
-mod game_resources;
-pub mod ui_resources;
+pub mod game_resources;
+pub mod ui_and_graphic_resources;

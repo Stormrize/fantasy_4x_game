@@ -1,9 +1,9 @@
+use crate::world::game_config::GameConfig;
 use ::noise::Perlin;
 use bevy::prelude::Resource;
-use crate::world::game_config::GameConfig;
 
-mod local_terrain_generation;
 mod global_terrain_generation;
+mod local_terrain_generation;
 mod noise;
 
 pub struct PerlinPlaceholder {

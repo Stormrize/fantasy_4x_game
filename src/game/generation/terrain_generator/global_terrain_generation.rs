@@ -1,17 +1,21 @@
-use bevy::tasks::{ComputeTaskPool, ParallelSlice, ParallelSliceMut};
-use super::noise::{fbm, normalise, sample};
-use crate::world::enums::biome::BiomeType;
-use crate::world::game_config::GameConfig;
-use crate::generation::terrain_generator::PerlinPlaceholder;
-use crate::world::terrain_map::GlobalTerrainMap;
+use smol_str::SmolStr;
+use crate::game::generation::terrain_generator::PerlinPlaceholder;
+use crate::game::generation::terrain_generator::noise::{fbm, normalise, sample};
+use crate::world::{
+    game_config::GameConfig,
+    game_resources::{data::biome::BiomeType, terrain_map::GlobalTerrainMap},
+};
+use crate::world::game_config::PlayerRace;
+
 impl GlobalTerrainMap {
     pub fn new(config: &GameConfig, perlin_placeholder: &PerlinPlaceholder) -> Self {
         let terrain_size = config.terrain_size;
-
-        let mut data = Vec::with_capacity(terrain_size * terrain_size);
         
-        //let task_pool = ComputeTaskPool::get();
+        println!("{:#?}", config);
+        
+        let mut data = vec![BiomeType::Ground; terrain_size * terrain_size];
 
+        //let task_pool = ComputeTaskPool::get();
 
         for row in 0..terrain_size {
             for col in 0..terrain_size {
@@ -41,20 +45,22 @@ impl GlobalTerrainMap {
                 let index = row * terrain_size + col;
 
                 if result < config.water_threshold {
-                    data[index] = BiomeType::Water;
+                    data[index] = BiomeType::Water(PlayerRace::new(SmolStr::from("default")));
                 }
             }
         }
 
-        Self { map: data, size: terrain_size }
+        Self {
+            map: data,
+            size: terrain_size,
+        }
     }
 
     #[inline]
-    pub fn get(&self, row: usize, col: usize) -> BiomeType {
+    pub fn get(&self, row: usize, col: usize) -> &BiomeType {
         debug_assert!(col < self.size);
         debug_assert!(row < self.size);
 
-        let index = row * self.size + col;
-        self.map[index].clone()
+        &self.map[row * self.size + col]
     }
 }

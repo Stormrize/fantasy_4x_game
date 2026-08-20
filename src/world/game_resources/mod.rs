@@ -1,6 +1,6 @@
-mod buildings_map;
-mod terrain_map;
-mod fog_map;
-mod resource_map;
-mod unit_map;
-mod data;
+pub mod buildings_map;
+pub mod data;
+pub mod fog_map;
+pub mod resource_map;
+pub mod terrain_map;
+pub mod unit_map;

@@ -1,28 +1,35 @@
-use crate::world::enums::biome::BiomeType;
-use crate::world::game_config::GameConfig;
-use rand::{RngExt, SeedableRng};
+use crate::world::{
+    game_config::{GameConfig, PlayerRace},
+    game_resources::{data::biome::BiomeType, terrain_map::GlobalTerrainMap},
+};
+use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
-use crate::world::enums::races::FantasyRace;
-use crate::world::terrain_map::GlobalTerrainMap;
 
-pub struct PlayerTerrainData {
-    pub data: Vec<((u8, FantasyRace), (usize, usize))>,
+#[derive(Copy, Clone)]
+pub struct CapitalCoord(pub usize, pub usize);
+
+#[derive(Copy, Clone)]
+pub struct Id(pub u8);
+
+pub struct PlayersTerrainData {
+    pub data: Vec<((Id, PlayerRace), CapitalCoord)>,
 }
 
-impl PlayerTerrainData {
+impl PlayersTerrainData {
     pub fn calculate_player_positions(
         config: &GameConfig,
         global_terrain: &GlobalTerrainMap,
-    ) -> Option<PlayerTerrainData> {
+    ) -> Option<PlayersTerrainData> {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
-        let mut players = config.players.clone();
+        let mut players = config.current_players.clone();
         players.shuffle(&mut rng);
         let terrain_size = config.terrain_size;
-        let mut spawn_points = Vec::with_capacity(players.len());
-        
+        let mut spawn_points: Vec<((Id, PlayerRace), CapitalCoord)> =
+            Vec::with_capacity(players.len());
+
         if players.len() == 0 {
-            return None
+            return None;
         }
 
         let cols = (players.len() as f32).sqrt().ceil() as usize;
@@ -51,23 +58,32 @@ impl PlayerTerrainData {
                     let current_max_x = base_max_offset_x * multiplier;
                     let current_max_y = base_max_offset_y * multiplier;
 
-                    // Безопасный clamp координат к границам карты
                     let min_x = (ideal_x.round() as i32 - current_max_x).max(2);
-                    let max_x = (ideal_x.round() as i32 + current_max_x).min(terrain_size as i32 - 2);
+                    let max_x =
+                        (ideal_x.round() as i32 + current_max_x).min(terrain_size as i32 - 2);
                     let min_y = (ideal_y.round() as i32 - current_max_y).max(2);
-                    let max_y = (ideal_y.round() as i32 + current_max_y).min(terrain_size as i32 - 2);
+                    let max_y =
+                        (ideal_y.round() as i32 + current_max_y).min(terrain_size as i32 - 2);
 
                     let mut candidates = Vec::new();
 
                     for x in min_x..=max_x {
                         for y in min_y..=max_y {
                             if multiplier == 2 {
-                                let inner_min_x = (ideal_x.round() as i32 - base_max_offset_x).max(2);
-                                let inner_max_x = (ideal_x.round() as i32 + base_max_offset_x).min(terrain_size as i32 - 2);
-                                let inner_min_y = (ideal_y.round() as i32 - base_max_offset_y).max(2);
-                                let inner_max_y = (ideal_y.round() as i32 + base_max_offset_y).min(terrain_size as i32 - 2);
+                                let inner_min_x =
+                                    (ideal_x.round() as i32 - base_max_offset_x).max(2);
+                                let inner_max_x = (ideal_x.round() as i32 + base_max_offset_x)
+                                    .min(terrain_size as i32 - 2);
+                                let inner_min_y =
+                                    (ideal_y.round() as i32 - base_max_offset_y).max(2);
+                                let inner_max_y = (ideal_y.round() as i32 + base_max_offset_y)
+                                    .min(terrain_size as i32 - 2);
 
-                                if x >= inner_min_x && x <= inner_max_x && y >= inner_min_y && y <= inner_max_y {
+                                if x >= inner_min_x
+                                    && x <= inner_max_x
+                                    && y >= inner_min_y
+                                    && y <= inner_max_y
+                                {
                                     continue;
                                 }
                             }
@@ -75,13 +91,16 @@ impl PlayerTerrainData {
                         }
                     }
 
-
                     candidates.shuffle(&mut rng);
 
                     for (x, y) in candidates {
-                        if global_terrain.get(x, y) != BiomeType::Water {
-                            found_pos = Some((x, y));
-                            break;
+                        match global_terrain.get(x, y) {
+                            BiomeType::Water(_) => continue,
+                            BiomeType::Ground => {
+                                found_pos = Some((x, y));
+                                break;
+                            }
+                            _ => unreachable!()
                         }
                     }
 
@@ -91,17 +110,21 @@ impl PlayerTerrainData {
                 }
 
                 if let Some((final_x, final_y)) = found_pos {
-                    spawn_points.push((players[player_index], (final_x, final_y)));
+                    let id = Id(players[player_index].0);
+                    let player_race = players[player_index].1.clone();
+                    let capital_coord = CapitalCoord(final_x, final_y);
+                    spawn_points.push(((id, player_race), capital_coord));
                     player_index += 1;
                 } else {
-                    println!("Error: Could not spawn player {} even with 2x radius expansion.", player_index);
+                    println!(
+                        "Error: Could not spawn player {} even with 2x radius expansion.",
+                        player_index
+                    );
                     return None;
                 }
             }
         }
 
-        Some(PlayerTerrainData {
-            data: spawn_points,
-        })
+        Some(PlayersTerrainData { data: spawn_points })
     }
 }

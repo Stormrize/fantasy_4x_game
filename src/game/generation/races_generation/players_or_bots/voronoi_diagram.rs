@@ -1,35 +1,39 @@
-use crate::world::game_config::GameConfig;
-use bevy::prelude::Resource;
+use crate::game::generation::{
+    races_generation::players_or_bots::generate_players_positions::{
+        CapitalCoord, PlayersTerrainData,
+    },
+    terrain_generator::PerlinPlaceholder,
+};
+use crate::world::game_config::{GameConfig, PlayerRace};
 use noise::{NoiseFn, Perlin};
-use voronoice::{Point};
-use crate::generation::races_generation::players_or_bots::generate_players_positions::PlayerTerrainData;
-use crate::generation::terrain_generator::PerlinPlaceholder;
-use crate::world::enums::races::FantasyRace;
-#[derive(Clone)]
+use std::collections::HashMap;
+use voronoice::Point;
+
 pub struct PlayerInfluenceCell {
-    pub fantasy_race: FantasyRace,
-    pub capital: (usize, usize),
+    pub player_race: PlayerRace,
+    pub capital: CapitalCoord,
     pub tile_indices: Vec<usize>,
 }
 
 pub struct PlayerInfluenceMap {
     pub map: Vec<Option<usize>>,
     pub cells: Vec<PlayerInfluenceCell>,
-    pub size: usize,
 }
 
 impl PlayerInfluenceMap {
-    pub fn voronoi_diagram_for_players(config: &GameConfig, player_terrain_data: &PlayerTerrainData, perlin_placeholder: &PerlinPlaceholder) -> PlayerInfluenceMap {
+    pub fn voronoi_diagram_for_players(
+        config: &GameConfig,
+        player_terrain_data: &PlayersTerrainData,
+        perlin_placeholder: &PerlinPlaceholder,
+    ) -> PlayerInfluenceMap {
         let terrain_size = config.terrain_size;
 
         if player_terrain_data.data.is_empty() {
             return PlayerInfluenceMap {
                 map: vec![None; terrain_size * terrain_size],
                 cells: Vec::new(),
-                size: terrain_size,
             };
         }
-
 
         let sites = player_terrain_data
             .data
@@ -40,12 +44,11 @@ impl PlayerInfluenceMap {
             })
             .collect::<Vec<_>>();
 
-
         let mut cells = player_terrain_data
             .data
             .iter()
             .map(|coord| PlayerInfluenceCell {
-                fantasy_race: coord.0.1,
+                player_race: coord.0.1.clone(),
                 capital: coord.1,
                 tile_indices: Vec::new(),
             })
@@ -55,8 +58,14 @@ impl PlayerInfluenceMap {
 
         for row in 0..terrain_size {
             for col in 0..terrain_size {
-
-                let capital = nearest_capital_index_noisy(row, col, &sites, &perlin_placeholder.perlin_main, config.noise_scale, config.noise_strength);
+                let capital = nearest_capital_index_noisy(
+                    row,
+                    col,
+                    &sites,
+                    &perlin_placeholder.perlin_main,
+                    config.noise_scale,
+                    config.noise_strength,
+                );
                 let tile_index = row * terrain_size + col;
 
                 map[tile_index] = Some(capital);
@@ -64,12 +73,7 @@ impl PlayerInfluenceMap {
             }
         }
 
-
-        PlayerInfluenceMap {
-            map,
-            cells,
-            size: terrain_size,
-        }
+        PlayerInfluenceMap { map, cells }
     }
 }
 
@@ -84,8 +88,10 @@ fn nearest_capital_index_noisy(
     let x = row as f64;
     let y = col as f64;
 
-    let dx = perlin.get([x * noise_scale as f64, y * noise_scale as f64, 0.0]) * noise_strength as f64;
-    let dy = perlin.get([x * noise_scale as f64, y * noise_scale as f64, 100.0]) * noise_strength as f64;
+    let dx =
+        perlin.get([x * noise_scale as f64, y * noise_scale as f64, 0.0]) * noise_strength as f64;
+    let dy =
+        perlin.get([x * noise_scale as f64, y * noise_scale as f64, 100.0]) * noise_strength as f64;
 
     let noisy_x = x + dx;
     let noisy_y = y + dy;
@@ -123,15 +129,11 @@ fn nearest_capital_index(row: usize, col: usize, sites: &[Point]) -> usize {
 
 #[inline]
 fn squared_distance(ax: f64, ay: f64, bx: f64, by: f64) -> f64 {
-    let dx = ax - bx;  // x
-    let dy = ay - by;  // z
+    let dx = ax - bx; // x
+    let dy = ay - by; // z
 
     dx * dx + dy * dy
 }
-
-
-
-
 
 #[allow(dead_code)]
 #[cfg(false)]

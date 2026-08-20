@@ -393,7 +393,7 @@ dependencies = [
  "downcast-rs 2.0.2",
  "either",
  "petgraph",
- "ron",
+ "ron 0.12.2",
  "serde",
  "smallvec",
  "thiserror 2.0.18",
@@ -491,7 +491,7 @@ dependencies = [
  "futures-lite",
  "futures-util",
  "js-sys",
- "ron",
+ "ron 0.12.2",
  "serde",
  "stackfuture",
  "thiserror 2.0.18",
@@ -500,36 +500,6 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
-]
-
-[[package]]
-name = "bevy_asset_loader"
-version = "0.26.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a44eda0020550e0285223cbc0643398e0f4358e3e614e8b00230ee81618d184e"
-dependencies = [
- "anyhow",
- "bevy_app",
- "bevy_asset",
- "bevy_asset_loader_derive",
- "bevy_ecs",
- "bevy_log",
- "bevy_platform",
- "bevy_reflect",
- "bevy_state",
- "bevy_utils",
- "path-slash",
-]
-
-[[package]]
-name = "bevy_asset_loader_derive"
-version = "0.26.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12358b7aa33a70b4b49b4e78b7a084546ab7805fb17e4a23e788270244da604d"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
 ]
 
 [[package]]
@@ -602,6 +572,21 @@ dependencies = [
  "serde",
  "thiserror 2.0.18",
  "wgpu-types",
+]
+
+[[package]]
+name = "bevy_common_assets"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad51a6e9def88caadc4ce2a5670382d6ff19fa1e7e7af934326c5c0b376bdd9f"
+dependencies = [
+ "anyhow",
+ "bevy_app",
+ "bevy_asset",
+ "bevy_reflect",
+ "ron 0.11.0",
+ "serde",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -1341,7 +1326,7 @@ dependencies = [
  "bevy_transform",
  "bevy_utils",
  "derive_more",
- "ron",
+ "ron 0.12.2",
  "serde",
  "thiserror 2.0.18",
  "uuid",
@@ -2403,13 +2388,14 @@ name = "fantasy_4x_game"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_asset_loader",
+ "bevy_common_assets",
  "faster_poisson",
  "noise",
  "rand 0.10.2",
  "rand_chacha 0.10.0",
- "ron",
+ "ron 0.12.2",
  "serde",
+ "smol_str",
  "voronoice",
 ]
 
@@ -3865,12 +3851,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
-name = "path-slash"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e91099d4268b0e11973f036e885d652fb0b21fedcf69738c627f94db6a44f42"
-
-[[package]]
 name = "percent-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4304,6 +4284,19 @@ checksum = "e7ceb6607dd738c99bc8cb28eff249b7cd5c8ec88b9db96c0608c1480d140fb1"
 dependencies = [
  "cpal",
  "lewton",
+]
+
+[[package]]
+name = "ron"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "db09040cc89e461f1a265139777a2bde7f8d8c67c4936f700c63ce3e2904d468"
+dependencies = [
+ "base64",
+ "bitflags 2.13.1",
+ "serde",
+ "serde_derive",
+ "unicode-ident",
 ]
 
 [[package]]

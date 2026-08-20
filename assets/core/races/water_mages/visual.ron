@@ -1,5 +1,6 @@
 (
     //biome
+    water: "0.14, 0.42, 0.72",
     small_biome: "0.0, 0.99, 0.0",
     medium_biome: "0.0, 0.66, 0.0",
     large_biome: "0.0, 0.33, 0.0",
@@ -12,7 +13,7 @@
     //building
     capital: "0.0, 1.0, 0.0",
     empty_cities: "0.0, 0.0, 1.0",
-    empty_city_colonized: "0.0, 0.0, 0.0",
+    empty_cities_colonized: "0.0, 0.0, 0.0",
     medium_building: "0.0, 0.0, 0.0",
     large_building: "0.0, 0.0, 0.0",
     spawning_building: "0.0, 0.0, 0.0",

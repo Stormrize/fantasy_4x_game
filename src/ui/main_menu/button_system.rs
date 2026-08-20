@@ -3,7 +3,7 @@ use crate::ui::menus::AppState;
 use bevy::prelude::{AppExit, Changed, MessageWriter, NextState, Query, ResMut, With};
 use bevy::ui::Interaction;
 
-pub fn button_system(
+pub(super) fn button_system(
     mut interaction_query: Query<(&Interaction, &MainMenuButtons), (Changed<Interaction>)>,
     mut next_state: ResMut<NextState<AppState>>,
     mut exit: MessageWriter<AppExit>,
@@ -15,7 +15,7 @@ pub fn button_system(
                     next_state.set(AppState::GameSetupMenu);
                 }
                 MainMenuButtons::ResumeButton => {
-                    next_state.set(AppState::InGameMenu);
+                    next_state.set(AppState::InGameRenderer);
                 }
                 MainMenuButtons::Multiplayer => {
                     next_state.set(AppState::MultiplayerSetupMenu);

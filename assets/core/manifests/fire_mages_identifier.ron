@@ -1,0 +1,6 @@
+(
+    id: "FireMages",
+    description: "fire mages are cool",
+    ui_icon_path: "fire_mage_icon.png",
+    visual_path: "core/races/fire_mages/visual.ron"
+)

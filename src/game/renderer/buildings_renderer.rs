@@ -1,12 +1,14 @@
-use crate::world::enums::buildings::BuildingType;
 use crate::world::game_config::GameConfig;
+use crate::world::game_resources::buildings_map::BuildingMap;
+use crate::world::game_resources::data::buildings::BuildingType;
+use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
 use bevy::math::IVec2;
 use bevy::pbr::MeshMaterial3d;
 use bevy::prelude::{
-    default, Assets, Commands, Component, Entity, Handle, Mesh, Mesh3d, Resource, Sphere,
-    StandardMaterial, Transform, UVec2, Vec3,
+    Assets, Commands, Component, Entity, Handle, Mesh, Mesh3d, Res, Resource, Sphere,
+    StandardMaterial, Transform, default,
 };
-use crate::world::buildings_map::BuildingMap;
+use std::ops::Index;
 
 #[derive(Component)]
 pub struct BuildingsMesh {
@@ -14,37 +16,9 @@ pub struct BuildingsMesh {
     pub building: BuildingType,
 }
 
-#[derive(Resource)]
-pub struct BuildingsAssets {
-    pub materials: [Handle<StandardMaterial>; 8],
-}
-
 pub struct SpawnedBuildingsMeshes {
     pub entities: Vec<Entity>,
     pub mesh_handles: Vec<Handle<Mesh>>,
-}
-
-impl BuildingsAssets {
-    pub fn build(materials: &mut Assets<StandardMaterial>) -> Self {
-        let mat_handles: Vec<Handle<StandardMaterial>> = BuildingType::ALL
-            .iter()
-            .map(|&building| {
-                materials.add(StandardMaterial {
-                    base_color: building.color(),
-                    ..default()
-                })
-            })
-            .collect();
-
-        Self {
-            materials: mat_handles.try_into().expect("Check BuildingType::ALL"),
-        }
-    }
-
-    #[inline]
-    pub fn material_for(&self, resource: BuildingType) -> Handle<StandardMaterial> {
-        self.materials[resource.index()].clone()
-    }
 }
 
 pub fn spawn_buildings_meshes(
@@ -52,7 +26,7 @@ pub fn spawn_buildings_meshes(
     config: &GameConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    assets: &BuildingsAssets,
+    assets: &VisualRacesData,
     buildings: &BuildingMap,
 ) -> SpawnedBuildingsMeshes {
     let chunk_size = config.chunk_size;
@@ -70,9 +44,14 @@ pub fn spawn_buildings_meshes(
     for row in min_x..max_x {
         for col in min_y..max_y {
             let building = buildings.get(row as usize, col as usize);
-            if building.0 != BuildingType::Capital && building.0 != BuildingType::EmptyCities {
+
+            let player_race = building.inside();
+
+            if player_race.is_none() {
                 continue;
             }
+
+            let handle = &assets.0[player_race.unwrap()].get_building(building.index());
 
             let mesh_handle = meshes.add(Sphere::new(0.5));
 
@@ -80,7 +59,7 @@ pub fn spawn_buildings_meshes(
                 .spawn((
                     Transform::from_xyz(row as f32 * tile, 0.5, col as f32 * tile),
                     Mesh3d(mesh_handle.clone()),
-                    MeshMaterial3d(assets.material_for(building.0)),
+                    MeshMaterial3d(handle.clone()),
                 ))
                 .id();
 

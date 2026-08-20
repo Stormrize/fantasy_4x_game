@@ -1,12 +1,11 @@
-use crate::world::enums::resources::ResourceType;
 use crate::world::game_config::GameConfig;
-use bevy::math::IVec2;
-use bevy::pbr::MeshMaterial3d;
-use bevy::prelude::{default, Assets, Commands, Component, Cone, Cuboid, Entity, Handle, Mesh, Mesh3d, Resource, StandardMaterial, Transform};
-use crate::renderer::resource_renderer::ResourceAssets;
-use crate::world::enums::units::Unit;
-use crate::world::resource_map::ResourceMap;
-use crate::world::unit_map::UnitsMap;
+use crate::world::game_resources::data::resources::ResourceType;
+use crate::world::game_resources::unit_map::UnitsMap;
+use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
+use bevy::prelude::{
+    Assets, Commands, Component, Cone, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d,
+    Transform,
+};
 
 #[derive(Component)]
 pub struct UnitMesh {
@@ -14,45 +13,17 @@ pub struct UnitMesh {
     pub resource: ResourceType,
 }
 
-#[derive(Resource)]
-pub struct UnitsAssets {
-    pub materials: [Handle<StandardMaterial>; 10],
-}
-
 pub struct SpawnedUnitsMeshes {
     pub entities: Vec<Entity>,
     pub mesh_handles: Vec<Handle<Mesh>>,
 }
 
-impl UnitsAssets {
-    pub fn build(materials: &mut Assets<StandardMaterial>) -> Self {
-        let mat_handles: Vec<Handle<StandardMaterial>> = ResourceType::ALL
-            .iter()
-            .map(|&resource| {
-                materials.add(StandardMaterial {
-                    base_color: resource.color(),
-                    ..default()
-                })
-            })
-            .collect();
-
-        Self {
-            materials: mat_handles.try_into().expect("Check ResourceType::ALL"),
-        }
-    }
-
-    #[inline]
-    pub fn material_for(&self, resource: ResourceType) -> Handle<StandardMaterial> {
-        self.materials[resource.index()].clone()
-    }
-}
-
-pub fn spawn_resource_meshes(
+pub fn spawn_units_meshes(
     commands: &mut Commands,
     config: &GameConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    assets: &UnitsAssets,
+    assets: &VisualRacesData,
     units: &UnitsMap,
 ) -> SpawnedUnitsMeshes {
     let chunk_size = config.chunk_size;
@@ -71,9 +42,15 @@ pub fn spawn_resource_meshes(
     for row in min_x..max_x {
         for col in min_y..max_y {
             let unit = units.get(row as usize, col as usize);
-            if unit == Unit::None {
+
+            let player_race = unit.inside();
+
+            if player_race.is_none() {
                 continue;
             }
+
+            //todo пока нет асетов для юнитов
+            let handle = assets.0[player_race.unwrap()].get_resource(2);
 
             let mesh_handle = meshes.add(Cone::new(0.3, 0.5));
 
@@ -81,7 +58,7 @@ pub fn spawn_resource_meshes(
                 .spawn((
                     Transform::from_xyz(row as f32 * tile_size, 0.3, col as f32 * tile_size),
                     Mesh3d(mesh_handle.clone()),
-                   // MeshMaterial3d(assets.material_for(unit)),
+                    MeshMaterial3d(handle.clone()),
                 ))
                 .id();
 
@@ -93,7 +70,7 @@ pub fn spawn_resource_meshes(
     spawned
 }
 
-pub fn despawn_resource_meshes(
+pub fn despawn_units_meshes(
     commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
     spawned: SpawnedUnitsMeshes,

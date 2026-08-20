@@ -1,5 +1,4 @@
-use crate::world::fog_map::FogMap;
-use crate::world::game_config::GameConfig;
+use crate::world::{game_config::GameConfig, game_resources::fog_map::FogMap};
 
 impl FogMap {
     pub fn new(config: &GameConfig) -> Self {
@@ -16,7 +15,6 @@ impl FogMap {
         debug_assert!(col < self.size);
         debug_assert!(row < self.size);
 
-        let index = row * self.size + col;
-        self.map[index]
+        self.map[row * self.size + col]
     }
 }

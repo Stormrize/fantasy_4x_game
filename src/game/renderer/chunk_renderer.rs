@@ -1,29 +1,28 @@
-use crate::camera::camera::MainCamera;
-use crate::renderer::buildings_renderer::{despawn_buildings_meshes, spawn_buildings_meshes, BuildingsAssets};
-use crate::renderer::resource_renderer::{despawn_resource_meshes, spawn_resource_meshes, ResourceAssets};
-use crate::renderer::terrain_renderer::{despawn_terrain_meshes, spawn_terrain_meshes, TerrainAssets};
-use crate::renderer::Rendered;
+use crate::game::camera_plugin::camera::MainCamera;
+use crate::game::renderer::Rendered;
+use crate::game::renderer::buildings_renderer::{despawn_buildings_meshes, spawn_buildings_meshes};
+use crate::game::renderer::camera_math::{
+    camera_chunk_bounds, camera_ground_point, chunk_coord_from_world_xz, outside_bounds,
+};
+use crate::game::renderer::resource_renderer::{despawn_resource_meshes, spawn_resource_meshes};
+use crate::game::renderer::terrain_renderer::{despawn_terrain_meshes, spawn_terrain_meshes};
 use crate::world::game_config::GameConfig;
-use bevy::asset::Assets;
-use bevy::camera::Projection;
-use bevy::math::IVec2;
-use bevy::mesh::Mesh;
-use bevy::prelude::{Commands, Query, Res, ResMut, Transform, Window, With};
+use crate::world::game_resources::buildings_map::BuildingMap;
+use crate::world::game_resources::resource_map::ResourceMap;
+use crate::world::game_resources::terrain_map::TerrainMap;
+use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
+use bevy::prelude::{
+    Assets, Commands, IVec2, Mesh, Projection, Query, Res, ResMut, Transform, Window, With,
+};
 use bevy::window::PrimaryWindow;
 use std::time::Instant;
-use crate::renderer::camera_math::{camera_chunk_bounds, camera_ground_point, chunk_coord_from_world_xz, outside_bounds};
-use crate::world::buildings_map::BuildingMap;
-use crate::world::resource_map::ResourceMap;
-use crate::world::terrain_map::TerrainMap;
 
 pub fn stream_chunks(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut rendered: ResMut<Rendered>,
+    assets: Res<VisualRacesData>,
     config: Res<GameConfig>,
-    terrain_assets: Res<TerrainAssets>,
-    resource_assets: Res<ResourceAssets>,
-    buildings_assets: Res<BuildingsAssets>,
     terrain: Res<TerrainMap>,
     resources: Res<ResourceMap>,
     buildings: Res<BuildingMap>,
@@ -66,9 +65,7 @@ pub fn stream_chunks(
         &mut meshes,
         &mut rendered,
         missing_chunks,
-        &terrain_assets,
-        &resource_assets,
-        &buildings_assets,
+        &assets,
         &terrain,
         &resources,
         &buildings,
@@ -172,9 +169,7 @@ fn load_missing_chunks(
     meshes: &mut ResMut<Assets<Mesh>>,
     rendered: &mut Rendered,
     missing_chunks: Vec<IVec2>,
-    terrain_assets: &TerrainAssets,
-    resource_assets: &ResourceAssets,
-    buildings_assets: &BuildingsAssets,
+    assets: &VisualRacesData,
     terrain: &TerrainMap,
     resources: &ResourceMap,
     buildings: &BuildingMap,
@@ -190,11 +185,14 @@ fn load_missing_chunks(
             continue;
         }
 
-        let terrain_meshes = spawn_terrain_meshes(commands, &config, meshes, coord, terrain_assets, terrain);
+        let terrain_meshes =
+            spawn_terrain_meshes(commands, &config, meshes, coord, assets, terrain);
 
-        let resource_meshes = spawn_resource_meshes(commands, &config, meshes, coord, resource_assets, resources);
+        let resource_meshes =
+            spawn_resource_meshes(commands, &config, meshes, coord, assets, resources);
 
-        let building_meshes = spawn_buildings_meshes(commands, config, meshes, coord, buildings_assets, buildings);
+        let building_meshes =
+            spawn_buildings_meshes(commands, config, meshes, coord, assets, buildings);
 
         rendered.terrain.insert(coord, terrain_meshes);
         rendered.resources.insert(coord, resource_meshes);

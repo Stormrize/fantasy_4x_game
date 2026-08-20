@@ -1,22 +1,18 @@
 use crate::ui::menus::AppState;
-use bevy::app::App;
-use bevy::camera::{Camera, Camera2d, Camera3d};
 use bevy::color::Color;
-use bevy::prelude::{Button, Commands, Component, DespawnOnEnter, DespawnOnExit, KeyCode, MessageReader, Query, Res, ResMut, Text, TextColor, TextFont, Time, Transform, With};
+use bevy::prelude::{Button, Commands, Component, DespawnOnExit, Text, TextColor, TextFont};
 use bevy::ui::{AlignItems, BackgroundColor, FlexDirection, JustifyContent, Node, Val};
 use bevy::utils::default;
 
 #[derive(Component)]
-pub enum MainMenuButtons {
+pub(super) enum MainMenuButtons {
     StartButton,
     ResumeButton,
     Multiplayer,
     ExitButton,
 }
 
-
-pub fn spawn_main_menu(mut commands: Commands) {
-    commands.spawn((Camera2d, DespawnOnEnter(AppState::InGameMenu)));
+pub(super) fn spawn_main_menu(mut commands: Commands) {
     commands
         .spawn((
             Node {
@@ -75,22 +71,23 @@ pub fn spawn_main_menu(mut commands: Commands) {
                         TextColor(Color::WHITE),
                     ));
                 });
-            parent.spawn((
-                Button,
-                Node {
-                    width: Val::Percent(30.0),
-                    height: Val::Percent(10.0),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                BackgroundColor(Color::srgb(0.15, 0.15, 0.15)),
-                MainMenuButtons::Multiplayer,
+            parent
+                .spawn((
+                    Button,
+                    Node {
+                        width: Val::Percent(30.0),
+                        height: Val::Percent(10.0),
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgb(0.15, 0.15, 0.15)),
+                    MainMenuButtons::Multiplayer,
                 ))
                 .with_children(|button_parent| {
                     button_parent.spawn((
                         Text::new("Multiplayer"),
                         TextFont {
-                         font_size: 20.0,
+                            font_size: 20.0,
                             ..default()
                         },
                         TextColor(Color::WHITE),
