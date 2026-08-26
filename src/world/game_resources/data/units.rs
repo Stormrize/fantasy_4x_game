@@ -19,7 +19,7 @@ pub enum Unit {
     StoneMageBeginner(PlayerRace),
     StoneMageMaster(PlayerRace),
 
-    ResourceGatherer(PlayerRace),
+    ResourceGathererBuilder(PlayerRace),
     #[default]
     None,
 }
@@ -34,7 +34,7 @@ impl Unit {
             FireMageMaster(_) => 3,
             StoneMageBeginner(_) => 4,
             StoneMageMaster(_) => 5,
-            ResourceGatherer(_) => 6,
+            ResourceGathererBuilder(_) => 6,
             None => unreachable!(),
         }
     }
@@ -42,8 +42,13 @@ impl Unit {
     pub fn inside(&self) -> Option<&PlayerRace> {
         use Unit::*;
         match self {
-            WaterMageBeginner(p) | WaterMageMaster(p) | FireMageBeginner(p) | FireMageMaster(p)
-            | StoneMageBeginner(p) | StoneMageMaster(p) | ResourceGatherer(p) => Some(p),
+            WaterMageBeginner(p)
+            | WaterMageMaster(p)
+            | FireMageBeginner(p)
+            | FireMageMaster(p)
+            | StoneMageBeginner(p)
+            | StoneMageMaster(p)
+            | ResourceGathererBuilder(p) => Some(p),
 
             None => Option::None,
         }

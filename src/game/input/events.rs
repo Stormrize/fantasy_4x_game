@@ -14,6 +14,7 @@ pub fn handle_input(
             .seed
             .wrapping_mul(1_664_525)
             .wrapping_add(1_013_904_223);
+        events.write(RegenerateWorldEvent);
         info!("Случайный seed: {}", config.seed);
     }
 

@@ -1,3 +1,4 @@
+use crate::world::game_config::PlayerRace;
 use crate::world::{
     game_config::GameConfig,
     game_resources::{
@@ -8,7 +9,6 @@ use crate::world::{
 use rand::{RngExt, SeedableRng};
 use rand_chacha::ChaCha8Rng;
 use smol_str::SmolStr;
-use crate::world::game_config::PlayerRace;
 
 pub struct ResourceWindow;
 
@@ -42,7 +42,6 @@ impl ResourceMap {
                 }
             }
         }
-
 
         //note resource_window_index неважно ресурс какой расы поэтому ресурсы других цветов могут быть на поле другой расы пофиксить позже
 

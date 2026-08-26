@@ -13,38 +13,10 @@ pub struct ResourceMesh {
     pub resource: ResourceType,
 }
 
-// #[derive(Resource)]
-// pub struct ResourceAssets {
-//     pub materials: [Handle<StandardMaterial>; 10],
-// }
-
 pub struct SpawnedResourceMeshes {
     pub entities: Vec<Entity>,
     pub mesh_handles: Vec<Handle<Mesh>>,
 }
-
-// impl ResourceAssets {
-//     pub fn build(materials: &mut Assets<StandardMaterial>) -> Self {
-//         let mat_handles: Vec<Handle<StandardMaterial>> = ResourceType::ALL
-//             .iter()
-//             .map(|&resource| {
-//                 materials.add(StandardMaterial {
-//                     base_color: resource.color(),
-//                     ..default()
-//                 })
-//             })
-//             .collect();
-//
-//         Self {
-//             materials: mat_handles.try_into().expect("Check ResourceType::ALL"),
-//         }
-//     }
-//
-//     #[inline]
-//     pub fn material_for(&self, resource: ResourceType) -> Handle<StandardMaterial> {
-//         self.materials[resource.index()].clone()
-//     }
-// }
 
 pub fn spawn_resource_meshes(
     commands: &mut Commands,
@@ -83,7 +55,7 @@ pub fn spawn_resource_meshes(
 
             let entity = commands
                 .spawn((
-                    Transform::from_xyz(row as f32 * tile_size, 0.3, col as f32 * tile_size),
+                    Transform::from_xyz((row as f32 + 0.3) * tile_size, 0.3, (col as f32 + 0.3) * tile_size),
                     Mesh3d(mesh_handle.clone()),
                     MeshMaterial3d(handle.clone()),
                 ))

@@ -1,30 +1,43 @@
-use bevy::prelude::{MessageReader, ResMut};
-use crate::game::game_logic_plugin::selection::events_resources_structs::components::{SelectedEntity, TileLayer};
-use crate::game::game_logic_plugin::selection::events_resources_structs::messages::CycleSelectionEvent;
+use crate::game::game_logic_plugin::events_resources_structs::components::{
+    AlreadySelectedTile, JustSelectedTile, TileContent, TileLayer,
+};
+use crate::world::game_resources::data::buildings::BuildingType;
+use crate::world::game_resources::data::resources::ResourceType;
 
 pub fn cycle_selection_system(
-    mut events: MessageReader<CycleSelectionEvent>,
-    mut selected: ResMut<SelectedEntity>,
+    just_selected_tile: JustSelectedTile,
+    already_selected_tile: &mut AlreadySelectedTile,
 ) {
-    for event in events.read() {
-        let next = match selected.layer {
-            Some(TileLayer::Unit) if event.tile.has_building => Some(TileLayer::Building),
+    let next = match already_selected_tile.layer {
+        Some(TileLayer::Unit) if just_selected_tile.tile_content.building != BuildingType::None => {
+            Some(TileLayer::Building)
+        }
 
-            Some(TileLayer::Unit) if event.tile.has_resource => Some(TileLayer::Resource),
+        Some(TileLayer::Unit) if just_selected_tile.tile_content.resource != ResourceType::None => {
+            Some(TileLayer::Resource)
+        }
 
-            Some(TileLayer::Unit) => Some(TileLayer::Terrain),
+        Some(TileLayer::Unit) => Some(TileLayer::Terrain),
 
-            Some(TileLayer::Building) if event.tile.has_resource => Some(TileLayer::Resource),
+        Some(TileLayer::Building) if just_selected_tile.tile_content.resource != ResourceType::None => {
+            Some(TileLayer::Resource)
+        }
 
-            Some(TileLayer::Building) => Some(TileLayer::Terrain),
+        Some(TileLayer::Building) => Some(TileLayer::Terrain),
 
-            Some(TileLayer::Resource) => Some(TileLayer::Terrain),
+        Some(TileLayer::Resource) => Some(TileLayer::Terrain),
 
-            Some(TileLayer::Terrain) => None,
+        Some(TileLayer::Terrain) => None,
 
-            _ => None,
-        };
-        selected.layer = next;
-        println!("Cycled to:  {:?} {:?}", selected.position, selected.layer);
+        _ => None,
+    };
+    already_selected_tile.layer = next;
+
+    if already_selected_tile.layer.is_none() {
+        already_selected_tile.pos = None;
     }
+    println!(
+        "Cycled to:  {:?} {:?}",
+        already_selected_tile.pos, already_selected_tile.layer
+    );
 }

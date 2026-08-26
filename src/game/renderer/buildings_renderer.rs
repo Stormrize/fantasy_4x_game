@@ -8,7 +8,6 @@ use bevy::prelude::{
     Assets, Commands, Component, Entity, Handle, Mesh, Mesh3d, Res, Resource, Sphere,
     StandardMaterial, Transform, default,
 };
-use std::ops::Index;
 
 #[derive(Component)]
 pub struct BuildingsMesh {
@@ -30,7 +29,7 @@ pub fn spawn_buildings_meshes(
     buildings: &BuildingMap,
 ) -> SpawnedBuildingsMeshes {
     let chunk_size = config.chunk_size;
-    let tile = config.tile_size;
+    let tile_size = config.tile_size;
     let mut spawned = SpawnedBuildingsMeshes {
         entities: Vec::with_capacity(chunk_size),
         mesh_handles: Vec::with_capacity(chunk_size),
@@ -57,7 +56,7 @@ pub fn spawn_buildings_meshes(
 
             let entity = commands
                 .spawn((
-                    Transform::from_xyz(row as f32 * tile, 0.5, col as f32 * tile),
+                    Transform::from_xyz((row as f32 + 0.5) * tile_size, 0.5, (col as f32 + 0.5) * tile_size),
                     Mesh3d(mesh_handle.clone()),
                     MeshMaterial3d(handle.clone()),
                 ))

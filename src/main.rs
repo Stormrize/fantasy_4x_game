@@ -5,9 +5,9 @@ mod ui;
 mod utils_debug;
 mod world;
 
+use crate::game::GamePlugin;
 use ::bevy::prelude::*;
 use serde::Deserialize;
-use crate::game::GamePlugin;
 //use crate::camera_plugin::camera_plugin::CameraPlugin;
 //use crate::game_logic_plugin::GameLogic;
 //use crate::game_logic_plugin::selection::SelectionPlugin;

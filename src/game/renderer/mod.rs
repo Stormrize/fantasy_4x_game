@@ -6,24 +6,28 @@ use crate::world::{
     },
 };
 use bevy::platform::collections::HashMap;
-use bevy::prelude::{App, Assets, Commands, IVec2, IntoScheduleConfigs, Mesh, MessageReader, OnEnter, Plugin, Res, ResMut, Resource, Update, in_state, ClearColor, Color, StandardMaterial};
+use bevy::prelude::{
+    App, Assets, ClearColor, Color, Commands, IVec2, IntoScheduleConfigs, Mesh, MessageReader,
+    OnEnter, Plugin, Res, ResMut, Resource, Update, in_state,
+};
 
+use crate::game::input::events::{RegenerateWorldEvent, handle_input};
+use crate::game::renderer::fog_renderer::SpawnedFogMeshes;
 use crate::game::{
     generation::regenerate_map,
     renderer::{
-        chunk_renderer::stream_chunks,
         buildings_renderer::{SpawnedBuildingsMeshes, despawn_buildings_meshes},
+        chunk_renderer::stream_chunks,
         resource_renderer::{SpawnedResourceMeshes, despawn_resource_meshes},
         terrain_renderer::{SpawnedTerrainMeshes, despawn_terrain_meshes},
         units_renderer::{SpawnedUnitsMeshes, despawn_units_meshes},
     },
 };
-use crate::game::generation::insert_map_resources;
-use crate::game::input::events::{handle_input, RegenerateWorldEvent};
 
 pub mod buildings_renderer;
 pub mod camera_math;
 pub mod chunk_renderer;
+mod fog_renderer;
 pub mod resource_renderer;
 pub mod terrain_renderer;
 mod units_renderer;
@@ -33,7 +37,8 @@ pub struct Rendered {
     pub terrain: HashMap<IVec2, SpawnedTerrainMeshes>,
     pub resources: HashMap<IVec2, SpawnedResourceMeshes>,
     pub buildings: HashMap<IVec2, SpawnedBuildingsMeshes>,
-    //pub units: HashMap<IVec2, SpawnedUnitsMeshes>,
+    pub units: HashMap<IVec2, SpawnedUnitsMeshes>,
+    pub fog: HashMap<IVec2, SpawnedFogMeshes>,
 }
 
 pub struct MapRenderPlugin;
@@ -45,17 +50,14 @@ impl Plugin for MapRenderPlugin {
             .add_systems(
                 Update,
                 (handle_input, apply_regenerate, stream_chunks)
-                    .chain()
                     .run_if(in_state(AppState::InGameRenderer)),
             );
     }
 }
-fn insert_assets(mut commands: Commands) {
+fn insert_assets(mut commands: Commands, config: Res<GameConfig>) {
     //rendered
     commands.insert_resource(Rendered::default());
-    //map_generation
-    insert_map_resources(&mut commands);
-    //visual
+    //visual note переделается
     commands.insert_resource(ClearColor(Color::BLACK))
 }
 fn apply_regenerate(

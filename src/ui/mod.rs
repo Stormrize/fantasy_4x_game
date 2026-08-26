@@ -1,16 +1,16 @@
-use crate::ui::game_setup_menu::GameSetupMenuPlugin;
 use crate::ui::in_game_asset_loading::InGameAssetLoadingPlugin;
-use crate::ui::in_game_menu::InGameMenuPlugin;
+use crate::ui::in_game_ui::InGameMenuPlugin;
 use crate::ui::initial_loading::InitialLoadingPlugin;
+use crate::ui::local_game_setup_menu::GameSetupMenuPlugin;
 use crate::ui::main_menu::MainMenuPlugin;
 use crate::ui::menus::AppState;
 use bevy::app::App;
 use bevy::prelude::{AppExtStates, Plugin};
 
-mod game_setup_menu;
 mod in_game_asset_loading;
-mod in_game_menu;
+mod in_game_ui;
 mod initial_loading;
+mod local_game_setup_menu;
 mod main_menu;
 pub mod menus;
 mod settings_menu;

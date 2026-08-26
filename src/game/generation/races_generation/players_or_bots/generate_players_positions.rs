@@ -6,10 +6,10 @@ use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct CapitalCoord(pub usize, pub usize);
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Id(pub u8);
 
 pub struct PlayersTerrainData {
@@ -100,7 +100,7 @@ impl PlayersTerrainData {
                                 found_pos = Some((x, y));
                                 break;
                             }
-                            _ => unreachable!()
+                            _ => unreachable!(),
                         }
                     }
 

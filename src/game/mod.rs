@@ -1,16 +1,14 @@
 mod camera_plugin;
-mod generation;
-mod renderer;
-mod input;
 mod game_logic_plugin;
+pub mod generation;
+mod input;
+mod renderer;
 
+use crate::game::{
+    camera_plugin::camera::CameraPlugin, game_logic_plugin::GameLogic, renderer::MapRenderPlugin,
+};
 use bevy::app::App;
 use bevy::prelude::Plugin;
-use crate::game::{
-    camera_plugin::camera::CameraPlugin,
-    game_logic_plugin::GameLogic,
-    renderer::MapRenderPlugin,
-};
 
 pub struct GamePlugin;
 

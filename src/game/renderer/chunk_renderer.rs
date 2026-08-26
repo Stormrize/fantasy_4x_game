@@ -4,28 +4,38 @@ use crate::game::renderer::buildings_renderer::{despawn_buildings_meshes, spawn_
 use crate::game::renderer::camera_math::{
     camera_chunk_bounds, camera_ground_point, chunk_coord_from_world_xz, outside_bounds,
 };
+use crate::game::renderer::fog_renderer::{despawn_fog_meshes, spawn_fog_meshes};
 use crate::game::renderer::resource_renderer::{despawn_resource_meshes, spawn_resource_meshes};
 use crate::game::renderer::terrain_renderer::{despawn_terrain_meshes, spawn_terrain_meshes};
 use crate::world::game_config::GameConfig;
 use crate::world::game_resources::buildings_map::BuildingMap;
+use crate::world::game_resources::fog_map::FogMap;
 use crate::world::game_resources::resource_map::ResourceMap;
 use crate::world::game_resources::terrain_map::TerrainMap;
 use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
+use bevy::asset::AssetServer;
 use bevy::prelude::{
-    Assets, Commands, IVec2, Mesh, Projection, Query, Res, ResMut, Transform, Window, With,
+    Assets, Commands, IVec2, Image, Mesh, Projection, Query, Res, ResMut, StandardMaterial,
+    Transform, Window, With,
 };
 use bevy::window::PrimaryWindow;
 use std::time::Instant;
+use crate::game::renderer::units_renderer::spawn_units_meshes;
+use crate::world::game_resources::unit_map::UnitsMap;
 
 pub fn stream_chunks(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
     mut rendered: ResMut<Rendered>,
     assets: Res<VisualRacesData>,
     config: Res<GameConfig>,
     terrain: Res<TerrainMap>,
     resources: Res<ResourceMap>,
     buildings: Res<BuildingMap>,
+    fog_map: Res<FogMap>,
+    units: Res<UnitsMap>,
     camera_q: Query<(&Transform, &Projection), With<MainCamera>>,
     window_q: Query<&Window, With<PrimaryWindow>>,
 ) {
@@ -69,6 +79,10 @@ pub fn stream_chunks(
         &terrain,
         &resources,
         &buildings,
+        &fog_map,
+        &units,
+        &asset_server,
+        &mut materials,
     );
 }
 
@@ -133,6 +147,9 @@ fn unload_distant_chunks(
         if let Some(buildings_meshes) = rendered.buildings.remove(&coord) {
             despawn_buildings_meshes(commands, meshes, buildings_meshes);
         }
+        if let Some(fog_meshes) = rendered.fog.remove(&coord) {
+            despawn_fog_meshes(commands, meshes, fog_meshes);
+        }
     }
 }
 
@@ -173,6 +190,10 @@ fn load_missing_chunks(
     terrain: &TerrainMap,
     resources: &ResourceMap,
     buildings: &BuildingMap,
+    fog: &FogMap,
+    units: &UnitsMap,
+    asset_server: &AssetServer,
+    materials: &mut Assets<StandardMaterial>,
 ) {
     let start_time = Instant::now();
 
@@ -194,8 +215,22 @@ fn load_missing_chunks(
         let building_meshes =
             spawn_buildings_meshes(commands, config, meshes, coord, assets, buildings);
 
+        let fog_meshes = spawn_fog_meshes(
+            commands,
+            config,
+            meshes,
+            materials,
+            coord,
+            asset_server,
+            fog,
+        );
+
+        let units_meshes = spawn_units_meshes(commands, &config, meshes, coord, assets, units);
+
         rendered.terrain.insert(coord, terrain_meshes);
         rendered.resources.insert(coord, resource_meshes);
         rendered.buildings.insert(coord, building_meshes);
+        rendered.fog.insert(coord, fog_meshes);
+        rendered.units.insert(coord, units_meshes);
     }
 }

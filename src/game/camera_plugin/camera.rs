@@ -22,9 +22,7 @@ impl Plugin for CameraPlugin {
             .add_systems(OnEnter(AppState::InGameRenderer), setup_camera)
             .add_systems(
                 Update,
-                (camera_movement, apply_zoom_smoothing)
-                    .chain()
-                    .run_if(in_state(AppState::InGameRenderer)),
+                (camera_movement, apply_zoom_smoothing).run_if(in_state(AppState::InGameRenderer)),
             );
     }
 }

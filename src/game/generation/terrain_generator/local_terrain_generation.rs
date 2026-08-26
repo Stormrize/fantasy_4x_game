@@ -13,7 +13,9 @@ use crate::game::generation::{
     terrain_generator::PerlinPlaceholder,
 };
 use crate::world::game_config::PlayerRace;
-use crate::world::game_resources::data::biome::BiomeType::{LargeBiome, MediumBiome, SmallBiome, Water};
+use crate::world::game_resources::data::biome::BiomeType::{
+    LargeBiome, MediumBiome, SmallBiome, Water,
+};
 
 const CAPITAL_SMALL_BIOME_RADIUS: f64 = 0.05;
 
@@ -72,8 +74,8 @@ fn apply_local_biomes(
             Water(_) => {
                 map[tile_index] = Water(cell.player_race.clone());
                 continue;
-            },
-            _ => ()
+            }
+            _ => (),
         }
 
         let nx = ((row as f64 - cell.capital.1 as f64) / size as f64) * config.local_frequency
@@ -91,9 +93,9 @@ fn apply_local_biomes(
         ));
 
         // добавляем small_biome возле столицы
-        let value =
-            ((value - capital_small_biome_bias(row, col, cell.capital, size)).clamp(0.0, 1.0) * 255.0) as u8;
-
+        let value = ((value - capital_small_biome_bias(row, col, cell.capital, size))
+            .clamp(0.0, 1.0)
+            * 255.0) as u8;
 
         map[tile_index] = choose_local_biome(value, config, cell.player_race.clone());
     }

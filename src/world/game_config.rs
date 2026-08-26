@@ -1,10 +1,14 @@
+use std::collections::HashMap;
+use crate::game::generation::races_generation::players_or_bots::generate_players_positions::Id;
 use crate::world::game_config::TerrainShape::Jagged;
 use bevy::prelude::Resource;
 use smol_str::SmolStr;
 
-#[derive(Resource, Debug)]
+#[derive(Resource, Debug, Clone)]
 pub struct GameConfig {
-    pub seed: u32,                              //4
+    pub seed: u32, //4
+    pub game_mode: GameMode,
+    pub player: PlayerRace,
     pub current_players: Vec<(u8, PlayerRace)>, //?
     pub terrain_size: usize,                    //8
     pub chunk_size: usize,                      //8
@@ -26,8 +30,8 @@ pub struct GameConfig {
     pub local_frequency: f64,                   //8
     pub local_persistence: f64,                 //8
     pub local_lacunarity: f64,                  //8
-    pub local_small_threshold: u8,             //8
-    pub local_middle_threshold: u8,            //8
+    pub local_small_threshold: u8,              //8
+    pub local_middle_threshold: u8,             //8
     pub local_seed_offset: f64,                 //8
     pub noise_scale: f32,
     pub noise_strength: f32,
@@ -38,6 +42,8 @@ impl Default for GameConfig {
         Self {
             //seed + players
             seed: 33,
+            game_mode: GameMode::Local,
+            player: PlayerRace::new(SmolStr::from("WaterMages")),
             current_players: vec![
                 (0, PlayerRace::new(SmolStr::from("WaterMages"))),
                 (1, PlayerRace::new(SmolStr::from("FireMages"))),
@@ -75,8 +81,8 @@ impl Default for GameConfig {
             local_frequency: 9.0,
             local_persistence: 0.55,
             local_lacunarity: 2.0,
-            local_small_threshold: 115, //0.45
-            local_middle_threshold: 158,   //0.62
+            local_small_threshold: 115,  //0.45
+            local_middle_threshold: 158, //0.62
             local_seed_offset: 19.19,
 
             //borders
@@ -89,6 +95,8 @@ impl Default for GameConfig {
 impl GameConfig {
     pub fn new(
         seed: u32,
+        game_mode: GameMode,
+        player: PlayerRace,
         current_players: Vec<(u8, PlayerRace)>,
         terrain_size: usize,
         chunk_size: usize,
@@ -102,6 +110,8 @@ impl GameConfig {
     ) -> Self {
         Self {
             seed,
+            game_mode,
+            player,
             current_players,
             terrain_size,
             chunk_size,
@@ -124,6 +134,21 @@ impl GameConfig {
     }
 }
 
+//---------------------------------------------------------------------------------------------------------------------------//
+#[derive(Resource)]
+pub struct PlayerRegistry {
+    races: HashMap<PlayerId, PlayerRace>
+}
+
+impl PlayerRegistry {
+    pub fn race_of(&self,  id: PlayerId) -> &PlayerRace {
+        &self.races[&id]
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub struct PlayerId(pub u8);
+
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PlayerRace(pub SmolStr);
 
@@ -131,6 +156,14 @@ impl PlayerRace {
     pub fn new(name: SmolStr) -> Self {
         Self(name)
     }
+}
+//---------------------------------------------------------------------------------------------------------------------------//
+
+#[derive(Clone, Debug, PartialEq)]
+#[repr(u8)]
+pub enum GameMode {
+    Multiplayer,
+    Local,
 }
 
 #[derive(Clone, Debug, Default)]

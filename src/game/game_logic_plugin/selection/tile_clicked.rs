@@ -1,19 +1,19 @@
+use crate::game::camera_plugin::camera::MainCamera;
+use crate::game::game_logic_plugin::events_resources_structs::render_messages::TileClickedEvent;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
 use bevy::prelude::{MouseButton, Res};
-use crate::game::game_logic_plugin::selection::events_resources_structs::messages::TileClickedEvent;
 
 // TODO для телефонов + сделать правая мышь детали
 pub fn click_to_world(
     mouse_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window>,
-    camera_query: Query<(&Camera, &GlobalTransform)>,
+    camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut tile_clicked_event: MessageWriter<TileClickedEvent>,
 ) {
     if !mouse_input.just_pressed(MouseButton::Left) {
         return;
     }
-
     let Some(window) = windows.iter().next() else {
         return;
     };
@@ -34,7 +34,9 @@ pub fn click_to_world(
                     click_world_pos.x.round() as i32,
                     click_world_pos.z.round() as i32,
                 );
-                tile_clicked_event.write(TileClickedEvent { grid_pos });
+                tile_clicked_event.write(TileClickedEvent { pos: grid_pos });
+
+                println!("Tile clicked at {:?}", click_world_pos);
             }
         }
     }

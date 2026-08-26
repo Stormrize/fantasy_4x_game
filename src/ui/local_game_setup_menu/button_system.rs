@@ -1,6 +1,6 @@
-use crate::ui::game_setup_menu::spawn_game_setup_menu::GameSetupMenuButtons;
+use crate::ui::local_game_setup_menu::spawn_game_setup_menu::GameSetupMenuButtons;
 use crate::ui::menus::AppState;
-use crate::world::game_config::{GameConfig, PlayerRace};
+use crate::world::game_config::{GameConfig, GameMode, PlayerRace};
 use bevy::prelude::{Changed, Commands, Interaction, NextState, Query, ResMut};
 use smol_str::SmolStr;
 
@@ -19,6 +19,7 @@ pub(super) fn button_system(
     }
 }
 
+//todo доделать наконец
 pub(super) fn build_game_config(mut commands: Commands) {
     let seed = rand::random_range(0..u32::MAX);
     let current_players = vec![
@@ -28,6 +29,8 @@ pub(super) fn build_game_config(mut commands: Commands) {
     ];
     let game_config = GameConfig::new(
         seed,
+        GameMode::Local,
+        PlayerRace::new(SmolStr::from("StoneMages")),
         current_players,
         32,
         4,

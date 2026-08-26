@@ -1,15 +1,11 @@
-use bevy::prelude::{MessageReader, ResMut};
-use crate::game::game_logic_plugin::selection::events_resources_structs::components::SelectedEntity;
-use crate::game::game_logic_plugin::selection::events_resources_structs::messages::NewTileSelectionEvent;
+use crate::game::game_logic_plugin::events_resources_structs::components::{AlreadySelectedTile, JustSelectedTile, TileContent};
 
 pub fn new_tile_selection_system(
-    mut events: MessageReader<NewTileSelectionEvent>,
-    mut selected: ResMut<SelectedEntity>,
+    just_selected_tile: JustSelectedTile,
+    already_selected_tile: &mut AlreadySelectedTile,
 ) {
-    for event in events.read() {
-        selected.position = Some(event.tile.pos);
-        selected.layer = Some(event.tile.get_top_layer());
+    already_selected_tile.pos = Some(just_selected_tile.pos);
+    already_selected_tile.layer = Some(just_selected_tile.tile_content.get_top_layer());
 
-        println!("Selected {:?} {:?}", selected.position, selected.layer);
-    }
+    println!("Selected {:?} {:?}", already_selected_tile.pos, already_selected_tile.layer);
 }

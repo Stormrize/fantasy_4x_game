@@ -1,80 +1,75 @@
-use bevy::prelude::{MessageReader, MessageWriter, Res};
-use crate::game::game_logic_plugin::selection::events_resources_structs::components::{SelectedEntity, TileContent};
-use crate::game::game_logic_plugin::selection::events_resources_structs::messages::{ActionSelectionEvent, ClearSelectionEvent, CycleSelectionEvent, NewTileSelectionEvent, TileClickedEvent};
-
-use crate::world::{
-    game_config::GameConfig,
-    game_resources::{
-        buildings_map::BuildingMap,
-        fog_map::FogMap,
-        resource_map::ResourceMap,
-        terrain_map::TerrainMap,
-        unit_map::UnitsMap,
-        data::{
-            buildings::BuildingType,
-            biome::BiomeType,
-            resources::ResourceType,
-            units::Unit
-        }
-    }
-};
+use crate::game::game_logic_plugin::action::action_router::route_action;
+use crate::game::game_logic_plugin::events_resources_structs::action_messages::ActionCommandWriters;
+use crate::game::game_logic_plugin::events_resources_structs::components::{AlreadySelectedTile, JustSelectedTile, TileContent, TileLayer, WorldMaps};
+use crate::game::game_logic_plugin::events_resources_structs::render_messages::TileClickedEvent;
+use crate::game::game_logic_plugin::selection::selection_systems::clear::clear_selection_system;
+use crate::game::game_logic_plugin::selection::selection_systems::cycle::cycle_selection_system;
+use crate::game::game_logic_plugin::selection::selection_systems::new_tile::new_tile_selection_system;
+use bevy::prelude::{MessageReader, ResMut};
 
 pub fn route_selection(
-    config: Res<GameConfig>,
-    terrain: Res<TerrainMap>,
-    resources: Res<ResourceMap>,
-    buildings: Res<BuildingMap>,
-    units: Res<UnitsMap>,
-    fog: Res<FogMap>,
+    world_maps: WorldMaps,
 
-    selected: Res<SelectedEntity>,
-
+    mut already_selected_tile: ResMut<AlreadySelectedTile>,
     mut tile_clicked: MessageReader<TileClickedEvent>,
 
-    mut new_tile: MessageWriter<NewTileSelectionEvent>,
-    mut cycle: MessageWriter<CycleSelectionEvent>,
-    mut action: MessageWriter<ActionSelectionEvent>,
-    mut clear: MessageWriter<ClearSelectionEvent>,
+    mut commands: ActionCommandWriters,
 ) {
     for click in tile_clicked.read() {
-        let pos = click.grid_pos;
+        let clicked_pos = click.pos;
 
-        if pos.x < 0
-            || pos.y < 0
-            || pos.x >= config.terrain_size as i32
-            || pos.y >= config.terrain_size as i32
+        if clicked_pos.x < 0
+            || clicked_pos.y < 0
+            || clicked_pos.x >= world_maps.config.terrain_size as i32
+            || clicked_pos.y >= world_maps.config.terrain_size as i32
         {
-            clear.write(ClearSelectionEvent);
+            clear_selection_system(&mut already_selected_tile);
             continue;
         }
-
-        let tile = TileContent::from_world(
-            pos,
-            match terrain.get(pos.x as usize, pos.y as usize).clone() { 
-                BiomeType::Water(_) => true,
-                _ => false,
-            },
-            units.get(pos.x as usize, pos.y as usize).clone() != Unit::None,
-            buildings.get(pos.x as usize, pos.y as usize).clone() != BuildingType::None,
-            resources.get(pos.x as usize, pos.y as usize).clone() != ResourceType::None,
-            fog.get(pos.x as usize, pos.y as usize) == true,
+        
+        let tile_content = TileContent::from_world(
+            world_maps
+                .terrain
+                .get(clicked_pos.x as usize, clicked_pos.y as usize)
+                .clone(),
+            world_maps
+                .units
+                .get(clicked_pos.x as usize, clicked_pos.y as usize)
+                .clone(),
+            world_maps
+                .buildings
+                .get(clicked_pos.x as usize, clicked_pos.y as usize)
+                .clone(),
+            world_maps
+                .resources
+                .get(clicked_pos.x as usize, clicked_pos.y as usize)
+                .clone(),
+            world_maps
+                .fog
+                .get(clicked_pos.x as usize, clicked_pos.y as usize)
         );
 
-        match selected.position {
+        let just_selected_tile = JustSelectedTile { 
+            pos: clicked_pos, 
+            tile_content
+        };
+
+        match already_selected_tile.pos {
             None => {
-                new_tile.write(NewTileSelectionEvent { tile });
+                new_tile_selection_system(just_selected_tile, &mut already_selected_tile);
             }
 
-            Some(selected_pos) if selected_pos == pos => {
-                cycle.write(CycleSelectionEvent { tile });
+            Some(selected_pos) if selected_pos == clicked_pos => {
+                cycle_selection_system(just_selected_tile, &mut already_selected_tile);
             }
 
-            Some(selected_pos) => {
-                action.write(ActionSelectionEvent {
-                    selected_pos,
-                    target_tile: tile,
-                    selected_layer: selected.layer.unwrap(),
-                });
+            Some(_) => {
+                route_action(
+                    &*world_maps.config,
+                    just_selected_tile,
+                    &mut already_selected_tile,
+                    &mut commands,
+                );
             }
         }
     }

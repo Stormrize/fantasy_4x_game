@@ -34,7 +34,7 @@ impl UnitsMap {
 
                 let index = x * terrain_size + y;
                 //todo
-                data[index] = Unit::ResourceGatherer(PlayerRace::new(SmolStr::new("sfds")));
+                data[index] = Unit::ResourceGathererBuilder(PlayerRace::new(SmolStr::new("sfds")));
             }
         }
 

@@ -1,18 +1,18 @@
-use smol_str::SmolStr;
 use crate::game::generation::terrain_generator::PerlinPlaceholder;
 use crate::game::generation::terrain_generator::noise::{fbm, normalise, sample};
+use crate::world::game_config::PlayerRace;
 use crate::world::{
     game_config::GameConfig,
     game_resources::{data::biome::BiomeType, terrain_map::GlobalTerrainMap},
 };
-use crate::world::game_config::PlayerRace;
+use smol_str::SmolStr;
 
 impl GlobalTerrainMap {
     pub fn new(config: &GameConfig, perlin_placeholder: &PerlinPlaceholder) -> Self {
         let terrain_size = config.terrain_size;
-        
+
         println!("{:#?}", config);
-        
+
         let mut data = vec![BiomeType::Ground; terrain_size * terrain_size];
 
         //let task_pool = ComputeTaskPool::get();

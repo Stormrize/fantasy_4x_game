@@ -49,14 +49,14 @@ pub fn spawn_units_meshes(
                 continue;
             }
 
-            //todo пока нет асетов для юнитов
+            //todo пока нет ассетов для юнитов
             let handle = assets.0[player_race.unwrap()].get_resource(2);
 
             let mesh_handle = meshes.add(Cone::new(0.3, 0.5));
 
             let entity = commands
                 .spawn((
-                    Transform::from_xyz(row as f32 * tile_size, 0.3, col as f32 * tile_size),
+                    Transform::from_xyz((row as f32 + 0.3) * tile_size, 0.3, (col as f32 + 0.3) * tile_size),
                     Mesh3d(mesh_handle.clone()),
                     MeshMaterial3d(handle.clone()),
                 ))

@@ -3,7 +3,7 @@
     water: "0.14, 0.42, 0.72",
     small_biome: "0.99, 0.0, 0.0",
     medium_biome: "0.66, 0.0, 0.0",
-    large_biome: "0.99, 0.0, 0.0",
+    large_biome: "0.33, 0.0, 0.0",
 
     //resource
     small_resource: "0.33, 0.0, 0.0",
