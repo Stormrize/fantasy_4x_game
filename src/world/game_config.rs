@@ -1,31 +1,44 @@
 use std::collections::HashMap;
-use crate::game::generation::races_generation::players_or_bots::generate_players_positions::Id;
-use crate::world::game_config::TerrainShape::Jagged;
 use bevy::prelude::Resource;
 use smol_str::SmolStr;
+use crate::world::game_config::MapShape::Jagged;
 
 #[derive(Resource, Debug, Clone)]
 pub struct GameConfig {
+    //seed + players
     pub seed: u32, //4
     pub game_mode: GameMode,
     pub player: PlayerRace,
     pub current_players: Vec<(u8, PlayerRace)>, //?
+
+    //terrain
     pub terrain_size: usize,                    //8
     pub chunk_size: usize,                      //8
     pub tile_size: f32,                         //4
+
+    //camera_plugin
     pub min_orthographic_scale: f32,            //4
     pub max_orthographic_scale: f32,            //4
     pub camera_viewport_height: f32,            //4
+
+    //renderer
     pub preload_margin_chunks: u8,              //1
     pub unload_margin_chunks: u8,               //1
-    pub terrain_shape: TerrainShape,            //1
+
+    pub terrain_shape: MapShape,                //1
+
+    //global procedural thresholds
     pub water_threshold: u8,                    //1
+
+    //global procedural generation (water/ground)
     pub global_octaves: u8,                     //1
     pub global_frequency: f64,                  //8
     pub global_persistence: f64,                //8
     pub global_lacunarity: f64,                 //8
     pub global_detail_frequency: f64,           //8
     pub global_detail_weight: f64,              //8
+
+    //local procedural generation (for each fantasy race)
     pub local_octaves: u8,                      //1
     pub local_frequency: f64,                   //8
     pub local_persistence: f64,                 //8
@@ -33,6 +46,8 @@ pub struct GameConfig {
     pub local_small_threshold: u8,              //8
     pub local_middle_threshold: u8,             //8
     pub local_seed_offset: f64,                 //8
+
+    //borders
     pub noise_scale: f32,
     pub noise_strength: f32,
 }
@@ -166,10 +181,10 @@ pub enum GameMode {
     Local,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 #[allow(dead_code)]
 #[repr(u8)]
-pub enum TerrainShape {
+pub enum MapShape {
     #[default]
     Round,
     Jagged,

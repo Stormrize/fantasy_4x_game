@@ -1,16 +1,22 @@
-use crate::world::game_config::GameConfig;
-use crate::world::game_resources::buildings_map::BuildingMap;
-use crate::world::game_resources::data::biome::BiomeType;
-use crate::world::game_resources::data::buildings::BuildingType;
-use crate::world::game_resources::data::resources::ResourceType;
-use crate::world::game_resources::data::units::Unit;
-use crate::world::game_resources::fog_map::FogMap;
-use crate::world::game_resources::resource_map::ResourceMap;
-use crate::world::game_resources::terrain_map::TerrainMap;
-use crate::world::game_resources::unit_map::UnitsMap;
+use crate::world::{
+    game_config::GameConfig,
+    game_resources::{
+        buildings_map::BuildingMap,
+        data::{
+            biome::BiomeType,
+            buildings::BuildingType,
+            resources::ResourceType,
+            units::Unit,
+        },
+        fog_map::FogMap,
+        resource_map::ResourceMap,
+        terrain_map::TerrainMap,
+        unit_map::UnitsMap,
+    }
+};
+
 use bevy::ecs::system::SystemParam;
-use bevy::math::IVec2;
-use bevy::prelude::{Bundle, Res, Resource};
+use bevy::prelude::{Res, Resource, IVec2};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum TileLayer {

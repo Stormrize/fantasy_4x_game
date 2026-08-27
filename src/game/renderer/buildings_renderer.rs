@@ -1,12 +1,14 @@
-use crate::world::game_config::GameConfig;
-use crate::world::game_resources::buildings_map::BuildingMap;
-use crate::world::game_resources::data::buildings::BuildingType;
-use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
-use bevy::math::IVec2;
-use bevy::pbr::MeshMaterial3d;
+use crate::world::{
+    game_config::GameConfig, 
+    game_resources::{
+        buildings_map::BuildingMap, 
+        data::buildings::BuildingType,
+    },
+    ui_and_graphic_resources::player_registry::RacesAssetsRegistry
+};
 use bevy::prelude::{
-    Assets, Commands, Component, Entity, Handle, Mesh, Mesh3d, Res, Resource, Sphere,
-    StandardMaterial, Transform, default,
+    Assets, Commands, Component, Entity, Handle, Mesh, Mesh3d, Sphere,
+    Transform, MeshMaterial3d, IVec2
 };
 
 #[derive(Component)]
@@ -25,7 +27,7 @@ pub fn spawn_buildings_meshes(
     config: &GameConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    assets: &VisualRacesData,
+    assets_registry: &RacesAssetsRegistry,
     buildings: &BuildingMap,
 ) -> SpawnedBuildingsMeshes {
     let chunk_size = config.chunk_size;
@@ -50,7 +52,7 @@ pub fn spawn_buildings_meshes(
                 continue;
             }
 
-            let handle = &assets.0[player_race.unwrap()].get_building(building.index());
+            let handle = &assets_registry.0[player_race.unwrap()].get_building(building.index());
 
             let mesh_handle = meshes.add(Sphere::new(0.5));
 

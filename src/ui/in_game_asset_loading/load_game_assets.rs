@@ -1,37 +1,33 @@
-use crate::ui::menus::AppState;
 use crate::world::{
     game_config::{GameConfig, PlayerRace},
     ui_and_graphic_resources::{
-        data::visual_race_data::{RawVisualRaceData, VisualRaceData},
-        ui_race_dataset::InitialRacesData,
-        visual_race_dataset::VisualRacesData,
+        data::visual_race_data::{RawRaceAssets, RaceAssets},
+        player_registry::{RacesAssetsRegistry, RacesUiRegistry}
     },
 };
-use bevy::asset::LoadState;
 use bevy::color::Color;
 use bevy::prelude::{
-    AssetServer, Assets, Commands, Handle, NextState, Res, ResMut, Resource, StandardMaterial,
+    AssetServer, Assets, Commands, Handle, Res, ResMut, Resource, StandardMaterial,
 };
 use bevy::utils::default;
 
 #[derive(Resource, Default, Debug)]
-pub(super) struct RawVisualRaceHandles(pub Vec<(PlayerRace, Handle<RawVisualRaceData>)>);
+pub(super) struct RawVisualRaceHandles(pub Vec<(PlayerRace, Handle<RawRaceAssets>)>);
 
 pub(super) fn load_assets(
     mut commands: Commands,
     config: Res<GameConfig>,
-    races_data: Res<InitialRacesData>,
+    races_data: Res<RacesUiRegistry>,
     asset_server: Res<AssetServer>,
 ) {
     let players = &config.current_players;
-    let visual_paths = &races_data.0;
-
+    
     let mut vec = Vec::new();
 
     for player in players {
-        let visual_path = &visual_paths.get(&player.1).unwrap().visual_path;
-
-        let raw_visual_data: Handle<RawVisualRaceData> = asset_server.load(visual_path);
+        let visual_path = &races_data.ui_race_data_of(&player.1).visual_path;
+        
+        let raw_visual_data: Handle<RawRaceAssets> = asset_server.load(visual_path);
 
         vec.push((player.1.clone(), raw_visual_data));
     }
@@ -40,14 +36,14 @@ pub(super) fn load_assets(
 
 pub(super) fn check_raw_handles(
     raw_handles: Res<RawVisualRaceHandles>,
-    mut raw_assets: ResMut<Assets<RawVisualRaceData>>,
+    mut raw_assets: ResMut<Assets<RawRaceAssets>>,
     asset_server: Res<AssetServer>,
-    mut visual_races_data: ResMut<VisualRacesData>,
+    mut assets_registry: ResMut<RacesAssetsRegistry>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for handle in &raw_handles.0 {
         if let Some(asset) = raw_assets.remove(&handle.1) {
-            let RawVisualRaceData {
+            let RawRaceAssets {
                 water,
                 small_biome,
                 medium_biome,
@@ -90,7 +86,7 @@ pub(super) fn check_raw_handles(
             //     research_center: asset_server.load(research_center),
             // };
 
-            let fallback_visual_race_data = VisualRaceData {
+            let fallback_visual_race_data = RaceAssets {
                 biomes: [
                     materials.add(StandardMaterial {
                         base_color: parse_color(parse_string(&water)),
@@ -161,7 +157,7 @@ pub(super) fn check_raw_handles(
                 ],
             };
 
-            visual_races_data
+            assets_registry
                 .0
                 .insert(handle.0.clone(), fallback_visual_race_data);
         }

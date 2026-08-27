@@ -1,7 +1,11 @@
-use crate::world::game_config::GameConfig;
-use crate::world::game_resources::data::resources::ResourceType;
-use crate::world::game_resources::resource_map::ResourceMap;
-use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
+use crate::world::{
+    game_config::GameConfig, 
+    game_resources::{
+        data::resources::ResourceType, 
+        resource_map::ResourceMap
+    },
+    ui_and_graphic_resources::player_registry::RacesAssetsRegistry
+};
 use bevy::prelude::{
     Assets, Commands, Component, Cuboid, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d,
     Transform,
@@ -23,7 +27,7 @@ pub fn spawn_resource_meshes(
     config: &GameConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    assets: &VisualRacesData,
+    assets_registry: &RacesAssetsRegistry,
     resources: &ResourceMap,
 ) -> SpawnedResourceMeshes {
     let chunk_size = config.chunk_size;
@@ -49,7 +53,7 @@ pub fn spawn_resource_meshes(
                 continue;
             }
 
-            let handle = assets.0[player_race.unwrap()].get_resource(resource.index());
+            let handle = assets_registry.0[player_race.unwrap()].get_resource(resource.index());
 
             let mesh_handle = meshes.add(Cuboid::new(0.3, 0.3, 0.3));
 

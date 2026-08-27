@@ -3,7 +3,7 @@
 //! Все вызовы `noise`-крейта изолированы здесь — остальной код
 //! не знает о конкретной библиотеке шума.
 
-use noise::{Fbm, MultiFractal, NoiseFn, Perlin};
+use noise::{NoiseFn, Perlin};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // fBm — Fractal Brownian Motion

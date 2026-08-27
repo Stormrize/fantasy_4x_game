@@ -1,6 +1,5 @@
-use crate::world::game_config::GameConfig;
 use ::noise::Perlin;
-use bevy::prelude::Resource;
+use crate::world::game_configs::GenerationConfig;
 
 mod global_terrain_generation;
 mod local_terrain_generation;
@@ -23,7 +22,7 @@ impl Default for PerlinPlaceholder {
 }
 
 impl PerlinPlaceholder {
-    pub fn new(config: &GameConfig) -> Self {
+    pub fn new(config: &GenerationConfig) -> Self {
         Self {
             perlin_main: Perlin::new(config.seed),
             perlin_detail: Perlin::new(config.seed.wrapping_sub(1337)),

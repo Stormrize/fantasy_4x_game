@@ -1,7 +1,6 @@
 use crate::world::game_config::GameConfig;
-use bevy::camera::{OrthographicProjection, Projection, ScalingMode};
-use bevy::math::{IVec2, Vec3};
-use bevy::prelude::{Transform, Window};
+use bevy::camera::ScalingMode;
+use bevy::prelude::{Transform, Window, IVec2, Vec3, Projection, OrthographicProjection};
 
 pub fn camera_forward(transform: &Transform) -> Vec3 {
     transform.rotation * Vec3::NEG_Z

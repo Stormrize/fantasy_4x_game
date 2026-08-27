@@ -1,21 +1,17 @@
-use crate::world::game_config::GameConfig;
-use crate::world::game_resources::data::resources::ResourceType;
-use crate::world::game_resources::fog_map::FogMap;
-use crate::world::game_resources::resource_map::ResourceMap;
-use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
-use bevy::asset::AssetServer;
-use bevy::image::Image;
-use bevy::mesh::Meshable;
-use bevy::prelude::{
-    AlphaMode, Assets, Commands, Component, Cuboid, Entity, Handle, IVec2, Mesh, Mesh3d,
-    MeshMaterial3d, Plane3d, ResMut, StandardMaterial, Transform, default,
+use crate::world::{
+    game_config::GameConfig,
+    game_resources::fog_map::FogMap,
 };
-use bevy::sprite::Sprite;
+use bevy::prelude::{
+    AssetServer, Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d,
+    MeshMaterial3d, Plane3d, StandardMaterial, Transform, default, Image,
+    Meshable
+};
 
 #[derive(Component)]
 pub struct FogMesh {
     pub coord: IVec2,
-    pub resource: ResourceType,
+    pub fog: bool,
 }
 
 pub struct SpawnedFogMeshes {

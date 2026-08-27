@@ -1,10 +1,14 @@
 use crate::game::generation::races_generation::players_or_bots::generate_players_positions::{
-    CapitalCoord, PlayersTerrainData,
+    PlayersTerrainData,
 };
-use crate::world::{game_config::GameConfig, game_resources::fog_map::FogMap};
+
+use crate::world::{
+    game_resources::fog_map::FogMap,
+    game_configs::GenerationConfig
+};
 
 impl FogMap {
-    pub fn new(config: &GameConfig, capital_coord: &PlayersTerrainData) -> Self {
+    pub fn new(config: &GenerationConfig, capital_coord: &PlayersTerrainData) -> Self {
         let terrain_size = config.terrain_size;
         let player = &config.player;
         let mut player_capital_coord = None;

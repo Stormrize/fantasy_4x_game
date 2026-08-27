@@ -1,5 +1,5 @@
 use bevy::ecs::system::SystemParam;
-use bevy::prelude::{Entity, IVec2, Message, MessageWriter, Res, ResMut};
+use bevy::prelude::{Entity, IVec2, Message, MessageWriter};
 
 //movement
 #[derive(Message)]

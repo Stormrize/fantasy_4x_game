@@ -1,7 +1,11 @@
-use crate::world::game_config::GameConfig;
-use crate::world::game_resources::data::resources::ResourceType;
-use crate::world::game_resources::unit_map::UnitsMap;
-use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
+use crate::world::{
+    game_config::GameConfig, 
+    game_resources::{
+        data::resources::ResourceType, 
+        unit_map::UnitsMap,
+    },
+    ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
+};
 use bevy::prelude::{
     Assets, Commands, Component, Cone, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d,
     Transform,
@@ -23,7 +27,7 @@ pub fn spawn_units_meshes(
     config: &GameConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    assets: &VisualRacesData,
+    assets_registry: &RacesAssetsRegistry,
     units: &UnitsMap,
 ) -> SpawnedUnitsMeshes {
     let chunk_size = config.chunk_size;
@@ -50,7 +54,7 @@ pub fn spawn_units_meshes(
             }
 
             //todo пока нет ассетов для юнитов
-            let handle = assets.0[player_race.unwrap()].get_resource(2);
+            let handle = assets_registry.0[player_race.unwrap()].get_resource(2);
 
             let mesh_handle = meshes.add(Cone::new(0.3, 0.5));
 

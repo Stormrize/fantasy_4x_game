@@ -11,16 +11,15 @@ use bevy::prelude::{
     OnEnter, Plugin, Res, ResMut, Resource, Update, in_state,
 };
 
-use crate::game::input::events::{RegenerateWorldEvent, handle_input};
-use crate::game::renderer::fog_renderer::SpawnedFogMeshes;
 use crate::game::{
-    generation::regenerate_map,
+    input::events::{RegenerateWorldEvent, handle_input},
     renderer::{
         buildings_renderer::{SpawnedBuildingsMeshes, despawn_buildings_meshes},
         chunk_renderer::stream_chunks,
         resource_renderer::{SpawnedResourceMeshes, despawn_resource_meshes},
         terrain_renderer::{SpawnedTerrainMeshes, despawn_terrain_meshes},
         units_renderer::{SpawnedUnitsMeshes, despawn_units_meshes},
+        fog_renderer::SpawnedFogMeshes
     },
 };
 
@@ -74,7 +73,7 @@ fn apply_regenerate(
         return;
     }
 
-    regenerate_map(config, terrains, resources, buildings);
+    //regenerate_map(config, terrains, resources, buildings);
 
     for (_, terrain_meshes) in &mut rendered.terrain.drain() {
         despawn_terrain_meshes(&mut commands, &mut meshes, terrain_meshes);
@@ -84,5 +83,8 @@ fn apply_regenerate(
     }
     for (_, buildings) in &mut rendered.buildings.drain() {
         despawn_buildings_meshes(&mut commands, &mut meshes, buildings);
+    }
+    for (_, units_meshes) in &mut rendered.units.drain() {
+        despawn_units_meshes(&mut commands, &mut meshes, units_meshes);
     }
 }

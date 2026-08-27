@@ -1,10 +1,17 @@
-use crate::game::game_logic_plugin::action::action_router::route_action;
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::ActionCommandWriters;
-use crate::game::game_logic_plugin::events_resources_structs::components::{AlreadySelectedTile, JustSelectedTile, TileContent, TileLayer, WorldMaps};
-use crate::game::game_logic_plugin::events_resources_structs::render_messages::TileClickedEvent;
-use crate::game::game_logic_plugin::selection::selection_systems::clear::clear_selection_system;
-use crate::game::game_logic_plugin::selection::selection_systems::cycle::cycle_selection_system;
-use crate::game::game_logic_plugin::selection::selection_systems::new_tile::new_tile_selection_system;
+use crate::game::game_logic_plugin::{
+    action::action_router::route_action,
+    events_resources_structs::{
+        action_messages::ActionCommandWriters,
+        components::*,
+        render_messages::TileClickedEvent,
+    },
+    selection::selection_systems::{
+        clear::clear_selection_system,
+        cycle::cycle_selection_system,
+        new_tile::new_tile_selection_system
+    },
+};
+
 use bevy::prelude::{MessageReader, ResMut};
 
 pub fn route_selection(

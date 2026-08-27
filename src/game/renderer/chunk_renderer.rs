@@ -1,27 +1,35 @@
-use crate::game::camera_plugin::camera::MainCamera;
-use crate::game::renderer::Rendered;
-use crate::game::renderer::buildings_renderer::{despawn_buildings_meshes, spawn_buildings_meshes};
-use crate::game::renderer::camera_math::{
-    camera_chunk_bounds, camera_ground_point, chunk_coord_from_world_xz, outside_bounds,
+use crate::game::{
+    camera_plugin::camera::MainCamera,
+    renderer::{
+        Rendered,
+        buildings_renderer::{despawn_buildings_meshes, spawn_buildings_meshes},
+        camera_math::{
+            camera_chunk_bounds, camera_ground_point, chunk_coord_from_world_xz, outside_bounds,
+        },
+        fog_renderer::{despawn_fog_meshes, spawn_fog_meshes},
+        resource_renderer::{despawn_resource_meshes, spawn_resource_meshes},
+        terrain_renderer::{despawn_terrain_meshes, spawn_terrain_meshes},
+        units_renderer::{despawn_units_meshes, spawn_units_meshes},
+    },
 };
-use crate::game::renderer::fog_renderer::{despawn_fog_meshes, spawn_fog_meshes};
-use crate::game::renderer::resource_renderer::{despawn_resource_meshes, spawn_resource_meshes};
-use crate::game::renderer::terrain_renderer::{despawn_terrain_meshes, spawn_terrain_meshes};
-use crate::world::game_config::GameConfig;
-use crate::world::game_resources::buildings_map::BuildingMap;
-use crate::world::game_resources::fog_map::FogMap;
-use crate::world::game_resources::resource_map::ResourceMap;
-use crate::world::game_resources::terrain_map::TerrainMap;
-use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
-use bevy::asset::AssetServer;
+
+use crate::world::{
+    game_config::GameConfig,
+    game_resources::{
+        buildings_map::BuildingMap,
+        fog_map::FogMap,
+        resource_map::ResourceMap, 
+        terrain_map::TerrainMap,
+        unit_map::UnitsMap
+    },
+    ui_and_graphic_resources::player_registry::RacesAssetsRegistry
+};
 use bevy::prelude::{
-    Assets, Commands, IVec2, Image, Mesh, Projection, Query, Res, ResMut, StandardMaterial,
-    Transform, Window, With,
+    Assets, Commands, IVec2, Mesh, Projection, Query, Res, ResMut, StandardMaterial,
+    Transform, Window, With, AssetServer
 };
 use bevy::window::PrimaryWindow;
 use std::time::Instant;
-use crate::game::renderer::units_renderer::spawn_units_meshes;
-use crate::world::game_resources::unit_map::UnitsMap;
 
 pub fn stream_chunks(
     mut commands: Commands,
@@ -29,7 +37,7 @@ pub fn stream_chunks(
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
     mut rendered: ResMut<Rendered>,
-    assets: Res<VisualRacesData>,
+    assets_registry: Res<RacesAssetsRegistry>,
     config: Res<GameConfig>,
     terrain: Res<TerrainMap>,
     resources: Res<ResourceMap>,
@@ -75,7 +83,7 @@ pub fn stream_chunks(
         &mut meshes,
         &mut rendered,
         missing_chunks,
-        &assets,
+        &assets_registry,
         &terrain,
         &resources,
         &buildings,
@@ -150,6 +158,9 @@ fn unload_distant_chunks(
         if let Some(fog_meshes) = rendered.fog.remove(&coord) {
             despawn_fog_meshes(commands, meshes, fog_meshes);
         }
+        if let Some(units_meshes) = rendered.units.remove(&coord) {
+            despawn_units_meshes(commands, meshes, units_meshes);
+        }
     }
 }
 
@@ -186,7 +197,7 @@ fn load_missing_chunks(
     meshes: &mut ResMut<Assets<Mesh>>,
     rendered: &mut Rendered,
     missing_chunks: Vec<IVec2>,
-    assets: &VisualRacesData,
+    assets_registry: &RacesAssetsRegistry,
     terrain: &TerrainMap,
     resources: &ResourceMap,
     buildings: &BuildingMap,
@@ -207,13 +218,13 @@ fn load_missing_chunks(
         }
 
         let terrain_meshes =
-            spawn_terrain_meshes(commands, &config, meshes, coord, assets, terrain);
+            spawn_terrain_meshes(commands, &config, meshes, coord, assets_registry, terrain);
 
         let resource_meshes =
-            spawn_resource_meshes(commands, &config, meshes, coord, assets, resources);
+            spawn_resource_meshes(commands, &config, meshes, coord, assets_registry, resources);
 
         let building_meshes =
-            spawn_buildings_meshes(commands, config, meshes, coord, assets, buildings);
+            spawn_buildings_meshes(commands, config, meshes, coord, assets_registry, buildings);
 
         let fog_meshes = spawn_fog_meshes(
             commands,
@@ -225,7 +236,7 @@ fn load_missing_chunks(
             fog,
         );
 
-        let units_meshes = spawn_units_meshes(commands, &config, meshes, coord, assets, units);
+        let units_meshes = spawn_units_meshes(commands, &config, meshes, coord, assets_registry, units);
 
         rendered.terrain.insert(coord, terrain_meshes);
         rendered.resources.insert(coord, resource_meshes);

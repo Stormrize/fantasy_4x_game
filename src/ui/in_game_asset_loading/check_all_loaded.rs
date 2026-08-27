@@ -1,9 +1,14 @@
-use crate::ui::in_game_asset_loading::load_game_assets::RawVisualRaceHandles;
-use crate::ui::in_game_asset_loading::load_game_map::MapGenerationTask;
-use crate::ui::menus::AppState;
-use crate::world::game_config::{GameConfig, GameMode};
-use crate::world::ui_and_graphic_resources::data::visual_race_data::VisualRaceData;
-use crate::world::ui_and_graphic_resources::visual_race_dataset::VisualRacesData;
+use crate::ui::{
+    in_game_asset_loading::{load_game_assets::RawVisualRaceHandles, load_game_map::MapGenerationTask}
+    menus::AppState,
+};
+use crate::world::{
+    game_config::{GameConfig, GameMode},
+    ui_and_graphic_resources::{
+        data::visual_race_data::RaceAssets,
+       player_registry::RacesAssetsRegistry,
+    }
+};
 use bevy::asset::{AssetServer, LoadState};
 use bevy::prelude::{Commands, NextState, Res, ResMut};
 use bevy::tasks::futures_lite::future;
@@ -24,7 +29,7 @@ fn poll_map_generation(mut commands: Commands, task: &mut MapGenerationTask) -> 
 }
 
 pub(super) fn set_new_state_if_all_loaded(
-    visual_races_data: Res<VisualRacesData>,
+    assets_registry: Res<RacesAssetsRegistry>,
     raw_handles: Res<RawVisualRaceHandles>,
     asset_server: Res<AssetServer>,
     mut next_state: ResMut<NextState<AppState>>,
@@ -38,13 +43,13 @@ pub(super) fn set_new_state_if_all_loaded(
 
     let expected_current_races = raw_handles.0.len();
 
-    if visual_races_data.0.len() < expected_current_races || visual_races_data.0.len() == 0 {
+    if assets_registry.0.len() < expected_current_races || assets_registry.0.len() == 0 {
         return;
     }
 
     let mut counter = 0;
 
-    for (_, visual_race_data) in &visual_races_data.0 {
+    for (_, visual_race_data) in &assets_registry.0 {
         let loaded = all_fields_loaded(visual_race_data, &asset_server);
 
         if loaded {
@@ -67,7 +72,7 @@ pub(super) fn set_new_state_if_all_loaded(
     }
 }
 
-fn all_fields_loaded(data: &VisualRaceData, asset_server: &AssetServer) -> bool {
+fn all_fields_loaded(data: &RaceAssets, asset_server: &AssetServer) -> bool {
     let mut all_loaded = true;
 
     for handle in data.handles() {

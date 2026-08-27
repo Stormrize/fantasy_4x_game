@@ -1,8 +1,9 @@
 use crate::ui::local_game_setup_menu::spawn_game_setup_menu::GameSetupMenuButtons;
 use crate::ui::menus::AppState;
-use crate::world::game_config::{GameConfig, GameMode, PlayerRace};
+use crate::world::game_config::{MapShape, PlayerRace};
 use bevy::prelude::{Changed, Commands, Interaction, NextState, Query, ResMut};
 use smol_str::SmolStr;
+use crate::world::game_configs::{AiDifficulty, ConfigType, GameConfig, LocalPlayerConfig, MapSize};
 
 pub(super) fn button_system(
     mut interaction_query: Query<(&Interaction, &GameSetupMenuButtons), (Changed<Interaction>)>,
@@ -22,25 +23,26 @@ pub(super) fn button_system(
 //todo доделать наконец
 pub(super) fn build_game_config(mut commands: Commands) {
     let seed = rand::random_range(0..u32::MAX);
-    let current_players = vec![
-        (0, PlayerRace::new(SmolStr::from("WaterMages"))),
-        (1, PlayerRace::new(SmolStr::from("FireMages"))),
-        (2, PlayerRace::new(SmolStr::from("StoneMages"))),
-    ];
-    let game_config = GameConfig::new(
-        seed,
-        GameMode::Local,
+    let possible_races = vec![
+        PlayerRace::new(SmolStr::from("WaterMages")),
+        PlayerRace::new(SmolStr::from("FireMages")),
         PlayerRace::new(SmolStr::from("StoneMages")),
-        current_players,
-        32,
-        4,
-        1.0,
-        0.1,
-        100.,
-        32.0 * 1.5,
-        2,
-        2,
-        100,
+    ];
+
+    let game_config = GameConfig::new(
+        MapSize::Medium,
+        MapShape::Jagged,
+        PlayerRace::new(SmolStr::from("WaterMages")),
     );
-    commands.insert_resource(game_config);
+
+    let local_game_config = LocalPlayerConfig {
+        game_config,
+        seed,
+        possible_races,
+        ai_difficulty: AiDifficulty::Hard,
+    };
+
+    let config_type = ConfigType::Local(local_game_config);
+
+    commands.insert_resource(config_type);
 }

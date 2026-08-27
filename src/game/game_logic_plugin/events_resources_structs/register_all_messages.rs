@@ -1,9 +1,11 @@
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
-    AttackEntityCommand, BuildBuildingCommand, MoveEntityCommand, PickResourceCommand,
-    SpawnUnitCommand,
-};
-use crate::game::game_logic_plugin::events_resources_structs::render_messages::{
-    RenderBuilding, RenderFog, RenderResource, RenderTerrain, RenderUnit, TileClickedEvent,
+use crate::game::game_logic_plugin::events_resources_structs::{
+    action_messages::{
+        AttackEntityCommand, BuildBuildingCommand, MoveEntityCommand, PickResourceCommand,
+        SpawnUnitCommand,
+    },
+    render_messages::{
+        RenderBuilding, RenderFog, RenderResource, RenderTerrain, RenderUnit, TileClickedEvent,
+    },
 };
 use bevy::prelude::App;
 

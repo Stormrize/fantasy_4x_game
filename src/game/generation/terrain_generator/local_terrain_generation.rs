@@ -1,5 +1,4 @@
 use crate::world::{
-    game_config::GameConfig,
     game_resources::{
         data::biome::BiomeType,
         terrain_map::{GlobalTerrainMap, TerrainMap},
@@ -13,6 +12,7 @@ use crate::game::generation::{
     terrain_generator::PerlinPlaceholder,
 };
 use crate::world::game_config::PlayerRace;
+use crate::world::game_configs::GenerationConfig;
 use crate::world::game_resources::data::biome::BiomeType::{
     LargeBiome, MediumBiome, SmallBiome, Water,
 };
@@ -21,7 +21,7 @@ const CAPITAL_SMALL_BIOME_RADIUS: f64 = 0.05;
 
 impl TerrainMap {
     pub fn new(
-        config: &GameConfig,
+        config: &GenerationConfig,
         perlin_placeholder: &PerlinPlaceholder,
         global_terrain: &GlobalTerrainMap,
         influence_map: &PlayerInfluenceMap,
@@ -56,7 +56,7 @@ impl TerrainMap {
 }
 
 fn apply_local_biomes(
-    config: &GameConfig,
+    config: &GenerationConfig,
     perlin_placeholder: &PerlinPlaceholder,
     global_terrain: &GlobalTerrainMap,
     map: &mut Vec<BiomeType>,
@@ -114,7 +114,7 @@ fn capital_small_biome_bias(
     (1.0 - d / CAPITAL_SMALL_BIOME_RADIUS).clamp(0.0, 1.0)
 }
 
-fn choose_local_biome(value: u8, config: &GameConfig, player_race: PlayerRace) -> BiomeType {
+fn choose_local_biome(value: u8, config: &GenerationConfig, player_race: PlayerRace) -> BiomeType {
     if value <= config.local_small_threshold {
         SmallBiome(player_race)
     } else if value <= config.local_middle_threshold {

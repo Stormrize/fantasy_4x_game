@@ -8,6 +8,7 @@ use crate::world::game_config::{GameConfig, PlayerRace};
 use noise::{NoiseFn, Perlin};
 use std::collections::HashMap;
 use voronoice::Point;
+use crate::world::game_configs::GenerationConfig;
 
 pub struct PlayerInfluenceCell {
     pub player_race: PlayerRace,
@@ -22,7 +23,7 @@ pub struct PlayerInfluenceMap {
 
 impl PlayerInfluenceMap {
     pub fn voronoi_diagram_for_players(
-        config: &GameConfig,
+        config: &GenerationConfig,
         player_terrain_data: &PlayersTerrainData,
         perlin_placeholder: &PerlinPlaceholder,
     ) -> PlayerInfluenceMap {

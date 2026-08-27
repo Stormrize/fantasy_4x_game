@@ -1,15 +1,16 @@
 use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
 use crate::world::{
-    game_config::GameConfig,
     game_resources::{
         buildings_map::BuildingMap,
         data::{biome::BiomeType, buildings::BuildingType},
         terrain_map::TerrainMap,
     },
+    game_configs::GenerationConfig
 };
+
 impl BuildingMap {
     pub fn new(
-        config: &GameConfig,
+        config: &GenerationConfig,
         plater_terrain_data: &PlayersTerrainData,
         terrain: &TerrainMap,
     ) -> BuildingMap {

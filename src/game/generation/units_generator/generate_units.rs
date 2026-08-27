@@ -8,9 +8,10 @@ use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
 use smol_str::SmolStr;
+use crate::world::game_configs::GenerationConfig;
 
 impl UnitsMap {
-    pub fn new(config: &GameConfig, capital_coord: &PlayersTerrainData) -> Self {
+    pub fn new(config: &GenerationConfig, capital_coord: &PlayersTerrainData) -> Self {
         let terrain_size = config.terrain_size;
         let mut data = vec![Unit::default(); terrain_size * terrain_size];
         let map = &capital_coord.data;

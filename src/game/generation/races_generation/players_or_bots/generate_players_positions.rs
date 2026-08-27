@@ -1,6 +1,7 @@
 use crate::world::{
-    game_config::{GameConfig, PlayerRace},
+    game_config::PlayerRace,
     game_resources::{data::biome::BiomeType, terrain_map::GlobalTerrainMap},
+    game_configs::GenerationConfig
 };
 use rand::SeedableRng;
 use rand::prelude::SliceRandom;
@@ -18,11 +19,11 @@ pub struct PlayersTerrainData {
 
 impl PlayersTerrainData {
     pub fn calculate_player_positions(
-        config: &GameConfig,
+        config: &GenerationConfig,
         global_terrain: &GlobalTerrainMap,
     ) -> Option<PlayersTerrainData> {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
-        let mut players = config.current_players.clone();
+        let mut players = config.clone();
         players.shuffle(&mut rng);
         let terrain_size = config.terrain_size;
         let mut spawn_points: Vec<((Id, PlayerRace), CapitalCoord)> =

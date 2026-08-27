@@ -5,10 +5,10 @@ use crate::ui::initial_loading::load_ui_assets::{
 use crate::ui::initial_loading::spawn_loading_screen::spawn_loading_screen;
 use crate::ui::menus::AppState;
 use crate::world::ui_and_graphic_resources::data::ui_race_data::RawRaceData;
-use crate::world::ui_and_graphic_resources::ui_race_dataset::InitialRacesData;
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{IntoScheduleConfigs, OnEnter, OnExit, in_state};
 use bevy_common_assets::ron::RonAssetPlugin;
+use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
 
 pub mod load_ui_assets;
 mod spawn_loading_screen;
@@ -18,7 +18,7 @@ pub(super) struct InitialLoadingPlugin;
 impl Plugin for InitialLoadingPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InitialRawRaceDataHandles>()
-            .init_resource::<InitialRacesData>()
+            .init_resource::<RacesUiRegistry>()
             .add_plugins(RonAssetPlugin::<RawRaceData>::new(&["ron"]))
             .add_systems(
                 OnEnter(AppState::InitialAssetLoading),

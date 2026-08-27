@@ -1,14 +1,12 @@
-use crate::world::game_config::PlayerRace;
 use crate::world::{
-    game_config::GameConfig,
     game_resources::{
         data::biome::BiomeType, data::resources::ResourceType, resource_map::ResourceMap,
         terrain_map::TerrainMap,
     },
+    game_configs::GenerationConfig
 };
 use rand::{RngExt, SeedableRng};
 use rand_chacha::ChaCha8Rng;
-use smol_str::SmolStr;
 
 pub struct ResourceWindow;
 
@@ -17,7 +15,7 @@ impl ResourceWindow {
 }
 
 impl ResourceMap {
-    pub fn new(config: &GameConfig, terrain: &TerrainMap) -> Self {
+    pub fn new(config: &GenerationConfig, terrain: &TerrainMap) -> Self {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let terrain_size = config.terrain_size;
         let mut map = vec![ResourceType::None; terrain_size * terrain_size];

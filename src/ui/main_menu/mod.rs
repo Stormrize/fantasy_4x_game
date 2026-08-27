@@ -1,6 +1,10 @@
-use crate::ui::main_menu::button_system::button_system;
-use crate::ui::main_menu::spawn_start_menu::spawn_main_menu;
-use crate::ui::menus::AppState;
+use crate::ui::{
+    main_menu::{
+        button_system::button_system, 
+        spawn_start_menu::spawn_main_menu,
+    },
+    menus::AppState
+};
 use bevy::app::{App, Update};
 use bevy::prelude::{IntoScheduleConfigs, OnEnter, Plugin, in_state};
 

@@ -1,19 +1,19 @@
 use crate::ui::menus::AppState;
-use crate::world::ui_and_graphic_resources::ui_race_dataset::InitialRacesData;
 use bevy::color::{Color, Srgba};
 use bevy::prelude::{
     AlignItems, BackgroundColor, Button, Commands, Component, DespawnOnExit, FlexDirection,
     FlexWrap, ImageNode, JustifyContent, Node, Res, Text, TextColor, TextFont, Val, default,
 };
 use bevy::ui::UiRect;
+use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
 
 #[derive(Component)]
 pub(super) enum GameSetupMenuButtons {
     StartGame,
 }
 
-pub(super) fn spawn_game_setup_menu(mut commands: Commands, races_data: Res<InitialRacesData>) {
-    let races_data = &races_data.0;
+pub(super) fn spawn_game_setup_menu(mut commands: Commands, races_ui_registry: Res<RacesUiRegistry>) {
+    let races_data = &races_ui_registry.0;
     commands
         .spawn((
             Node {

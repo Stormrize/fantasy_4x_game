@@ -13,7 +13,7 @@ pub struct RawRaceData {
 }
 
 #[derive(Debug, Clone)]
-pub struct RaceData {
+pub struct UiRaceData {
     pub id: SmolStr,
     pub description: String,
     pub ui_icon: Handle<Image>,

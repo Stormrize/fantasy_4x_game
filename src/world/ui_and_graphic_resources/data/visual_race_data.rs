@@ -4,7 +4,7 @@ use bevy::prelude::TypePath;
 use serde::Deserialize;
 
 #[derive(Asset, TypePath, Deserialize, Debug, Clone)]
-pub struct RawVisualRaceData {
+pub struct RawRaceAssets {
     //biome
     pub water: String,
     pub small_biome: String,
@@ -28,7 +28,7 @@ pub struct RawVisualRaceData {
 }
 
 #[derive(Debug, Clone)]
-pub struct VisualRaceData {
+pub struct RaceAssets {
     pub biomes: [Handle<StandardMaterial>; 4],
 
     pub resources: [Handle<StandardMaterial>; 3],
@@ -36,7 +36,7 @@ pub struct VisualRaceData {
     pub buildings: [Handle<StandardMaterial>; 8],
 }
 
-impl VisualRaceData {
+impl RaceAssets {
     pub fn handles(&self) -> impl Iterator<Item = &Handle<StandardMaterial>> {
         [
             &self.biomes[0],
@@ -68,23 +68,3 @@ impl VisualRaceData {
         self.buildings[index].clone()
     }
 }
-
-//
-// small_biome: "0.99, 0.0, 0.0",
-// medium_biome: "0.66, 0.0, 0.0",
-// large_biome: "0.99, 0.0, 0.0",
-//
-// //resource
-// small_resource: "0.33, 0.0, 0.0",
-// medium_resource: "0.66, 0.0, 0.0",
-// large_resource: "0.99, 0.0, 0.0",
-//
-// //building
-// capital: "0.0, 1.0, 0.0",
-// empty_cities: "0.0, 0.0, 1.0",
-// empty_city_colonized: "0.0, 0.0, 0.0",
-// medium_building: "0.0, 0.0, 0.0",
-// large_building: "0.0, 0.0, 0.0",
-// spawning_building: "0.0, 0.0, 0.0",
-// house: "0.0, 0.0, 0.0",
-// research_center: "0.0, 0.0, 0.0",
