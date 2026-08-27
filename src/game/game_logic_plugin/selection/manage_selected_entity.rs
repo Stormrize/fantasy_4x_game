@@ -4,7 +4,7 @@
 //     render_messages::{RenderBuilding, RenderFog, RenderResource, RenderTerrain, RenderUnit},
 // };
 // use bevy::prelude::Res;
-// 
+//
 // pub fn manage_selected_entity(
 //     selected_entity: Res<AlreadySelectedTileContent>,
 //     mut render_messages: RenderMessages,

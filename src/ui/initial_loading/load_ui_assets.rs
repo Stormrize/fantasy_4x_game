@@ -2,8 +2,8 @@ use crate::ui::menus::AppState;
 use crate::world::{
     game_config::PlayerRace,
     ui_and_graphic_resources::{
-        data::ui_race_data::{UiRaceData, RawRaceData},
-        player_registry::RacesUiRegistry
+        data::ui_race_data::{RawRaceData, UiRaceData},
+        player_registry::RacesUiRegistry,
     },
 };
 use bevy::asset::LoadState;

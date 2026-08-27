@@ -1,15 +1,15 @@
-use crate::world::game_config::PlayerRace;
+use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
 
-#[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
 pub enum BuildingType {
-    Capital(PlayerRace),
-    EmptyCities(PlayerRace),
-    MediumBuilding(PlayerRace),
-    LargeBuilding(PlayerRace),
-    SpawningBuilding(PlayerRace),
-    House(PlayerRace),
-    ResearchCenter(PlayerRace),
+    Capital(PlayerId),
+    EmptyCities(PlayerId),
+    MediumBuilding(PlayerId),
+    LargeBuilding(PlayerId),
+    SpawningBuilding(PlayerId),
+    House(PlayerId),
+    ResearchCenter(PlayerId),
     #[default]
     None,
 }
@@ -29,7 +29,7 @@ impl BuildingType {
         }
     }
 
-    pub fn inside(&self) -> Option<&PlayerRace> {
+    pub fn inside(self) -> Option<PlayerId> {
         use BuildingType::*;
         match self {
             Capital(p) | EmptyCities(p) | MediumBuilding(p) | LargeBuilding(p)

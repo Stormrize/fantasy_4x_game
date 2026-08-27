@@ -1,14 +1,11 @@
 use crate::game::game_logic_plugin::{
     action::action_router::route_action,
     events_resources_structs::{
-        action_messages::ActionCommandWriters,
-        components::*,
-        render_messages::TileClickedEvent,
+        action_messages::ActionCommandWriters, components::*, render_messages::TileClickedEvent,
     },
     selection::selection_systems::{
-        clear::clear_selection_system,
-        cycle::cycle_selection_system,
-        new_tile::new_tile_selection_system
+        clear::clear_selection_system, cycle::cycle_selection_system,
+        new_tile::new_tile_selection_system,
     },
 };
 
@@ -33,7 +30,7 @@ pub fn route_selection(
             clear_selection_system(&mut already_selected_tile);
             continue;
         }
-        
+
         let tile_content = TileContent::from_world(
             world_maps
                 .terrain
@@ -53,12 +50,12 @@ pub fn route_selection(
                 .clone(),
             world_maps
                 .fog
-                .get(clicked_pos.x as usize, clicked_pos.y as usize)
+                .get(clicked_pos.x as usize, clicked_pos.y as usize),
         );
 
-        let just_selected_tile = JustSelectedTile { 
-            pos: clicked_pos, 
-            tile_content
+        let just_selected_tile = JustSelectedTile {
+            pos: clicked_pos,
+            tile_content,
         };
 
         match already_selected_tile.pos {

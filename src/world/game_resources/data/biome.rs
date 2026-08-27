@@ -1,13 +1,12 @@
-use crate::world::game_config::PlayerRace;
-use crate::world::game_resources::data::resources::ResourceType::{Large, Medium, Small};
+use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
 
-#[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
 pub enum BiomeType {
-    Water(PlayerRace),
-    SmallBiome(PlayerRace),
-    MediumBiome(PlayerRace),
-    LargeBiome(PlayerRace),
+    Water(PlayerId),
+    SmallBiome(PlayerId),
+    MediumBiome(PlayerId),
+    LargeBiome(PlayerId),
     #[default]
     Ground,
 }
@@ -24,12 +23,12 @@ impl BiomeType {
         }
     }
 
-    pub fn inside(&self) -> Option<&PlayerRace> {
+    pub fn inside(self) -> Option<PlayerId> {
         use BiomeType::*;
         match self {
             SmallBiome(p) | MediumBiome(p) | LargeBiome(p) | Water(p) => Some(p),
 
-            Ground => Option::None,
+            Ground => None,
         }
     }
 }

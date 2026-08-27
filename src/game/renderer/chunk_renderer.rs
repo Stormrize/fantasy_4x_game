@@ -13,20 +13,18 @@ use crate::game::{
     },
 };
 
+use crate::world::ui_and_graphic_resources::player_registry::PlayerRegistry;
 use crate::world::{
     game_config::GameConfig,
     game_resources::{
-        buildings_map::BuildingMap,
-        fog_map::FogMap,
-        resource_map::ResourceMap, 
-        terrain_map::TerrainMap,
-        unit_map::UnitsMap
+        buildings_map::BuildingMap, fog_map::FogMap, resource_map::ResourceMap,
+        terrain_map::TerrainMap, unit_map::UnitsMap,
     },
-    ui_and_graphic_resources::player_registry::RacesAssetsRegistry
+    ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
 };
 use bevy::prelude::{
-    Assets, Commands, IVec2, Mesh, Projection, Query, Res, ResMut, StandardMaterial,
-    Transform, Window, With, AssetServer
+    AssetServer, Assets, Commands, IVec2, Mesh, Projection, Query, Res, ResMut, StandardMaterial,
+    Transform, Window, With,
 };
 use bevy::window::PrimaryWindow;
 use std::time::Instant;
@@ -38,6 +36,7 @@ pub fn stream_chunks(
     asset_server: Res<AssetServer>,
     mut rendered: ResMut<Rendered>,
     assets_registry: Res<RacesAssetsRegistry>,
+    player_registry: Res<PlayerRegistry>,
     config: Res<GameConfig>,
     terrain: Res<TerrainMap>,
     resources: Res<ResourceMap>,
@@ -84,6 +83,7 @@ pub fn stream_chunks(
         &mut rendered,
         missing_chunks,
         &assets_registry,
+        &player_registry,
         &terrain,
         &resources,
         &buildings,
@@ -198,6 +198,7 @@ fn load_missing_chunks(
     rendered: &mut Rendered,
     missing_chunks: Vec<IVec2>,
     assets_registry: &RacesAssetsRegistry,
+    player_registry: &PlayerRegistry,
     terrain: &TerrainMap,
     resources: &ResourceMap,
     buildings: &BuildingMap,
@@ -217,14 +218,35 @@ fn load_missing_chunks(
             continue;
         }
 
-        let terrain_meshes =
-            spawn_terrain_meshes(commands, &config, meshes, coord, assets_registry, terrain);
+        let terrain_meshes = spawn_terrain_meshes(
+            commands,
+            &config,
+            meshes,
+            coord,
+            assets_registry,
+            terrain,
+            player_registry,
+        );
 
-        let resource_meshes =
-            spawn_resource_meshes(commands, &config, meshes, coord, assets_registry, resources);
+        let resource_meshes = spawn_resource_meshes(
+            commands,
+            &config,
+            meshes,
+            coord,
+            assets_registry,
+            resources,
+            player_registry,
+        );
 
-        let building_meshes =
-            spawn_buildings_meshes(commands, config, meshes, coord, assets_registry, buildings);
+        let building_meshes = spawn_buildings_meshes(
+            commands,
+            config,
+            meshes,
+            coord,
+            assets_registry,
+            buildings,
+            player_registry,
+        );
 
         let fog_meshes = spawn_fog_meshes(
             commands,
@@ -236,7 +258,15 @@ fn load_missing_chunks(
             fog,
         );
 
-        let units_meshes = spawn_units_meshes(commands, &config, meshes, coord, assets_registry, units);
+        let units_meshes = spawn_units_meshes(
+            commands,
+            &config,
+            meshes,
+            coord,
+            assets_registry,
+            units,
+            player_registry,
+        );
 
         rendered.terrain.insert(coord, terrain_meshes);
         rendered.resources.insert(coord, resource_meshes);

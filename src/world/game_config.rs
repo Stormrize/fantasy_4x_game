@@ -1,7 +1,8 @@
-use std::collections::HashMap;
+use crate::world::game_config::MapShape::Jagged;
+use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
 use bevy::prelude::Resource;
 use smol_str::SmolStr;
-use crate::world::game_config::MapShape::Jagged;
+use std::collections::HashMap;
 
 #[derive(Resource, Debug, Clone)]
 pub struct GameConfig {
@@ -12,40 +13,40 @@ pub struct GameConfig {
     pub current_players: Vec<(u8, PlayerRace)>, //?
 
     //terrain
-    pub terrain_size: usize,                    //8
-    pub chunk_size: usize,                      //8
-    pub tile_size: f32,                         //4
+    pub terrain_size: usize, //8
+    pub chunk_size: usize,   //8
+    pub tile_size: f32,      //4
 
     //camera_plugin
-    pub min_orthographic_scale: f32,            //4
-    pub max_orthographic_scale: f32,            //4
-    pub camera_viewport_height: f32,            //4
+    pub min_orthographic_scale: f32, //4
+    pub max_orthographic_scale: f32, //4
+    pub camera_viewport_height: f32, //4
 
     //renderer
-    pub preload_margin_chunks: u8,              //1
-    pub unload_margin_chunks: u8,               //1
+    pub preload_margin_chunks: u8, //1
+    pub unload_margin_chunks: u8,  //1
 
-    pub terrain_shape: MapShape,                //1
+    pub terrain_shape: MapShape, //1
 
     //global procedural thresholds
-    pub water_threshold: u8,                    //1
+    pub water_threshold: u8, //1
 
     //global procedural generation (water/ground)
-    pub global_octaves: u8,                     //1
-    pub global_frequency: f64,                  //8
-    pub global_persistence: f64,                //8
-    pub global_lacunarity: f64,                 //8
-    pub global_detail_frequency: f64,           //8
-    pub global_detail_weight: f64,              //8
+    pub global_octaves: u8,           //1
+    pub global_frequency: f64,        //8
+    pub global_persistence: f64,      //8
+    pub global_lacunarity: f64,       //8
+    pub global_detail_frequency: f64, //8
+    pub global_detail_weight: f64,    //8
 
     //local procedural generation (for each fantasy race)
-    pub local_octaves: u8,                      //1
-    pub local_frequency: f64,                   //8
-    pub local_persistence: f64,                 //8
-    pub local_lacunarity: f64,                  //8
-    pub local_small_threshold: u8,              //8
-    pub local_middle_threshold: u8,             //8
-    pub local_seed_offset: f64,                 //8
+    pub local_octaves: u8,          //1
+    pub local_frequency: f64,       //8
+    pub local_persistence: f64,     //8
+    pub local_lacunarity: f64,      //8
+    pub local_small_threshold: u8,  //8
+    pub local_middle_threshold: u8, //8
+    pub local_seed_offset: f64,     //8
 
     //borders
     pub noise_scale: f32,
@@ -150,19 +151,6 @@ impl GameConfig {
 }
 
 //---------------------------------------------------------------------------------------------------------------------------//
-#[derive(Resource)]
-pub struct PlayerRegistry {
-    races: HashMap<PlayerId, PlayerRace>
-}
-
-impl PlayerRegistry {
-    pub fn race_of(&self,  id: PlayerId) -> &PlayerRace {
-        &self.races[&id]
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub struct PlayerId(pub u8);
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PlayerRace(pub SmolStr);

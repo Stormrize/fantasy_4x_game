@@ -1,9 +1,9 @@
 use crate::world::{
+    game_configs::GenerationConfig,
     game_resources::{
         data::biome::BiomeType, data::resources::ResourceType, resource_map::ResourceMap,
         terrain_map::TerrainMap,
     },
-    game_configs::GenerationConfig
 };
 use rand::{RngExt, SeedableRng};
 use rand_chacha::ChaCha8Rng;
@@ -62,9 +62,9 @@ fn resource_for_biome(biome: &BiomeType) -> ResourceType {
     use BiomeType::*;
     use ResourceType::*;
     match biome {
-        SmallBiome(player_race) => Small(player_race.clone()),
-        MediumBiome(player_race) => Medium(player_race.clone()),
-        LargeBiome(player_race) => Large(player_race.clone()),
+        SmallBiome(player_id) => Small(player_id.clone()),
+        MediumBiome(player_id) => Medium(player_id.clone()),
+        LargeBiome(player_id) => Large(player_id.clone()),
         _ => None,
     }
 }

@@ -1,13 +1,12 @@
-use crate::game::generation::terrain_generator::{ 
-    PerlinPlaceholder, 
-    noise::{fbm, normalise, sample}
-}; 
-use crate::world::{
-    game_config::PlayerRace,
-    game_resources::{data::biome::BiomeType, terrain_map::GlobalTerrainMap},
-    game_configs::GenerationConfig
+use crate::game::generation::terrain_generator::{
+    PerlinPlaceholder,
+    noise::{fbm, normalise, sample},
 };
-use smol_str::SmolStr;
+use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
+use crate::world::{
+    game_configs::GenerationConfig,
+    game_resources::{data::biome::BiomeType, terrain_map::GlobalTerrainMap},
+};
 
 impl GlobalTerrainMap {
     pub fn new(config: &GenerationConfig, perlin_placeholder: &PerlinPlaceholder) -> Self {
@@ -47,7 +46,7 @@ impl GlobalTerrainMap {
                 let index = row * terrain_size + col;
 
                 if result < config.water_threshold {
-                    data[index] = BiomeType::Water(PlayerRace::new(SmolStr::from("default")));
+                    data[index] = BiomeType::Water(PlayerId::default());
                 }
             }
         }

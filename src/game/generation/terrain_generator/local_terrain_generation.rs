@@ -1,8 +1,6 @@
-use crate::world::{
-    game_resources::{
-        data::biome::BiomeType,
-        terrain_map::{GlobalTerrainMap, TerrainMap},
-    },
+use crate::world::game_resources::{
+    data::biome::BiomeType,
+    terrain_map::{GlobalTerrainMap, TerrainMap},
 };
 
 use crate::game::generation::races_generation::players_or_bots::generate_players_positions::CapitalCoord;
@@ -11,11 +9,11 @@ use crate::game::generation::{
     races_generation::players_or_bots::voronoi_diagram::{PlayerInfluenceCell, PlayerInfluenceMap},
     terrain_generator::PerlinPlaceholder,
 };
-use crate::world::game_config::PlayerRace;
 use crate::world::game_configs::GenerationConfig;
 use crate::world::game_resources::data::biome::BiomeType::{
     LargeBiome, MediumBiome, SmallBiome, Water,
 };
+use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
 
 const CAPITAL_SMALL_BIOME_RADIUS: f64 = 0.05;
 
@@ -26,7 +24,6 @@ impl TerrainMap {
         global_terrain: &GlobalTerrainMap,
         influence_map: &PlayerInfluenceMap,
     ) -> Self {
-        //TODO clone
         let size = config.terrain_size;
         let mut map = global_terrain.map.clone();
 
@@ -72,7 +69,7 @@ fn apply_local_biomes(
 
         match global_terrain.get(row, col) {
             Water(_) => {
-                map[tile_index] = Water(cell.player_race.clone());
+                map[tile_index] = Water(cell.player_id);
                 continue;
             }
             _ => (),
@@ -97,7 +94,7 @@ fn apply_local_biomes(
             .clamp(0.0, 1.0)
             * 255.0) as u8;
 
-        map[tile_index] = choose_local_biome(value, config, cell.player_race.clone());
+        map[tile_index] = choose_local_biome(value, config, cell.player_id);
     }
 }
 
@@ -114,12 +111,12 @@ fn capital_small_biome_bias(
     (1.0 - d / CAPITAL_SMALL_BIOME_RADIUS).clamp(0.0, 1.0)
 }
 
-fn choose_local_biome(value: u8, config: &GenerationConfig, player_race: PlayerRace) -> BiomeType {
+fn choose_local_biome(value: u8, config: &GenerationConfig, player_id: PlayerId) -> BiomeType {
     if value <= config.local_small_threshold {
-        SmallBiome(player_race)
+        SmallBiome(player_id)
     } else if value <= config.local_middle_threshold {
-        MediumBiome(player_race)
+        MediumBiome(player_id)
     } else {
-        LargeBiome(player_race)
+        LargeBiome(player_id)
     }
 }

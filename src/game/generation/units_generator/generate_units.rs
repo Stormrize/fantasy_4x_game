@@ -1,5 +1,7 @@
 use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
 use crate::world::game_config::PlayerRace;
+use crate::world::game_configs::GenerationConfig;
+use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
 use crate::world::{
     game_config::GameConfig,
     game_resources::{data::units::Unit, unit_map::UnitsMap},
@@ -8,7 +10,6 @@ use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
 use smol_str::SmolStr;
-use crate::world::game_configs::GenerationConfig;
 
 impl UnitsMap {
     pub fn new(config: &GenerationConfig, capital_coord: &PlayersTerrainData) -> Self {
@@ -35,7 +36,7 @@ impl UnitsMap {
 
                 let index = x * terrain_size + y;
                 //todo
-                data[index] = Unit::ResourceGathererBuilder(PlayerRace::new(SmolStr::new("sfds")));
+                data[index] = Unit::ResourceGathererBuilder(PlayerId::default());
             }
         }
 

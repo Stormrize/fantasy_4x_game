@@ -1,11 +1,11 @@
 use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
 use crate::world::{
+    game_configs::GenerationConfig,
     game_resources::{
         buildings_map::BuildingMap,
         data::{biome::BiomeType, buildings::BuildingType},
         terrain_map::TerrainMap,
     },
-    game_configs::GenerationConfig
 };
 
 impl BuildingMap {
@@ -22,8 +22,8 @@ impl BuildingMap {
         for player in players_positions {
             let x = player.1.0;
             let y = player.1.1;
-            let player_race = player.0.1.clone();
-            cities[x * terrain_size + y] = BuildingType::Capital(player_race);
+            let player_id = player.0;
+            cities[x * terrain_size + y] = BuildingType::Capital(player_id);
             let min_y = y.saturating_sub(3);
             let max_y = (y + 3).min(terrain_size - 1);
             let min_x = x.saturating_sub(3);

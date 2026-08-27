@@ -40,7 +40,7 @@ mod units_generator;
 //     );
 //     let next_resources = ResourceMap::new(&config, &next_terrain);
 //     let next_cities = BuildingMap::new(&config, &next_capital_coords, &next_terrain);
-// 
+//
 //     *terrain = next_terrain;
 //     *resources = next_resources;
 //     *cities = next_cities;

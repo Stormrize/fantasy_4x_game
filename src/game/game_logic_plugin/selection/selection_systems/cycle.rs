@@ -19,7 +19,9 @@ pub fn cycle_selection_system(
 
         Some(TileLayer::Unit) => Some(TileLayer::Terrain),
 
-        Some(TileLayer::Building) if just_selected_tile.tile_content.resource != ResourceType::None => {
+        Some(TileLayer::Building)
+            if just_selected_tile.tile_content.resource != ResourceType::None =>
+        {
             Some(TileLayer::Resource)
         }
 

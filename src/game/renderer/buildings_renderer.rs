@@ -1,14 +1,12 @@
+use crate::world::ui_and_graphic_resources::player_registry::PlayerRegistry;
 use crate::world::{
-    game_config::GameConfig, 
-    game_resources::{
-        buildings_map::BuildingMap, 
-        data::buildings::BuildingType,
-    },
-    ui_and_graphic_resources::player_registry::RacesAssetsRegistry
+    game_config::GameConfig,
+    game_resources::{buildings_map::BuildingMap, data::buildings::BuildingType},
+    ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
 };
 use bevy::prelude::{
-    Assets, Commands, Component, Entity, Handle, Mesh, Mesh3d, Sphere,
-    Transform, MeshMaterial3d, IVec2
+    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Res, Sphere,
+    Transform,
 };
 
 #[derive(Component)]
@@ -29,6 +27,7 @@ pub fn spawn_buildings_meshes(
     coord: IVec2,
     assets_registry: &RacesAssetsRegistry,
     buildings: &BuildingMap,
+    player_registry: &PlayerRegistry,
 ) -> SpawnedBuildingsMeshes {
     let chunk_size = config.chunk_size;
     let tile_size = config.tile_size;
@@ -46,19 +45,24 @@ pub fn spawn_buildings_meshes(
         for col in min_y..max_y {
             let building = buildings.get(row as usize, col as usize);
 
-            let player_race = building.inside();
+            let player_id = building.inside();
 
-            if player_race.is_none() {
+            if player_id.is_none() {
                 continue;
             }
-
-            let handle = &assets_registry.0[player_race.unwrap()].get_building(building.index());
-
+            let player_race = player_registry.race_of(player_id.unwrap());
+            let handle = assets_registry
+                .race_assets_of(player_race)
+                .get_building(building.index());
             let mesh_handle = meshes.add(Sphere::new(0.5));
 
             let entity = commands
                 .spawn((
-                    Transform::from_xyz((row as f32 + 0.5) * tile_size, 0.5, (col as f32 + 0.5) * tile_size),
+                    Transform::from_xyz(
+                        (row as f32 + 0.5) * tile_size,
+                        0.5,
+                        (col as f32 + 0.5) * tile_size,
+                    ),
                     Mesh3d(mesh_handle.clone()),
                     MeshMaterial3d(handle.clone()),
                 ))

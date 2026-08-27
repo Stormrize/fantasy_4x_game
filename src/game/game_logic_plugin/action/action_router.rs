@@ -4,7 +4,7 @@ use crate::game::game_logic_plugin::{
         action_messages::{ActionCommandWriters, AttackEntityCommand, MoveEntityCommand},
         components::*,
     },
-    selection::selection_systems::clear::clear_selection_system
+    selection::selection_systems::clear::clear_selection_system,
 };
 
 use crate::world::game_config::GameConfig;
@@ -15,18 +15,17 @@ pub fn route_action(
     already_selected_tile: &mut AlreadySelectedTile,
     commands: &mut ActionCommandWriters,
 ) {
-
     let player_or_none = already_selected_tile.tile_content.unit.inside();
-    
+
     let Some(player) = player_or_none else {
         clear_selection_system(already_selected_tile);
-        return;  
-    };
-    
-    if *player != config.player {
-        clear_selection_system(already_selected_tile);
         return;
-    }
+    };
+    //
+    // if *player != config.player {
+    //     clear_selection_system(already_selected_tile);
+    //     return;
+    // }
 
     match just_selected_tile.tile_content.get_top_layer() {
         TileLayer::Unit => {

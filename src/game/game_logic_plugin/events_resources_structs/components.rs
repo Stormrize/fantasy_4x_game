@@ -2,21 +2,16 @@ use crate::world::{
     game_config::GameConfig,
     game_resources::{
         buildings_map::BuildingMap,
-        data::{
-            biome::BiomeType,
-            buildings::BuildingType,
-            resources::ResourceType,
-            units::Unit,
-        },
+        data::{biome::BiomeType, buildings::BuildingType, resources::ResourceType, units::Unit},
         fog_map::FogMap,
         resource_map::ResourceMap,
         terrain_map::TerrainMap,
         unit_map::UnitsMap,
-    }
+    },
 };
 
 use bevy::ecs::system::SystemParam;
-use bevy::prelude::{Res, Resource, IVec2};
+use bevy::prelude::{IVec2, Res, Resource};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum TileLayer {

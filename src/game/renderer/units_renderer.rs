@@ -1,13 +1,11 @@
+use crate::world::ui_and_graphic_resources::player_registry::PlayerRegistry;
 use crate::world::{
-    game_config::GameConfig, 
-    game_resources::{
-        data::resources::ResourceType, 
-        unit_map::UnitsMap,
-    },
+    game_config::GameConfig,
+    game_resources::{data::resources::ResourceType, unit_map::UnitsMap},
     ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
 };
 use bevy::prelude::{
-    Assets, Commands, Component, Cone, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d,
+    Assets, Commands, Component, Cone, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Res,
     Transform,
 };
 
@@ -29,6 +27,7 @@ pub fn spawn_units_meshes(
     coord: IVec2,
     assets_registry: &RacesAssetsRegistry,
     units: &UnitsMap,
+    player_registry: &PlayerRegistry,
 ) -> SpawnedUnitsMeshes {
     let chunk_size = config.chunk_size;
     let tile_size = config.tile_size;
@@ -47,20 +46,26 @@ pub fn spawn_units_meshes(
         for col in min_y..max_y {
             let unit = units.get(row as usize, col as usize);
 
-            let player_race = unit.inside();
+            let player_id = unit.inside();
 
-            if player_race.is_none() {
+            if player_id.is_none() {
                 continue;
             }
 
+            let player_race = player_registry.race_of(player_id.unwrap());
+
             //todo пока нет ассетов для юнитов
-            let handle = assets_registry.0[player_race.unwrap()].get_resource(2);
+            let handle = assets_registry.race_assets_of(player_race).get_building(2);
 
             let mesh_handle = meshes.add(Cone::new(0.3, 0.5));
 
             let entity = commands
                 .spawn((
-                    Transform::from_xyz((row as f32 + 0.3) * tile_size, 0.3, (col as f32 + 0.3) * tile_size),
+                    Transform::from_xyz(
+                        (row as f32 + 0.3) * tile_size,
+                        0.3,
+                        (col as f32 + 0.3) * tile_size,
+                    ),
                     Mesh3d(mesh_handle.clone()),
                     MeshMaterial3d(handle.clone()),
                 ))

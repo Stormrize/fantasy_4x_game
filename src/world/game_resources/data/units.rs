@@ -1,25 +1,21 @@
-use crate::world::game_config::PlayerRace;
-use crate::world::game_resources::data::buildings::BuildingType;
-use crate::world::game_resources::data::buildings::BuildingType::{
-    Capital, EmptyCities, House, LargeBuilding, MediumBuilding, ResearchCenter, SpawningBuilding,
-};
+use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
 
-#[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
 pub enum Unit {
     //вода
-    WaterMageBeginner(PlayerRace),
-    WaterMageMaster(PlayerRace),
+    WaterMageBeginner(PlayerId),
+    WaterMageMaster(PlayerId),
 
     //огонь
-    FireMageBeginner(PlayerRace),
-    FireMageMaster(PlayerRace),
+    FireMageBeginner(PlayerId),
+    FireMageMaster(PlayerId),
 
     //камень
-    StoneMageBeginner(PlayerRace),
-    StoneMageMaster(PlayerRace),
+    StoneMageBeginner(PlayerId),
+    StoneMageMaster(PlayerId),
 
-    ResourceGathererBuilder(PlayerRace),
+    ResourceGathererBuilder(PlayerId),
     #[default]
     None,
 }
@@ -39,7 +35,7 @@ impl Unit {
         }
     }
 
-    pub fn inside(&self) -> Option<&PlayerRace> {
+    pub fn inside(self) -> Option<PlayerId> {
         use Unit::*;
         match self {
             WaterMageBeginner(p)

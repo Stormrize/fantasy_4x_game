@@ -1,13 +1,11 @@
+use crate::world::ui_and_graphic_resources::player_registry::PlayerRegistry;
 use crate::world::{
     game_config::GameConfig,
-    game_resources::{
-        data::biome::BiomeType,
-        terrain_map::TerrainMap,
-    },
+    game_resources::{data::biome::BiomeType, terrain_map::TerrainMap},
     ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
 };
 use bevy::prelude::{
-    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Plane3d,
+    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Plane3d, Res,
     Transform,
 };
 
@@ -71,6 +69,7 @@ pub fn spawn_terrain_meshes(
     coord: IVec2,
     assets_registry: &RacesAssetsRegistry,
     terrain: &TerrainMap,
+    player_registry: &PlayerRegistry,
 ) -> SpawnedTerrainMeshes {
     // TODO можно поменять тайлы на гексагоны изза боевки
 
@@ -91,13 +90,17 @@ pub fn spawn_terrain_meshes(
         for col in min_y..max_y {
             let biome = terrain.get(row as usize, col as usize);
 
-            let player_race = biome.inside();
+            let player_id = biome.inside();
 
-            if player_race.is_none() {
+            if player_id.is_none() {
                 continue;
             }
 
-            let handle = &assets_registry.0[player_race.unwrap()].get_biome(biome.index());
+            let player_race = player_registry.race_of(player_id.unwrap());
+
+            let handle = assets_registry
+                .race_assets_of(player_race)
+                .get_biome(biome.index());
 
             let mesh_handle = meshes.add(Plane3d::default());
 

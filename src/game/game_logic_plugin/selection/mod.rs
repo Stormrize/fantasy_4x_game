@@ -1,8 +1,7 @@
 use crate::game::game_logic_plugin::events_resources_structs::components::AlreadySelectedTile;
 use crate::game::game_logic_plugin::events_resources_structs::register_all_messages::AppMessageExt;
 use crate::game::game_logic_plugin::selection::{
-    click_router::route_selection,
-    tile_clicked::click_to_world,
+    click_router::route_selection, tile_clicked::click_to_world,
 };
 use crate::ui::menus::AppState;
 use bevy::app::{App, Plugin, Update};
@@ -21,8 +20,7 @@ impl Plugin for SelectionPlugin {
             .insert_resource(AlreadySelectedTile::default())
             .add_systems(
                 Update,
-                (click_to_world, route_selection)
-                    .run_if(in_state(AppState::InGameRenderer)),
+                (click_to_world, route_selection).run_if(in_state(AppState::InGameRenderer)),
             );
     }
 }

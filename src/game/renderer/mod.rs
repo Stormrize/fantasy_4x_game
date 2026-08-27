@@ -16,10 +16,10 @@ use crate::game::{
     renderer::{
         buildings_renderer::{SpawnedBuildingsMeshes, despawn_buildings_meshes},
         chunk_renderer::stream_chunks,
+        fog_renderer::SpawnedFogMeshes,
         resource_renderer::{SpawnedResourceMeshes, despawn_resource_meshes},
         terrain_renderer::{SpawnedTerrainMeshes, despawn_terrain_meshes},
         units_renderer::{SpawnedUnitsMeshes, despawn_units_meshes},
-        fog_renderer::SpawnedFogMeshes
     },
 };
 

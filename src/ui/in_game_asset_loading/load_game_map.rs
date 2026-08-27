@@ -1,15 +1,18 @@
-use crate::world::{
-    game_resources::{
-        buildings_map::BuildingMap, fog_map::FogMap, resource_map::ResourceMap, terrain_map::{GlobalTerrainMap, TerrainMap}, unit_map::UnitsMap
-    },
-    game_configs::{ConfigType, GenerationConfig},
-};
 use crate::game::generation::{
     races_generation::players_or_bots::{
-        generate_players_positions::PlayersTerrainData,
-        voronoi_diagram::PlayerInfluenceMap
+        generate_players_positions::PlayersTerrainData, voronoi_diagram::PlayerInfluenceMap,
     },
     terrain_generator::PerlinPlaceholder,
+};
+use crate::world::{
+    game_configs::{ConfigType, GenerationConfig},
+    game_resources::{
+        buildings_map::BuildingMap,
+        fog_map::FogMap,
+        resource_map::ResourceMap,
+        terrain_map::{GlobalTerrainMap, TerrainMap},
+        unit_map::UnitsMap,
+    },
 };
 use bevy::prelude::{Commands, Res, Resource};
 use bevy::tasks::{AsyncComputeTaskPool, Task};
@@ -50,20 +53,17 @@ fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
 }
 
 pub(super) fn start_map_generation(mut commands: Commands, config: Res<ConfigType>) {
-
     match &*config {
         ConfigType::Local(config) => {
-
             let generation_config = GenerationConfig::from(config);
 
-            let task = AsyncComputeTaskPool::get().spawn(async move { generate_map_resources(&generation_config) });
+            let task = AsyncComputeTaskPool::get()
+                .spawn(async move { generate_map_resources(&generation_config) });
 
             commands.insert_resource(MapGenerationTask { task });
-        },
+        }
         ConfigType::Multiplayer(config) => {
-            // send a request to a server
-        },
+            // todo send a request to a server
+        }
     }
-
-
 }

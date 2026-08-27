@@ -1,14 +1,19 @@
 //! Файл, который хранить в себе hashmap нужные для lookup
 
-use bevy::platform::collections::HashMap;
-use bevy::prelude::Resource;
 use crate::world::game_config::PlayerRace;
 use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
+use bevy::platform::collections::HashMap;
+use bevy::prelude::Resource;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct PlayerId(pub u8);
 
+impl Default for PlayerId {
+    fn default() -> Self {
+        PlayerId(255)
+    }
+}
 
 /// PLayerRegistry хеш меп, чтобы достать PlayerRace
 /// # Examples

@@ -1,8 +1,10 @@
+use crate::world::game_configs::ConfigType;
+use crate::world::ui_and_graphic_resources::player_registry::{PlayerId, PlayerRegistry};
 use crate::world::{
     game_config::{GameConfig, PlayerRace},
     ui_and_graphic_resources::{
-        data::visual_race_data::{RawRaceAssets, RaceAssets},
-        player_registry::{RacesAssetsRegistry, RacesUiRegistry}
+        data::visual_race_data::{RaceAssets, RawRaceAssets},
+        player_registry::{RacesAssetsRegistry, RacesUiRegistry},
     },
 };
 use bevy::color::Color;
@@ -16,31 +18,50 @@ pub(super) struct RawVisualRaceHandles(pub Vec<(PlayerRace, Handle<RawRaceAssets
 
 pub(super) fn load_assets(
     mut commands: Commands,
-    config: Res<GameConfig>,
+    config: Res<ConfigType>,
     races_data: Res<RacesUiRegistry>,
     asset_server: Res<AssetServer>,
 ) {
-    let players = &config.current_players;
-    
-    let mut vec = Vec::new();
+    let push_raw_race_assets = |vec: &mut Vec<(PlayerRace, Handle<RawRaceAssets>)>,
+                                races: &Vec<PlayerRace>| {
+        for race in races {
+            let visual_path = &races_data.ui_race_data_of(&race).visual_path;
 
-    for player in players {
-        let visual_path = &races_data.ui_race_data_of(&player.1).visual_path;
-        
-        let raw_visual_data: Handle<RawRaceAssets> = asset_server.load(visual_path);
+            let raw_visual_data: Handle<RawRaceAssets> = asset_server.load(visual_path);
 
-        vec.push((player.1.clone(), raw_visual_data));
+            vec.push((race.clone(), raw_visual_data));
+        }
+    };
+
+    let mut vec;
+
+    match &*config {
+        ConfigType::Local(config) => {
+            let races = &config.races;
+            vec = Vec::with_capacity(races.len());
+
+            push_raw_race_assets(&mut vec, &races);
+        }
+        ConfigType::Multiplayer(config) => {
+            let allowed_races = &config.allowed_races;
+            vec = Vec::with_capacity(allowed_races.len());
+
+            push_raw_race_assets(&mut vec, &allowed_races);
+        }
     }
+
     commands.insert_resource(RawVisualRaceHandles(vec));
 }
 
 pub(super) fn check_raw_handles(
     raw_handles: Res<RawVisualRaceHandles>,
     mut raw_assets: ResMut<Assets<RawRaceAssets>>,
-    asset_server: Res<AssetServer>,
     mut assets_registry: ResMut<RacesAssetsRegistry>,
+    mut player_registry: ResMut<PlayerRegistry>,
+    asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let mut id_counter = 0;
     for handle in &raw_handles.0 {
         if let Some(asset) = raw_assets.remove(&handle.1) {
             let RawRaceAssets {
@@ -160,6 +181,12 @@ pub(super) fn check_raw_handles(
             assets_registry
                 .0
                 .insert(handle.0.clone(), fallback_visual_race_data);
+
+            //note под вопросиком
+            player_registry
+                .0
+                .insert(PlayerId(id_counter), handle.0.clone());
+            id_counter += 1;
         }
     }
 }

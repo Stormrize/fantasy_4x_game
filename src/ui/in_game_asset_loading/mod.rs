@@ -1,16 +1,15 @@
 use crate::ui::{
-    menus::AppState,
     in_game_asset_loading::{
         check_all_loaded::set_new_state_if_all_loaded,
         load_game_assets::{
             RawVisualRaceHandles, check_raw_handles, cleanup_resources, load_assets,
         },
         load_game_map::start_map_generation,
-    }
+    },
+    menus::AppState,
 };
 use crate::world::ui_and_graphic_resources::{
-    data::visual_race_data::RawRaceAssets, 
-    player_registry::RacesAssetsRegistry,
+    data::visual_race_data::RawRaceAssets, player_registry::RacesAssetsRegistry,
 };
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{IntoScheduleConfigs, OnEnter, OnExit, in_state};

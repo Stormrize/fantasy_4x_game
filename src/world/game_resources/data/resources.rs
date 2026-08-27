@@ -1,15 +1,12 @@
-use crate::world::game_config::PlayerRace;
-use crate::world::game_resources::data::buildings::BuildingType::{
-    Capital, EmptyCities, House, LargeBuilding, MediumBuilding, ResearchCenter, SpawningBuilding,
-};
+use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
 
-#[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
 pub enum ResourceType {
     //Common
-    Small(PlayerRace),
-    Medium(PlayerRace),
-    Large(PlayerRace),
+    Small(PlayerId),
+    Medium(PlayerId),
+    Large(PlayerId),
 
     //Rare
 
@@ -29,7 +26,7 @@ impl ResourceType {
         }
     }
 
-    pub fn inside(&self) -> Option<&PlayerRace> {
+    pub fn inside(self) -> Option<PlayerId> {
         use ResourceType::*;
         match self {
             Small(p) | Medium(p) | Large(p) => Some(p),

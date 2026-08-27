@@ -1,9 +1,11 @@
 use crate::ui::local_game_setup_menu::spawn_game_setup_menu::GameSetupMenuButtons;
 use crate::ui::menus::AppState;
 use crate::world::game_config::{MapShape, PlayerRace};
+use crate::world::game_configs::{
+    AiDifficulty, ConfigType, GameConfig, LocalPlayerConfig, MapSize,
+};
 use bevy::prelude::{Changed, Commands, Interaction, NextState, Query, ResMut};
 use smol_str::SmolStr;
-use crate::world::game_configs::{AiDifficulty, ConfigType, GameConfig, LocalPlayerConfig, MapSize};
 
 pub(super) fn button_system(
     mut interaction_query: Query<(&Interaction, &GameSetupMenuButtons), (Changed<Interaction>)>,
@@ -38,11 +40,11 @@ pub(super) fn build_game_config(mut commands: Commands) {
     let local_game_config = LocalPlayerConfig {
         game_config,
         seed,
-        possible_races,
+        races: possible_races,
         ai_difficulty: AiDifficulty::Hard,
     };
 
     let config_type = ConfigType::Local(local_game_config);
-
+    // todo убить при переходе
     commands.insert_resource(config_type);
 }
