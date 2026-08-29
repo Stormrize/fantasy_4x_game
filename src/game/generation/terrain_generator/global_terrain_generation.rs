@@ -2,14 +2,16 @@ use crate::game::generation::terrain_generator::{
     PerlinPlaceholder,
     noise::{fbm, normalise, sample},
 };
-use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
+use crate::world::ui_and_graphic_resources::player_registry::Id;
 use crate::world::{
     game_configs::GenerationConfig,
-    game_resources::{data::biome::BiomeType, terrain_map::GlobalTerrainMap},
+    game_resources::data::biome::BiomeType,
 };
+use crate::world::game_config::PlayerRace;
+use crate::world::game_resources::terrain_map::TerrainMap;
 
-impl GlobalTerrainMap {
-    pub fn new(config: &GenerationConfig, perlin_placeholder: &PerlinPlaceholder) -> Self {
+impl TerrainMap {
+    pub fn new_global_terrain_map(config: &GenerationConfig, perlin_placeholder: &PerlinPlaceholder) -> Self {
         let terrain_size = config.terrain_size;
 
         println!("{:#?}", config);
@@ -46,7 +48,7 @@ impl GlobalTerrainMap {
                 let index = row * terrain_size + col;
 
                 if result < config.water_threshold {
-                    data[index] = BiomeType::Water(PlayerId::default());
+                    data[index] = BiomeType::Water(Id::default_local_id(), PlayerRace::default());
                 }
             }
         }

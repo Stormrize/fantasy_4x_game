@@ -5,12 +5,14 @@ use crate::game::generation::{
     terrain_generator::PerlinPlaceholder,
 };
 use crate::world::game_configs::GenerationConfig;
-use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
+use crate::world::game_config::PlayerRace;
+use crate::world::ui_and_graphic_resources::player_registry::Id;
 use noise::{NoiseFn, Perlin};
 use voronoice::Point;
 
 pub struct PlayerInfluenceCell {
-    pub player_id: PlayerId,
+    pub player_id: Id,
+    pub player_race: PlayerRace,
     pub capital: CapitalCoord,
     pub tile_indices: Vec<usize>,
 }
@@ -48,7 +50,8 @@ impl PlayerInfluenceMap {
             .data
             .iter()
             .map(|coord| PlayerInfluenceCell {
-                player_id: coord.0,
+                player_id: coord.0.0,
+                player_race: coord.0.1.clone(),
                 capital: coord.1,
                 tile_indices: Vec::new(),
             })

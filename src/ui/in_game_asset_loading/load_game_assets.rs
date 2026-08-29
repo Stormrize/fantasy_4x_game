@@ -1,7 +1,7 @@
 use crate::world::game_configs::ConfigType;
-use crate::world::ui_and_graphic_resources::player_registry::{PlayerId, PlayerRegistry};
+use crate::world::ui_and_graphic_resources::player_registry::{Id, PlayerRegistry};
 use crate::world::{
-    game_config::{GameConfig, PlayerRace},
+    game_config::PlayerRace,
     ui_and_graphic_resources::{
         data::visual_race_data::{RaceAssets, RawRaceAssets},
         player_registry::{RacesAssetsRegistry, RacesUiRegistry},
@@ -22,17 +22,6 @@ pub(super) fn load_assets(
     races_data: Res<RacesUiRegistry>,
     asset_server: Res<AssetServer>,
 ) {
-    let push_raw_race_assets = |vec: &mut Vec<(PlayerRace, Handle<RawRaceAssets>)>,
-                                races: &Vec<PlayerRace>| {
-        for race in races {
-            let visual_path = &races_data.ui_race_data_of(&race).visual_path;
-
-            let raw_visual_data: Handle<RawRaceAssets> = asset_server.load(visual_path);
-
-            vec.push((race.clone(), raw_visual_data));
-        }
-    };
-
     let mut vec;
 
     match &*config {
@@ -40,13 +29,21 @@ pub(super) fn load_assets(
             let races = &config.races;
             vec = Vec::with_capacity(races.len());
 
-            push_raw_race_assets(&mut vec, &races);
+            for race in races {
+                let visual_path = &races_data.ui_race_data_of(&race.1).visual_path;
+                let raw_visual_data: Handle<RawRaceAssets> = asset_server.load(visual_path);
+                vec.push((race.1.clone(), raw_visual_data));
+            }
         }
         ConfigType::Multiplayer(config) => {
             let allowed_races = &config.allowed_races;
             vec = Vec::with_capacity(allowed_races.len());
 
-            push_raw_race_assets(&mut vec, &allowed_races);
+            for race in allowed_races {
+                let visual_path = &races_data.ui_race_data_of(&race).visual_path;
+                let raw_visual_data: Handle<RawRaceAssets> = asset_server.load(visual_path);
+                vec.push((race.clone(), raw_visual_data));
+            }
         }
     }
 
@@ -185,7 +182,7 @@ pub(super) fn check_raw_handles(
             //note под вопросиком
             player_registry
                 .0
-                .insert(PlayerId(id_counter), handle.0.clone());
+                .insert(Id::LocalPlayerId(id_counter), handle.0.clone());
             id_counter += 1;
         }
     }

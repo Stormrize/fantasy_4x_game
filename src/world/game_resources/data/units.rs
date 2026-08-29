@@ -1,23 +1,31 @@
-use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
+use crate::world::game_config::PlayerRace;
+use crate::world::ui_and_graphic_resources::player_registry::Id;
 
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
 pub enum Unit {
     //вода
-    WaterMageBeginner(PlayerId),
-    WaterMageMaster(PlayerId),
+    WaterMageBeginner(Id),
+    WaterMageMaster(Id),
 
     //огонь
-    FireMageBeginner(PlayerId),
-    FireMageMaster(PlayerId),
+    FireMageBeginner(Id),
+    FireMageMaster(Id),
 
     //камень
-    StoneMageBeginner(PlayerId),
-    StoneMageMaster(PlayerId),
+    StoneMageBeginner(Id),
+    StoneMageMaster(Id),
 
-    ResourceGathererBuilder(PlayerId),
-    #[default]
-    None,
+    ResourceGathererBuilder(Id),
+}
+
+pub struct UnitS {
+    pub player_id: Id,
+    pub player_race: PlayerRace,
+    pub unit: Unit,
+    pub attack: u8,
+    pub defense: u8,
+    pub health: u8,
 }
 
 impl Unit {
@@ -31,11 +39,10 @@ impl Unit {
             StoneMageBeginner(_) => 4,
             StoneMageMaster(_) => 5,
             ResourceGathererBuilder(_) => 6,
-            None => unreachable!(),
         }
     }
 
-    pub fn inside(self) -> Option<PlayerId> {
+    pub fn inside(self) -> Option<Id> {
         use Unit::*;
         match self {
             WaterMageBeginner(p)
@@ -45,8 +52,6 @@ impl Unit {
             | StoneMageBeginner(p)
             | StoneMageMaster(p)
             | ResourceGathererBuilder(p) => Some(p),
-
-            None => Option::None,
         }
     }
 }

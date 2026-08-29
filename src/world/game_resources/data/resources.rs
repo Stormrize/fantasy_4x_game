@@ -1,37 +1,37 @@
-use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
+use crate::world::game_config::PlayerRace;
+use crate::world::ui_and_graphic_resources::player_registry::Id;
 
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[repr(u8)]
 pub enum ResourceType {
     //Common
-    Small(PlayerId),
-    Medium(PlayerId),
-    Large(PlayerId),
-
+    Small(Id, PlayerRace),
+    Medium(Id, PlayerRace),
+    Large(Id, PlayerRace),
     //Rare
-
-    //None
-    #[default]
-    None = 255,
 }
 
 impl ResourceType {
     pub fn index(&self) -> usize {
         use ResourceType::*;
         match self {
-            Small(_) => 0,
-            Medium(_) => 1,
-            Large(_) => 2,
-            None => unreachable!(),
+            Small(_, _) => 0,
+            Medium(_, _) => 1,
+            Large(_, _) => 2,
         }
     }
 
-    pub fn inside(self) -> Option<PlayerId> {
+    pub fn id_inside(self) -> Option<Id> {
         use ResourceType::*;
         match self {
-            Small(p) | Medium(p) | Large(p) => Some(p),
+            Small(id, _) | Medium(id, _) | Large(id, _) => Some(id),
+        }
+    }
 
-            None => Option::None,
+    pub fn race_inside(self) -> Option<PlayerRace> {
+        use ResourceType::*;
+        match self {
+            Small(_, p) | Medium(_, p) | Large(_, p) => Some(p),
         }
     }
 }

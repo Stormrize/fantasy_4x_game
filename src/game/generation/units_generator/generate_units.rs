@@ -1,9 +1,7 @@
 use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
-use crate::world::game_config::PlayerRace;
 use crate::world::game_configs::GenerationConfig;
 use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
 use crate::world::{
-    game_config::GameConfig,
     game_resources::{data::units::Unit, unit_map::UnitsMap},
 };
 use rand::SeedableRng;

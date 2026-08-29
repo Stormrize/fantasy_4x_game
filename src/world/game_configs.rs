@@ -1,5 +1,5 @@
 use crate::world::game_config::{GameMode, MapShape, PlayerRace};
-use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
+use crate::world::ui_and_graphic_resources::player_registry::Id;
 use bevy::prelude::Resource;
 
 #[derive(Resource)]
@@ -22,7 +22,7 @@ impl Default for CameraConfig {
 pub struct GenerationConfig {
     pub seed: u32,
     pub terrain_size: usize,
-    pub players_amount: u8,
+    pub players: Vec<(Id, PlayerRace)>,
     pub water_threshold: u8,
     pub global_octaves: u8,
     pub global_frequency: f64,        //8
@@ -43,13 +43,13 @@ pub struct GenerationConfig {
 }
 
 impl GenerationConfig {
-    pub fn from(config: &LocalPlayerConfig) -> Self {
+    pub fn from_player_config(config: &LocalPlayerConfig) -> Self {
         let game_config = &config.game_config;
 
         Self {
             seed: config.seed,
             terrain_size: game_config.map_size as usize,
-            players_amount: config.races.len() as u8,
+            players: config.races.clone(),
 
             //todo менять в зависимости от карты
             water_threshold: 100,
@@ -86,6 +86,19 @@ pub struct RenderConfig {
     pub tile_size: f32,            //4
 }
 
+impl RenderConfig {
+    pub fn from_player_config(config: &LocalPlayerConfig) -> Self {
+        Self {
+            // todo добавить загрузку с настроек
+            preload_margin_chunks: 2,
+            unload_margin_chunks: 2,
+            terrain_size: config.game_config.map_size as usize,
+            chunk_size: 4,
+            tile_size: 1.0,
+        }
+    }
+}
+
 #[derive(Resource)]
 pub struct SessionConfig {
     pub seed: u32,                              //4
@@ -115,13 +128,13 @@ impl GameConfig {
 pub struct LocalPlayerConfig {
     pub game_config: GameConfig,
     pub seed: u32,
-    pub races: Vec<PlayerRace>,
+    pub races: Vec<(Id, PlayerRace)>,
     pub ai_difficulty: AiDifficulty,
 }
 
 pub struct OnlinePlayerConfig {
     pub game_config: GameConfig,
-    pub player_id: PlayerId,
+    pub player_id: Id,
     pub allowed_races: Vec<PlayerRace>,
 }
 
@@ -141,10 +154,21 @@ pub enum MapSize {
     Large = 128,
 }
 
-#[derive(Debug)]
+impl MapSize {
+    pub fn len() -> usize {
+        5
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum AiDifficulty {
     Easy,
     Normal,
     Hard,
     Crazy,
+}
+impl AiDifficulty {
+    pub fn len() -> usize {
+        4
+    }
 }

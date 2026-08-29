@@ -6,7 +6,6 @@ use crate::ui::{
 };
 use crate::world::game_configs::ConfigType;
 use crate::world::{
-    game_config::{GameConfig, GameMode},
     ui_and_graphic_resources::{
         data::visual_race_data::RaceAssets, player_registry::RacesAssetsRegistry,
     },

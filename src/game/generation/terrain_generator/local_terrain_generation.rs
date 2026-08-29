@@ -1,6 +1,6 @@
 use crate::world::game_resources::{
     data::biome::BiomeType,
-    terrain_map::{GlobalTerrainMap, TerrainMap},
+    terrain_map::TerrainMap,
 };
 
 use crate::game::generation::races_generation::players_or_bots::generate_players_positions::CapitalCoord;
@@ -9,54 +9,39 @@ use crate::game::generation::{
     races_generation::players_or_bots::voronoi_diagram::{PlayerInfluenceCell, PlayerInfluenceMap},
     terrain_generator::PerlinPlaceholder,
 };
+use crate::world::game_config::PlayerRace;
 use crate::world::game_configs::GenerationConfig;
-use crate::world::game_resources::data::biome::BiomeType::{
-    LargeBiome, MediumBiome, SmallBiome, Water,
-};
-use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
+use crate::world::game_resources::data::biome::BiomeType::{LargeBiome, MediumBiome, SmallBiome, Water};
+use crate::world::ui_and_graphic_resources::player_registry::Id;
 
 const CAPITAL_SMALL_BIOME_RADIUS: f64 = 0.05;
 
 impl TerrainMap {
-    pub fn new(
+    pub fn final_terrain_map(
+        &mut self,
         config: &GenerationConfig,
         perlin_placeholder: &PerlinPlaceholder,
-        global_terrain: &GlobalTerrainMap,
         influence_map: &PlayerInfluenceMap,
-    ) -> Self {
-        let size = config.terrain_size;
-        let mut map = global_terrain.map.clone();
-
+    ) {
         let mut counter = 0;
+        let terrain_map = self;
         for cell in &influence_map.cells {
             apply_local_biomes(
                 config,
                 perlin_placeholder,
-                global_terrain,
-                &mut map,
+                terrain_map,
                 cell,
                 counter,
             );
             counter += 1;
         }
-
-        Self { map, size }
-    }
-
-    #[inline]
-    pub fn get(&self, row: usize, col: usize) -> &BiomeType {
-        debug_assert!(row < self.size);
-        debug_assert!(col < self.size);
-
-        &self.map[row * self.size + col]
     }
 }
 
 fn apply_local_biomes(
     config: &GenerationConfig,
     perlin_placeholder: &PerlinPlaceholder,
-    global_terrain: &GlobalTerrainMap,
-    map: &mut Vec<BiomeType>,
+    terrain_map: &mut TerrainMap,
     cell: &PlayerInfluenceCell,
     seed_offset: u8,
 ) {
@@ -67,9 +52,9 @@ fn apply_local_biomes(
         let row = tile_index / size;
         let col = tile_index % size;
 
-        match global_terrain.get(row, col) {
-            Water(_) => {
-                map[tile_index] = Water(cell.player_id);
+        match terrain_map.get(row, col) {
+            Water(_, _) => {
+                terrain_map.map[tile_index] = Water(cell.player_id, cell.player_race.clone());
                 continue;
             }
             _ => (),
@@ -94,7 +79,7 @@ fn apply_local_biomes(
             .clamp(0.0, 1.0)
             * 255.0) as u8;
 
-        map[tile_index] = choose_local_biome(value, config, cell.player_id);
+        terrain_map.map[tile_index] = choose_local_biome(value, config, cell.player_id, cell.player_race.clone());
     }
 }
 
@@ -111,12 +96,12 @@ fn capital_small_biome_bias(
     (1.0 - d / CAPITAL_SMALL_BIOME_RADIUS).clamp(0.0, 1.0)
 }
 
-fn choose_local_biome(value: u8, config: &GenerationConfig, player_id: PlayerId) -> BiomeType {
+fn choose_local_biome(value: u8, config: &GenerationConfig, player_id: Id, player_race: PlayerRace) -> BiomeType {
     if value <= config.local_small_threshold {
-        SmallBiome(player_id)
+        SmallBiome(player_id, player_race)
     } else if value <= config.local_middle_threshold {
-        MediumBiome(player_id)
+        MediumBiome(player_id, player_race)
     } else {
-        LargeBiome(player_id)
+        LargeBiome(player_id, player_race)
     }
 }

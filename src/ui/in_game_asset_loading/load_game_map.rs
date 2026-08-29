@@ -10,7 +10,7 @@ use crate::world::{
         buildings_map::BuildingMap,
         fog_map::FogMap,
         resource_map::ResourceMap,
-        terrain_map::{GlobalTerrainMap, TerrainMap},
+        terrain_map::TerrainMap,
         unit_map::UnitsMap,
     },
 };
@@ -32,12 +32,12 @@ pub(super) struct GeneratedMapResources {
 
 fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
     let perlin = PerlinPlaceholder::new(config);
-    let global_terrain = GlobalTerrainMap::new(config, &perlin);
+    let mut terrain = TerrainMap::new_global_terrain_map(config, &perlin);
     let player_terrain_data =
-        PlayersTerrainData::calculate_player_positions(config, &global_terrain).unwrap();
+        PlayersTerrainData::calculate_player_positions_flood_fill(config, &terrain).unwrap();
     let influence_map =
         PlayerInfluenceMap::voronoi_diagram_for_players(config, &player_terrain_data, &perlin);
-    let terrain = TerrainMap::new(config, &perlin, &global_terrain, &influence_map);
+    terrain.final_terrain_map(config, &perlin, &influence_map);
     let resources = ResourceMap::new(config, &terrain);
     let cities = BuildingMap::new(config, &player_terrain_data, &terrain);
     let units = UnitsMap::new(config, &player_terrain_data);
@@ -55,7 +55,7 @@ fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
 pub(super) fn start_map_generation(mut commands: Commands, config: Res<ConfigType>) {
     match &*config {
         ConfigType::Local(config) => {
-            let generation_config = GenerationConfig::from(config);
+            let generation_config = GenerationConfig::from_player_config(config);
 
             let task = AsyncComputeTaskPool::get()
                 .spawn(async move { generate_map_resources(&generation_config) });

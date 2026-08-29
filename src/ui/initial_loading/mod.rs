@@ -12,6 +12,8 @@ use bevy_common_assets::ron::RonAssetPlugin;
 
 pub mod load_ui_assets;
 mod spawn_loading_screen;
+mod load_render_config;
+mod load_locale;
 
 pub(super) struct InitialLoadingPlugin;
 

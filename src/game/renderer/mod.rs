@@ -22,6 +22,7 @@ use crate::game::{
         units_renderer::{SpawnedUnitsMeshes, despawn_units_meshes},
     },
 };
+use crate::world::game_configs::ConfigType;
 
 pub mod buildings_renderer;
 pub mod camera_math;
@@ -53,7 +54,7 @@ impl Plugin for MapRenderPlugin {
             );
     }
 }
-fn insert_assets(mut commands: Commands, config: Res<GameConfig>) {
+fn insert_assets(mut commands: Commands) {
     //rendered
     commands.insert_resource(Rendered::default());
     //visual note переделается
@@ -64,16 +65,10 @@ fn apply_regenerate(
     mut commands: Commands,
     mut rendered: ResMut<Rendered>,
     mut meshes: ResMut<Assets<Mesh>>,
-    config: Res<GameConfig>,
-    terrains: ResMut<TerrainMap>,
-    resources: ResMut<ResourceMap>,
-    buildings: ResMut<BuildingMap>,
 ) {
     if events.read().count() == 0 {
         return;
     }
-
-    //regenerate_map(config, terrains, resources, buildings);
 
     for (_, terrain_meshes) in &mut rendered.terrain.drain() {
         despawn_terrain_meshes(&mut commands, &mut meshes, terrain_meshes);

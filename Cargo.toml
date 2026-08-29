@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.18.1", features = ["trace", "debug"] }
+bevy = { version = "0.18.1", features = ["trace", "debug", "file_watcher"] }
 rand = "0.10.1"
 noise = "0.9.0"
 voronoice = "0.2.0"
 faster_poisson = "1.3.0"
 rand_chacha = "0.10.0"
-ron = "0.12.2"
 serde = { version = "1.0.229", features = ["derive"] }
 bevy_common_assets = { version = "0.15.0", features = ["ron"] }
 smol_str = "0.2.2"
+bevy_fluent = "0.14.0"
 
 [profile.dev]
 debug = 1

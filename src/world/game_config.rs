@@ -1,5 +1,4 @@
 use crate::world::game_config::MapShape::Jagged;
-use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
 use bevy::prelude::Resource;
 use smol_str::SmolStr;
 use std::collections::HashMap;
@@ -160,6 +159,12 @@ impl PlayerRace {
         Self(name)
     }
 }
+
+impl Default for PlayerRace {
+    fn default() -> Self {
+        Self(SmolStr::from(""))
+    }
+}
 //---------------------------------------------------------------------------------------------------------------------------//
 
 #[derive(Clone, Debug, PartialEq)]
@@ -176,4 +181,10 @@ pub enum MapShape {
     #[default]
     Round,
     Jagged,
+}
+
+impl MapShape {
+    pub fn len() -> usize {
+        2
+    }
 }

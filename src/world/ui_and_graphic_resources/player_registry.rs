@@ -6,15 +6,6 @@ use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::Resource;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub struct PlayerId(pub u8);
-
-impl Default for PlayerId {
-    fn default() -> Self {
-        PlayerId(255)
-    }
-}
-
 /// PLayerRegistry хеш меп, чтобы достать PlayerRace
 /// # Examples
 /// ```
@@ -22,11 +13,28 @@ impl Default for PlayerId {
 /// let player_race = player_registry.race_of(player_id);
 /// let race_assets = races_assets_registry.race_assets_of(player_race);
 /// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Id {
+    LocalPlayerId(u8),
+    MultiPlayerId(u64),
+    Unoccupied,
+}
+
+impl Id {
+    pub fn default_local_id() -> Self {
+        Self::LocalPlayerId(255)
+    }
+
+    pub fn default_multi_id() -> Self {
+        Self::MultiPlayerId(u64::MAX)
+    }
+}
+
 #[derive(Resource)]
-pub struct PlayerRegistry(pub HashMap<PlayerId, PlayerRace>);
+pub struct PlayerRegistry(pub HashMap<Id, PlayerRace>);
 
 impl PlayerRegistry {
-    pub fn race_of(&self, id: PlayerId) -> &PlayerRace {
+    pub fn race_of(&self, id: Id) -> &PlayerRace {
         &self.0[&id]
     }
 }

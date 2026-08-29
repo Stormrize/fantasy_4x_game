@@ -1,37 +1,36 @@
-use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
+use crate::world::ui_and_graphic_resources::player_registry::Id;
 use crate::world::{
-    game_config::PlayerRace,
     game_configs::GenerationConfig,
-    game_resources::{data::biome::BiomeType, terrain_map::GlobalTerrainMap},
+    game_resources::{data::biome::BiomeType, terrain_map::TerrainMap},
 };
 use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
+use crate::world::game_config::PlayerRace;
 
 #[derive(Debug, Clone, Copy)]
 pub struct CapitalCoord(pub usize, pub usize);
 
 pub struct PlayersTerrainData {
-    pub data: Vec<(PlayerId, CapitalCoord)>,
+    pub data: Vec<((Id, PlayerRace) , CapitalCoord)>,
 }
 
 impl PlayersTerrainData {
     pub fn calculate_player_positions(
         config: &GenerationConfig,
-        global_terrain: &GlobalTerrainMap,
+        global_terrain: &TerrainMap,
     ) -> Option<PlayersTerrainData> {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
-        let players = config.players_amount as usize; // how many players are there
-        //players.shuffle(&mut rng);
+        let players = &config.players;
         let terrain_size = config.terrain_size;
-        let mut spawn_points: Vec<(PlayerId, CapitalCoord)> = Vec::with_capacity(players);
+        let mut spawn_points: Vec<((Id, PlayerRace), CapitalCoord)> = Vec::with_capacity(players.len());
 
-        if players == 0 {
+        if players.len() == 0 {
             return None;
         }
 
-        let cols = (players as f32).sqrt().ceil() as usize;
-        let rows = ((players as f32) / (cols as f32)).ceil() as usize;
+        let cols = (players.len() as f32).sqrt().ceil() as usize;
+        let rows = ((players.len() as f32) / (cols as f32)).ceil() as usize;
 
         let sector_width = terrain_size as f32 / cols as f32;
         let sector_height = terrain_size as f32 / rows as f32;
@@ -43,7 +42,7 @@ impl PlayersTerrainData {
 
         'outer: for row in 0..rows {
             for col in 0..cols {
-                if player_index == players {
+                if player_index == players.len() {
                     break 'outer;
                 }
 
@@ -93,7 +92,7 @@ impl PlayersTerrainData {
 
                     for (x, y) in candidates {
                         match global_terrain.get(x, y) {
-                            BiomeType::Water(_) => continue,
+                            BiomeType::Water(_, _) => continue,
                             BiomeType::Ground => {
                                 found_pos = Some((x, y));
                                 break;
@@ -108,10 +107,10 @@ impl PlayersTerrainData {
                 }
 
                 if let Some((final_x, final_y)) = found_pos {
-                    let id = PlayerId(player_index as u8);
-                    // let player_race = players[player_index].1.clone();
+                    let id = players[player_index].0;
+                    let player_race = players[player_index].1.clone();
                     let capital_coord = CapitalCoord(final_x, final_y);
-                    spawn_points.push((id, capital_coord));
+                    spawn_points.push(((id, player_race), capital_coord));
                     player_index += 1;
                 } else {
                     println!(
