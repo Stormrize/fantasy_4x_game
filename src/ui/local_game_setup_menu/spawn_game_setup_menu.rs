@@ -1,10 +1,16 @@
-use crate::ui::local_game_setup_menu::components_resources::{
-    AI_DIFFICULTY_VARIANTS, BOT_COUNT_MAX, BOT_COUNT_MIN, GameSetupSelection, MAP_SHAPE_VARIANTS,
-    MAP_SIZE_VARIANTS, RaceButton, Slider, SliderHandle, SliderTarget, SliderValueLabel,
-    StartButton,
+use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
+use crate::ui::initial_loading::localization_loader_plugin::public_api::{
+    CurrentLanguage, Localization,
 };
-use crate::ui::local_game_setup_menu::slider_systems::{slider_handle_left_percent, slider_label};
+use crate::ui::local_game_setup_menu::components_resources::{
+    AI_DIFFICULTY_VARIANTS, BOT_COUNT_MAX, BOT_COUNT_MIN, ChangeLanguageTry, GameSetupSelection,
+    MAP_SHAPE_VARIANTS, MAP_SIZE_VARIANTS, RaceButton, Slider, SliderHandle, SliderTarget,
+    SliderValueLabel, StartButton,
+};
+use crate::ui::local_game_setup_menu::view_helpers::{slider_handle_left_percent, slider_label};
+
 use crate::ui::menus::AppState;
+use crate::ui::update_ui_system::TranslationKey;
 use crate::world::game_config::PlayerRace;
 use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
 use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
@@ -19,6 +25,9 @@ use bevy::ui::{BorderColor, RelativeCursorPosition, UiRect};
 pub(super) fn spawn_game_setup_menu(
     mut commands: Commands,
     races_ui_registry: Res<RacesUiRegistry>,
+    current_language: Res<CurrentLanguage>,
+    localization: Res<Localization>,
+    fonts: Res<Fonts>,
 ) {
     // сбрасываем выбор при каждом входе в меню
     commands.insert_resource(GameSetupSelection::default());
@@ -99,12 +108,14 @@ pub(super) fn spawn_game_setup_menu(
                         },))
                         .with_children(|parent| {
                             parent.spawn((
-                                Text::new("Levels"),
+                                Text::new(localization.get("levels", current_language.0)),
                                 TextColor(Color::WHITE),
                                 TextFont {
+                                    font: fonts.get(current_language.0).clone(),
                                     font_size: 20.0,
                                     ..default()
                                 },
+                                TranslationKey { key: "levels" },
                             ));
                         });
 
@@ -112,25 +123,25 @@ pub(super) fn spawn_game_setup_menu(
                     for (target, title, steps, initial_index) in [
                         (
                             SliderTarget::MapSize,
-                            "Map Size",
+                            "map_size",
                             MAP_SIZE_VARIANTS.len(),
                             1,
                         ),
                         (
                             SliderTarget::MapShape,
-                            "Map Shape",
+                            "map_shape",
                             MAP_SHAPE_VARIANTS.len(),
                             0,
                         ),
                         (
                             SliderTarget::AiDifficulty,
-                            "AI Difficulty",
+                            "ai_difficulty",
                             AI_DIFFICULTY_VARIANTS.len(),
                             2,
                         ),
                         (
                             SliderTarget::BotCount,
-                            "Bots",
+                            "bots",
                             BOT_COUNT_MAX - BOT_COUNT_MIN + 1,
                             0,
                         ),
@@ -146,12 +157,14 @@ pub(super) fn spawn_game_setup_menu(
                             })
                             .with_children(|parent| {
                                 parent.spawn((
-                                    Text::new(title),
+                                    Text::new(localization.get(title, current_language.0)),
                                     TextColor(Color::WHITE),
                                     TextFont {
+                                        font: fonts.get(current_language.0).clone(),
                                         font_size: 16.0,
                                         ..default()
                                     },
+                                    TranslationKey { key: title },
                                 ));
 
                                 parent
@@ -194,9 +207,15 @@ pub(super) fn spawn_game_setup_menu(
                                     });
 
                                 parent.spawn((
-                                    Text::new(slider_label(target, initial_index)),
+                                    Text::new(slider_label(
+                                        target,
+                                        initial_index,
+                                        &localization,
+                                        current_language.0,
+                                    )),
                                     TextColor(Color::WHITE),
                                     TextFont {
+                                        font: fonts.get(current_language.0).clone(),
                                         font_size: 14.0,
                                         ..default()
                                     },
@@ -223,9 +242,10 @@ pub(super) fn spawn_game_setup_menu(
                         ))
                         .with_children(|parent| {
                             parent.spawn((
-                                Text::new("Start"),
+                                Text::new(localization.get("start_game", current_language.0)),
                                 TextColor(Color::WHITE),
                                 TextFont {
+                                    font: fonts.get(current_language.0).clone(),
                                     font_size: 22.0,
                                     ..default()
                                 },

@@ -1,7 +1,5 @@
-use crate::world::game_resources::{
-    data::biome::BiomeType,
-    terrain_map::TerrainMap,
-};
+use std::u128::MAX;
+use crate::world::game_resources::{data::biome::BiomeType, terrain_map::TerrainMap};
 
 use crate::game::generation::races_generation::players_or_bots::generate_players_positions::CapitalCoord;
 use crate::game::generation::terrain_generator::noise::{fbm, normalise};
@@ -11,7 +9,9 @@ use crate::game::generation::{
 };
 use crate::world::game_config::PlayerRace;
 use crate::world::game_configs::GenerationConfig;
-use crate::world::game_resources::data::biome::BiomeType::{LargeBiome, MediumBiome, SmallBiome, Water};
+use crate::world::game_resources::data::biome::BiomeType::{
+    LargeBiome, MediumBiome, SmallBiome, Water,
+};
 use crate::world::ui_and_graphic_resources::player_registry::Id;
 
 const CAPITAL_SMALL_BIOME_RADIUS: f64 = 0.05;
@@ -26,13 +26,7 @@ impl TerrainMap {
         let mut counter = 0;
         let terrain_map = self;
         for cell in &influence_map.cells {
-            apply_local_biomes(
-                config,
-                perlin_placeholder,
-                terrain_map,
-                cell,
-                counter,
-            );
+            apply_local_biomes(config, perlin_placeholder, terrain_map, cell, counter);
             counter += 1;
         }
     }
@@ -52,12 +46,9 @@ fn apply_local_biomes(
         let row = tile_index / size;
         let col = tile_index % size;
 
-        match terrain_map.get(row, col) {
-            Water(_, _) => {
-                terrain_map.map[tile_index] = Water(cell.player_id, cell.player_race.clone());
-                continue;
-            }
-            _ => (),
+        if matches!(terrain_map.get(row, col), Water(_, _)) {
+            terrain_map.map[tile_index] = Water(cell.player_id, cell.player_race.clone());
+            continue;
         }
 
         let nx = ((row as f64 - cell.capital.1 as f64) / size as f64) * config.local_frequency
@@ -79,7 +70,8 @@ fn apply_local_biomes(
             .clamp(0.0, 1.0)
             * 255.0) as u8;
 
-        terrain_map.map[tile_index] = choose_local_biome(value, config, cell.player_id, cell.player_race.clone());
+        terrain_map.map[tile_index] =
+            choose_local_biome(value, config, cell.player_id, cell.player_race.clone());
     }
 }
 
@@ -96,7 +88,12 @@ fn capital_small_biome_bias(
     (1.0 - d / CAPITAL_SMALL_BIOME_RADIUS).clamp(0.0, 1.0)
 }
 
-fn choose_local_biome(value: u8, config: &GenerationConfig, player_id: Id, player_race: PlayerRace) -> BiomeType {
+fn choose_local_biome(
+    value: u8,
+    config: &GenerationConfig,
+    player_id: Id,
+    player_race: PlayerRace,
+) -> BiomeType {
     if value <= config.local_small_threshold {
         SmallBiome(player_id, player_race)
     } else if value <= config.local_middle_threshold {

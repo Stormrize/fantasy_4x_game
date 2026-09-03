@@ -1,7 +1,10 @@
+use crate::ui::initial_loading::localization_loader_plugin::public_api::{
+    CurrentLanguage, Localization,
+};
 use crate::ui::local_game_setup_menu::components_resources::{
     GameSetupSelection, Slider, SliderHandle, SliderValueLabel,
 };
-use crate::ui::local_game_setup_menu::slider_systems::{
+use crate::ui::local_game_setup_menu::view_helpers::{
     apply_slider_value, slider_handle_left_percent, slider_label,
 };
 use bevy::prelude::{
@@ -69,11 +72,18 @@ pub(super) fn update_slider_handle_visuals(
 pub(super) fn update_slider_labels(
     sliders: Query<&Slider, Changed<Slider>>,
     mut labels: Query<(&mut Text, &SliderValueLabel)>,
+    localization: Res<Localization>,
+    current_language: Res<CurrentLanguage>,
 ) {
     for slider in &sliders {
         for (mut text, label) in &mut labels {
             if label.0 == slider.target {
-                *text = Text::new(slider_label(slider.target, slider.current));
+                *text = Text::new(slider_label(
+                    slider.target,
+                    slider.current,
+                    &localization,
+                    current_language.0,
+                ));
             }
         }
     }

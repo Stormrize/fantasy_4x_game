@@ -4,8 +4,8 @@ use crate::game::generation::{
     },
     terrain_generator::PerlinPlaceholder,
 };
-use crate::world::game_configs::GenerationConfig;
 use crate::world::game_config::PlayerRace;
+use crate::world::game_configs::GenerationConfig;
 use crate::world::ui_and_graphic_resources::player_registry::Id;
 use noise::{NoiseFn, Perlin};
 use voronoice::Point;

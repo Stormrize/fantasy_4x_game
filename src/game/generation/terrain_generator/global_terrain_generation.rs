@@ -2,16 +2,16 @@ use crate::game::generation::terrain_generator::{
     PerlinPlaceholder,
     noise::{fbm, normalise, sample},
 };
-use crate::world::ui_and_graphic_resources::player_registry::Id;
-use crate::world::{
-    game_configs::GenerationConfig,
-    game_resources::data::biome::BiomeType,
-};
 use crate::world::game_config::PlayerRace;
 use crate::world::game_resources::terrain_map::TerrainMap;
+use crate::world::ui_and_graphic_resources::player_registry::Id;
+use crate::world::{game_configs::GenerationConfig, game_resources::data::biome::BiomeType};
 
 impl TerrainMap {
-    pub fn new_global_terrain_map(config: &GenerationConfig, perlin_placeholder: &PerlinPlaceholder) -> Self {
+    pub fn new_global_terrain_map(
+        config: &GenerationConfig,
+        perlin_placeholder: &PerlinPlaceholder,
+    ) -> Self {
         let terrain_size = config.terrain_size;
 
         println!("{:#?}", config);

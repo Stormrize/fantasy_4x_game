@@ -1,9 +1,13 @@
-use rand::SeedableRng;
-use rand_chacha::ChaCha8Rng;
-use crate::game::generation::races_generation::players_or_bots::generate_players_positions::{CapitalCoord, PlayersTerrainData};
-use crate::game::generation::races_generation::players_pos_generator::helpers::{compute_land_components, farthest_point_seeds, flood_fill_balance, largest_component_id};
+use crate::game::generation::races_generation::players_or_bots::generate_players_positions::{
+    CapitalCoord, PlayersTerrainData,
+};
+use crate::game::generation::races_generation::players_pos_generator::helpers::{
+    compute_land_components, farthest_point_seeds, flood_fill_balance, largest_component_id,
+};
 use crate::world::game_configs::GenerationConfig;
 use crate::world::game_resources::terrain_map::TerrainMap;
+use rand::SeedableRng;
+use rand_chacha::ChaCha8Rng;
 
 impl PlayersTerrainData {
     pub fn calculate_player_positions_flood_fill(
@@ -29,7 +33,10 @@ impl PlayersTerrainData {
             .collect();
 
         if land.len() < players.len() {
-            println!("Error: main landmass too small for {} players.", players.len());
+            println!(
+                "Error: main landmass too small for {} players.",
+                players.len()
+            );
             return None;
         }
 

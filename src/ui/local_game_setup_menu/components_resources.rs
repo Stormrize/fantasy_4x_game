@@ -10,7 +10,7 @@ pub(super) const MAP_SIZE_VARIANTS: [MapSize; 5] = [
     MapSize::Big,
     MapSize::Large,
 ];
-pub(super) const MAP_SHAPE_VARIANTS: [MapShape; 2] = [MapShape::Jagged, MapShape::Round]; // поправь под свои варианты
+pub(super) const MAP_SHAPE_VARIANTS: [MapShape; 2] = [MapShape::Jagged, MapShape::Round];
 pub(super) const AI_DIFFICULTY_VARIANTS: [AiDifficulty; 4] = [
     AiDifficulty::Easy,
     AiDifficulty::Normal,
@@ -36,6 +36,10 @@ pub(super) struct DifficultyButton(pub(super) AiDifficulty);
 
 #[derive(Component)]
 pub(super) struct StartButton;
+
+// note
+#[derive(Component)]
+pub(super) struct ChangeLanguageTry;
 
 // slider
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

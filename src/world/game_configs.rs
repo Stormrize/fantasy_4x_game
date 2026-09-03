@@ -7,22 +7,28 @@ pub struct CameraConfig {
     pub min_orthographic_scale: f32, //в зависимости от настроек
     pub max_orthographic_scale: f32, //в зависимости от настроек
     pub camera_viewport_height: f32, //в зависимости от настроек
+    pub edge_scroll_enabled: bool,
+    pub edge_scroll_speed: f32,
+    pub camera_pan_speed: f32,
+    pub camera_zoom_speed: f32,
+    pub invert_zoom: bool,
 }
 
-impl Default for CameraConfig {
-    fn default() -> Self {
-        Self {
-            min_orthographic_scale: 0.1,
-            max_orthographic_scale: 100.0,
-            camera_viewport_height: 32.0 * 1.5,
-        }
-    }
-}
+// impl Default for CameraConfig {
+//     fn default() -> Self {
+//         Self {
+//             min_orthographic_scale: 0.1,
+//             max_orthographic_scale: 100.0,
+//             camera_viewport_height: 32.0 * 1.5,
+//         }
+//     }
+// }
 #[derive(Debug)]
 pub struct GenerationConfig {
     pub seed: u32,
     pub terrain_size: usize,
     pub players: Vec<(Id, PlayerRace)>,
+    // note добавить типа структуру которая все параметры упорядывает
     pub water_threshold: u8,
     pub global_octaves: u8,
     pub global_frequency: f64,        //8

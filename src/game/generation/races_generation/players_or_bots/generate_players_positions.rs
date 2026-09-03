@@ -1,3 +1,4 @@
+use crate::world::game_config::PlayerRace;
 use crate::world::ui_and_graphic_resources::player_registry::Id;
 use crate::world::{
     game_configs::GenerationConfig,
@@ -6,13 +7,12 @@ use crate::world::{
 use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
-use crate::world::game_config::PlayerRace;
 
 #[derive(Debug, Clone, Copy)]
 pub struct CapitalCoord(pub usize, pub usize);
 
 pub struct PlayersTerrainData {
-    pub data: Vec<((Id, PlayerRace) , CapitalCoord)>,
+    pub data: Vec<((Id, PlayerRace), CapitalCoord)>,
 }
 
 impl PlayersTerrainData {
@@ -23,7 +23,8 @@ impl PlayersTerrainData {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let players = &config.players;
         let terrain_size = config.terrain_size;
-        let mut spawn_points: Vec<((Id, PlayerRace), CapitalCoord)> = Vec::with_capacity(players.len());
+        let mut spawn_points: Vec<((Id, PlayerRace), CapitalCoord)> =
+            Vec::with_capacity(players.len());
 
         if players.len() == 0 {
             return None;

@@ -1,41 +1,41 @@
-use crate::ui::{
-    in_game_asset_loading::{
-        check_all_loaded::set_new_state_if_all_loaded,
-        load_game_assets::{
-            RawVisualRaceHandles, check_raw_handles, cleanup_resources, load_assets,
-        },
-        load_game_map::start_map_generation,
-    },
-    menus::AppState,
+use crate::ui::in_game_asset_loading::game_assets_loader_plugin::{
+    GameAssetsLoadingPlugin, GameAssetsLoadingState, RawRaceAssets,
 };
-use crate::world::ui_and_graphic_resources::{
-    data::visual_race_data::RawRaceAssets, player_registry::RacesAssetsRegistry,
-};
-use bevy::app::{App, Plugin, Update};
-use bevy::prelude::{IntoScheduleConfigs, OnEnter, OnExit, in_state};
-use bevy_common_assets::ron::RonAssetPlugin;
+// use crate::ui::in_game_asset_loading::map_generation_plugin::{
+//     GameMapGenerationPlugin, MapGenerationLoadingState,
+// };
 
-mod check_all_loaded;
-mod load_game_assets;
-mod load_game_map;
+use crate::ui::menus::AppState;
+use bevy::app::{App, Plugin, Update};
+use bevy::prelude::{IntoScheduleConfigs, NextState, Res, ResMut, State, in_state};
+
+mod game_assets_loader_plugin;
+mod map_generation_plugin;
 
 pub(super) struct InGameAssetLoadingPlugin;
 
 impl Plugin for InGameAssetLoadingPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<RawVisualRaceHandles>()
-            .init_resource::<RacesAssetsRegistry>()
-            .add_plugins(RonAssetPlugin::<RawRaceAssets>::new(&["ron"]))
-            .add_systems(
-                OnEnter(AppState::InGameAssetLoading),
-                (load_assets, start_map_generation),
-            )
-            .add_systems(OnExit(AppState::InGameAssetLoading), cleanup_resources)
+        app.add_plugins(GameAssetsLoadingPlugin)
+            //.add_plugins(GameMapGenerationPlugin)
             .add_systems(
                 Update,
-                (check_raw_handles, set_new_state_if_all_loaded)
-                    .chain()
-                    .run_if(in_state(AppState::InGameAssetLoading)),
+                try_enter_game.run_if(in_state(AppState::InGameAssetLoading)),
             );
+    }
+}
+
+fn try_enter_game(
+    //game_map_loading_state: Res<State<MapGenerationLoadingState>>,
+    game_assets_loading_state: Res<State<GameAssetsLoadingState>>,
+    mut next_state: ResMut<NextState<AppState>>,
+) {
+    //let map_ready = *game_map_loading_state.get() == MapGenerationLoadingState::Ready;
+    let assets_ready = *game_assets_loading_state == GameAssetsLoadingState::Ready;
+
+    if
+    /*map_ready &&*/
+    assets_ready {
+        next_state.set(AppState::InGameRenderer);
     }
 }

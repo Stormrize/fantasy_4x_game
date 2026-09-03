@@ -1,9 +1,9 @@
-use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap};
-use rand::RngExt;
-use rand_chacha::ChaCha8Rng;
 use crate::world::game_resources::data::biome::BiomeType;
 use crate::world::game_resources::terrain_map::TerrainMap;
+use rand::RngExt;
+use rand_chacha::ChaCha8Rng;
+use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashMap};
 // ---------- 1. Компоненты связности (кто с кем на одной земле) ----------
 
 pub(super) fn compute_land_components(terrain: &TerrainMap, terrain_size: usize) -> Vec<i32> {
@@ -43,17 +43,27 @@ pub(super) fn largest_component_id(comp: &[i32]) -> Option<i32> {
             *counts.entry(c).or_insert(0) += 1;
         }
     }
-    counts.into_iter().max_by_key(|&(_, cnt)| cnt).map(|(id, _)| id)
+    counts
+        .into_iter()
+        .max_by_key(|&(_, cnt)| cnt)
+        .map(|(id, _)| id)
 }
-
 
 // note можно добавить еще по диагонали
 fn neighbors4(x: usize, y: usize, size: usize) -> impl Iterator<Item = (usize, usize)> {
     let mut v = Vec::with_capacity(4);
-    if x > 0 { v.push((x - 1, y)); }
-    if x + 1 < size { v.push((x + 1, y)); }
-    if y > 0 { v.push((x, y - 1)); }
-    if y + 1 < size { v.push((x, y + 1)); }
+    if x > 0 {
+        v.push((x - 1, y));
+    }
+    if x + 1 < size {
+        v.push((x + 1, y));
+    }
+    if y > 0 {
+        v.push((x, y - 1));
+    }
+    if y + 1 < size {
+        v.push((x, y + 1));
+    }
     v.into_iter()
 }
 
@@ -156,13 +166,21 @@ pub(super) fn flood_fill_balance(
 
     while let Some(node) = heap.pop() {
         let idx = node.y * terrain_size + node.x;
-        if owner[idx].is_some() || !matches!(global_terrain.get(node.x, node.y), BiomeType::Ground) {
+        if owner[idx].is_some() || !matches!(global_terrain.get(node.x, node.y), BiomeType::Ground)
+        {
             continue; // уже занято или вода — рост тут обрывается
         }
         owner[idx] = Some(node.owner);
         claimed_count[node.owner] += 1;
         regions[node.owner].push((node.x, node.y));
-        push_neighbors(&mut heap, node.owner, node.x, node.y, node.cost, &claimed_count);
+        push_neighbors(
+            &mut heap,
+            node.owner,
+            node.x,
+            node.y,
+            node.cost,
+            &claimed_count,
+        );
     }
 
     regions

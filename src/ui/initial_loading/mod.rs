@@ -1,37 +1,49 @@
-use crate::ui::initial_loading::load_ui_assets::{
-    InitialRawRaceDataHandles, check_raw_handles, cleanup_resources, load_races,
-    set_new_state_if_all_loaded,
-};
-use crate::ui::initial_loading::spawn_loading_screen::spawn_loading_screen;
 use crate::ui::menus::AppState;
-use crate::world::ui_and_graphic_resources::data::ui_race_data::RawRaceData;
-use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
 use bevy::app::{App, Plugin, Update};
-use bevy::prelude::{IntoScheduleConfigs, OnEnter, OnExit, in_state};
-use bevy_common_assets::ron::RonAssetPlugin;
+use bevy::prelude::{IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, State, in_state};
 
-pub mod load_ui_assets;
+use crate::ui::initial_loading::player_settings_loader_plugin::GameConfigPlugin;
+use crate::ui::initial_loading::ui_assets::{RaceLoadingPlugin, RaceLoadingState};
+use crate::ui::initial_loading::{
+    fonts_loader_plugin::{FontsLoaderPlugin, FontsLoadingState},
+    localization_loader_plugin::{LocalizationPlugin, LocalizationState},
+    spawn_loading_screen::spawn_loading_screen,
+};
+
+pub(super) mod fonts_loader_plugin;
+pub(super) mod localization_loader_plugin;
+pub(super) mod player_settings_loader_plugin;
 mod spawn_loading_screen;
-mod load_render_config;
-mod load_locale;
+pub(super) mod ui_assets;
 
 pub(super) struct InitialLoadingPlugin;
 
 impl Plugin for InitialLoadingPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<InitialRawRaceDataHandles>()
-            .init_resource::<RacesUiRegistry>()
-            .add_plugins(RonAssetPlugin::<RawRaceData>::new(&["ron"]))
-            .add_systems(
-                OnEnter(AppState::InitialAssetLoading),
-                (load_races, spawn_loading_screen),
-            )
-            .add_systems(OnExit(AppState::InitialAssetLoading), cleanup_resources)
+        app.add_plugins(GameConfigPlugin)
+            .add_plugins(LocalizationPlugin)
+            .add_plugins(RaceLoadingPlugin)
+            .add_plugins(FontsLoaderPlugin)
+            .add_systems(OnEnter(AppState::InitialAssetLoading), spawn_loading_screen)
             .add_systems(
                 Update,
-                (check_raw_handles, set_new_state_if_all_loaded)
-                    .chain()
-                    .run_if(in_state(AppState::InitialAssetLoading)),
+                try_enter_main_menu.run_if(in_state(AppState::InitialAssetLoading)),
             );
+    }
+}
+
+fn try_enter_main_menu(
+    race_loading_state: Res<State<RaceLoadingState>>,
+    localization_state: Res<State<LocalizationState>>,
+    fonts_loading_state: Res<State<FontsLoadingState>>,
+    mut next_state: ResMut<NextState<AppState>>,
+) {
+    let races_ready = *race_loading_state.get() == RaceLoadingState::Ready;
+    let localization_ready = *localization_state.get() == LocalizationState::Ready;
+    let fonts_ready = *fonts_loading_state.get() == FontsLoadingState::Ready;
+
+    if races_ready && localization_ready && fonts_ready {
+        println!("Loaded all handles initial_loading");
+        next_state.set(AppState::MainMenu);
     }
 }

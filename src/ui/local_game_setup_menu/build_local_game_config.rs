@@ -1,9 +1,12 @@
-use crate::ui::local_game_setup_menu::components_resources::{GameSetupSelection, StartButton};
+use crate::ui::initial_loading::localization_loader_plugin::public_api::{
+    CurrentLanguage, Language,
+};
+use crate::ui::local_game_setup_menu::components_resources::{
+    ChangeLanguageTry, GameSetupSelection, StartButton,
+};
 use crate::ui::menus::AppState;
 use crate::world::game_config::PlayerRace;
-use crate::world::game_configs::{
-    ConfigType, GameConfig, LocalPlayerConfig, MapSize,
-};
+use crate::world::game_configs::{ConfigType, GameConfig, LocalPlayerConfig};
 use crate::world::ui_and_graphic_resources::player_registry::{Id, RacesUiRegistry};
 use bevy::prelude::{Changed, Commands, Interaction, NextState, Query, Res, ResMut, With, warn};
 use rand::prelude::SliceRandom;
@@ -60,4 +63,19 @@ pub(super) fn handle_start_button(
     let config_type = build_local_game_config(race, &selection, &races_ui_registry);
     commands.insert_resource(config_type);
     next_state.set(AppState::InGameAssetLoading);
+}
+
+pub(super) fn handle_change_language_button(
+    interactions: Query<&Interaction, (Changed<Interaction>, With<ChangeLanguageTry>)>,
+    mut current_language: ResMut<CurrentLanguage>,
+) {
+    let Ok(interaction) = interactions.single() else {
+        return;
+    };
+
+    if *interaction != Interaction::Pressed {
+        return;
+    }
+
+    current_language.0 = Language::De;
 }

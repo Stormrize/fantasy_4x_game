@@ -1,57 +1,54 @@
 use crate::world::game_config::PlayerRace;
 use crate::world::ui_and_graphic_resources::player_registry::Id;
+use bevy::prelude::Component;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
-pub enum Unit {
+pub enum UnitType {
     //вода
-    WaterMageBeginner(Id),
-    WaterMageMaster(Id),
+    WaterMageBeginner,
+    WaterMageMaster,
 
     //огонь
-    FireMageBeginner(Id),
-    FireMageMaster(Id),
+    FireMageBeginner,
+    FireMageMaster,
 
     //камень
-    StoneMageBeginner(Id),
-    StoneMageMaster(Id),
+    StoneMageBeginner,
+    StoneMageMaster,
 
-    ResourceGathererBuilder(Id),
+    ResourceGathererBuilder,
 }
 
-pub struct UnitS {
+#[derive(Component, Debug)]
+pub struct Health(u8);
+
+#[derive(Component, Debug)]
+pub struct Attack(u8);
+
+#[derive(Component, Debug)]
+pub struct Defense(u8);
+
+pub struct Unit {
     pub player_id: Id,
     pub player_race: PlayerRace,
-    pub unit: Unit,
+    pub unit: UnitType,
     pub attack: u8,
     pub defense: u8,
     pub health: u8,
 }
 
-impl Unit {
+impl UnitType {
     pub fn index(&self) -> usize {
-        use Unit::*;
+        use UnitType::*;
         match self {
-            WaterMageBeginner(_) => 0,
-            WaterMageMaster(_) => 1,
-            FireMageBeginner(_) => 2,
-            FireMageMaster(_) => 3,
-            StoneMageBeginner(_) => 4,
-            StoneMageMaster(_) => 5,
-            ResourceGathererBuilder(_) => 6,
-        }
-    }
-
-    pub fn inside(self) -> Option<Id> {
-        use Unit::*;
-        match self {
-            WaterMageBeginner(p)
-            | WaterMageMaster(p)
-            | FireMageBeginner(p)
-            | FireMageMaster(p)
-            | StoneMageBeginner(p)
-            | StoneMageMaster(p)
-            | ResourceGathererBuilder(p) => Some(p),
+            WaterMageBeginner => 0,
+            WaterMageMaster => 1,
+            FireMageBeginner => 2,
+            FireMageMaster => 3,
+            StoneMageBeginner => 4,
+            StoneMageMaster => 5,
+            ResourceGathererBuilder => 6,
         }
     }
 }

@@ -1,9 +1,7 @@
+use bevy::prelude::Entity;
 use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
 use crate::world::game_configs::GenerationConfig;
-use crate::world::ui_and_graphic_resources::player_registry::PlayerId;
-use crate::world::{
-    game_resources::{data::units::Unit, unit_map::UnitsMap},
-};
+use crate::world::game_resources::{data::units::Unit, unit_map::UnitsMap};
 use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
@@ -12,7 +10,7 @@ use smol_str::SmolStr;
 impl UnitsMap {
     pub fn new(config: &GenerationConfig, capital_coord: &PlayersTerrainData) -> Self {
         let terrain_size = config.terrain_size;
-        let mut data = vec![Unit::default(); terrain_size * terrain_size];
+        let mut data: Vec<Option<Entity>> = vec![None; terrain_size * terrain_size];
         let map = &capital_coord.data;
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let mut possible_positions: [(i32, i32); 8] = [

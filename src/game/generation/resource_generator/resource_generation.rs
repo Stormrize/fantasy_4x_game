@@ -18,19 +18,20 @@ impl ResourceMap {
     pub fn new(config: &GenerationConfig, terrain: &TerrainMap) -> Self {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let terrain_size = config.terrain_size;
-        let mut map = vec![ResourceType::None; terrain_size * terrain_size];
+        let mut map =  Vec::with_capacity(terrain_size * terrain_size);
+
         let mut windows: [Vec<(usize, usize)>; 3] = Default::default();
 
         for row in 0..terrain_size {
             for col in 0..terrain_size {
-                let biome = &terrain.get(row, col);
-                let resource = resource_for_biome(biome);
+                let biome = terrain.get(row, col);
 
-                if resource == ResourceType::None {
+                let Some(resource) = resource_for_biome(biome) else {
                     continue;
-                }
-
-                let window = &mut windows[resource_window_index(&resource)];
+                };
+                
+                let index = resource.index();
+                let window = &mut windows[index];
 
                 window.push((row, col));
 
@@ -58,24 +59,14 @@ impl ResourceMap {
     }
 }
 
-fn resource_for_biome(biome: &BiomeType) -> ResourceType {
+fn resource_for_biome(biome: &BiomeType) -> Option<ResourceType> {
     use BiomeType::*;
     use ResourceType::*;
     match biome {
-        SmallBiome(player_id) => Small(player_id.clone()),
-        MediumBiome(player_id) => Medium(player_id.clone()),
-        LargeBiome(player_id) => Large(player_id.clone()),
+        SmallBiome(player_id, player_race) => Some(Small(player_id.clone(), player_race.clone())),
+        MediumBiome(player_id, player_race) => Some(Medium(player_id.clone(), player_race.clone())),
+        LargeBiome(player_id, player_race) => Some(Large(player_id.clone(), player_race.clone())),
         _ => None,
-    }
-}
-
-fn resource_window_index(resource: &ResourceType) -> usize {
-    use ResourceType::*;
-    match resource {
-        Small(_) => 0,
-        Medium(_) => 1,
-        Large(_) => 2,
-        _ => unreachable!("resource_for_biome(ResourceType::None)"),
     }
 }
 

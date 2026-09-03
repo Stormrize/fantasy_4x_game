@@ -1,4 +1,6 @@
-use crate::ui::local_game_setup_menu::build_local_game_config::handle_start_button;
+use crate::ui::local_game_setup_menu::build_local_game_config::{
+    handle_change_language_button, handle_start_button,
+};
 use crate::ui::local_game_setup_menu::drag_systems::{
     start_slider_drag, stop_slider_drag, update_dragging_sliders, update_slider_handle_visuals,
     update_slider_labels,
@@ -10,12 +12,14 @@ use crate::ui::local_game_setup_menu::spawn_game_setup_menu::spawn_game_setup_me
 use crate::ui::menus::AppState;
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{IntoScheduleConfigs, OnEnter, in_state};
+
 mod build_local_game_config;
 mod components_resources;
 mod drag_systems;
+mod localization_systems;
 mod selection_pick_systems;
-mod slider_systems;
 mod spawn_game_setup_menu;
+mod view_helpers;
 
 pub(super) struct GameSetupMenuPlugin;
 
@@ -35,7 +39,6 @@ impl Plugin for GameSetupMenuPlugin {
                     handle_start_button,
                     update_start_button_visuals,
                 )
-                    .chain()
                     .run_if(in_state(AppState::GameSetupMenu)),
             );
     }

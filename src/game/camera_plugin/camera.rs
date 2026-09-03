@@ -157,7 +157,7 @@ fn camera_movement(
     }
 
     let zoom_speed = 0.2;
-    if let Projection::Orthographic(ref mut ortho) = *projection {
+    if let Projection::Orthographic(ref _ortho) = *projection {
         for mouse_wheel in mouse_wheel_reader.read() {
             let scroll = match mouse_wheel.unit {
                 MouseScrollUnit::Line => mouse_wheel.y * zoom_speed,
