@@ -2,6 +2,31 @@ use crate::ui::initial_loading::localization_loader_plugin::public_api::Language
 use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum GraphicsQuality {
+    Low,
+    #[default]
+    Medium,
+    High,
+    Ultra,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum GameSpeed {
+    Quick,
+    #[default]
+    Standard,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ColorblindMode {
+    #[default]
+    None,
+    Protanopia,
+    Deuteranopia,
+    Tritanopia,
+}
+
 #[derive(Resource, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct SettingsConfig {
     // ---------- World ----------
@@ -91,29 +116,4 @@ impl Default for SettingsConfig {
             colorblind_mode: ColorblindMode::default(),
         }
     }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum GraphicsQuality {
-    Low,
-    #[default]
-    Medium,
-    High,
-    Ultra,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum GameSpeed {
-    Quick,
-    #[default]
-    Standard,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum ColorblindMode {
-    #[default]
-    None,
-    Protanopia,
-    Deuteranopia,
-    Tritanopia,
 }

@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.18.1", features = ["trace", "debug", "experimental_bevy_ui_widgets"] }
+bevy = { version = "0.19.1", features = ["trace", "debug"] }
 rand = "0.10.1"
 noise = "0.9.0"
 voronoice = "0.2.0"
 faster_poisson = "1.3.0"
 rand_chacha = "0.10.0"
 serde = { version = "1.0.229", features = ["derive"] }
-bevy_common_assets = { version = "0.15.0", features = ["ron"] }
+bevy_common_assets = { version = "0.17.0", features = ["ron"] }
 smol_str = "0.2.2"
-bevy-persistent = { version = "0.10.0", features = ["ron", "pretty"] }
+bevy-persistent = { version = "0.11.0", features = ["ron", "pretty"] }
 sysdirs = "0.9.4"
 
 [profile.dev]

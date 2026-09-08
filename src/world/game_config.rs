@@ -178,8 +178,8 @@ pub enum GameMode {
 #[allow(dead_code)]
 #[repr(u8)]
 pub enum MapShape {
-    #[default]
     Round,
+    #[default]
     Jagged,
 }
 

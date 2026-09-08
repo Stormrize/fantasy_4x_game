@@ -1,4 +1,4 @@
-use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
+ use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
 use crate::world::{
     game_configs::GenerationConfig,
     game_resources::{

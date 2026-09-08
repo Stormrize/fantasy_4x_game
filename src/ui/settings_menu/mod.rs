@@ -37,9 +37,8 @@ mod theme;
 mod widgets;
 
 pub use build::spawn_settings_menu;
-pub use theme::*;
 
-use bevy::app::{App, Plugin, Startup, Update};
+use bevy::app::{App, Plugin};
 
 use crate::ui::menus::AppState;
 use bevy::prelude::OnEnter;

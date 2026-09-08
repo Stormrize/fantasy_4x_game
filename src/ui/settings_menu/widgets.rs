@@ -11,9 +11,10 @@ use bevy::ecs::hierarchy::{ChildOf, Children};
 use bevy::prelude::*;
 use bevy::ui::Checked;
 use bevy::ui_widgets::{
-    Activate, Button, Checkbox, RadioButton, RadioGroup, Slider, SliderRange, SliderStep,
-    SliderThumb, SliderValue, TrackClick, ValueChange,
+    Activate, Button, Checkbox, RadioButton, RadioGroup, Slider, SliderOrientation, SliderRange,
+    SliderStep, SliderThumb, SliderValue, TrackClick, ValueChange,
 };
+use std::fmt::Debug;
 
 use super::theme;
 use crate::ui::colors::{
@@ -71,9 +72,10 @@ pub fn spawn_slider_row(
         .spawn((
             Slider {
                 track_click: TrackClick::Snap,
+                orientation: SliderOrientation::Horizontal,
             },
             SliderRange::new(min, max),
-            SliderStep(step),
+            SliderStep(1.0),
             SliderValue(initial),
             Node {
                 width: Val::Px(180.0),
@@ -125,8 +127,8 @@ pub fn spawn_slider_row(
         .spawn((
             Text::new(format_value(initial, decimals, suffix)),
             TextFont {
-                font: font.clone(),
-                font_size: 14.0,
+                font: FontSource::Handle(font.clone()),
+                font_size: FontSize::Px(14.0),
                 ..default()
             },
             TextColor(COLOR_TEXT_MUTED),
@@ -158,7 +160,9 @@ pub fn spawn_slider_row(
             if let Ok(mut text) = q_text.get_mut(value_text) {
                 *text = Text::new(format_value(trigger.value, decimals, suffix));
             }
-            let _ = settings.update(|cfg| on_change(cfg, trigger.value));
+            on_change(&mut settings, trigger.value);
+
+            //let _ = settings.update(|cfg| on_change(cfg, trigger.value));
         },
     );
 
@@ -217,42 +221,24 @@ pub fn spawn_checkbox_row(
         ))
         .id();
 
-    // `Checkbox` сам переключает компонент `Checked` (см. CheckboxPlugin /
-    // checkbox_self_update) — нам остаётся только отразить это визуально и
-    // применить значение к настройкам.
     commands.entity(box_id).observe(
         move |trigger: On<ValueChange<bool>>,
+              mut commands: Commands,
               mut q_vis: Query<&mut Visibility>,
               mut settings: ResMut<Persistent<SettingsConfig>>| {
             if let Ok(mut vis) = q_vis.get_mut(mark_id) {
-                *vis = if trigger.value {
-                    Visibility::Visible
+                if trigger.value {
+                    *vis = Visibility::Visible;
+                    commands.entity(box_id).insert(Checked);
                 } else {
-                    Visibility::Hidden
+                    *vis = Visibility::Hidden;
+                    commands.entity(box_id).remove::<Checked>();
                 };
             }
-            let _ = settings.update(|cfg| on_change(cfg, trigger.value));
+            on_change(&mut settings, trigger.value);
+            //let _ = settings.update(|cfg| on_change(cfg, trigger.value));
         },
     );
-
-    commands
-        .entity(box_id)
-        .insert(Interaction::default()) // Нужен для кликов
-        .observe(
-            move |trigger: On<Pointer<Click>>,
-                  mut commands: Commands,
-                  q_checkbox: Query<Has<Checked>>| {
-                // Проверяем, есть ли уже Checked на этой сущности
-                if let Ok(is_checked) = q_checkbox.get(trigger.event_target()) {
-                    if is_checked {
-                        commands.entity(trigger.event_target()).remove::<Checked>();
-                    } else {
-                        commands.entity(trigger.event_target()).insert(Checked);
-                    }
-                }
-            },
-        );
-
     row
 }
 
@@ -290,7 +276,9 @@ fn on_radio_group_selection(
     }
 
     if let Ok(binding) = q_bindings.get(selected) {
-        let _ = settings.update(|cfg| binding.0(cfg));
+        binding.0(&mut settings);
+
+        //let _ = settings.update(|cfg| binding.0(cfg));
     }
 }
 
@@ -334,7 +322,7 @@ where
             .spawn((
                 RadioButton,
                 RadioOptionBinding(Box::new(move |cfg: &mut SettingsConfig| {
-                    on_change(cfg, value)
+                    on_change(cfg, value);
                 })),
                 Node {
                     padding: UiRect::axes(Val::Px(12.0), Val::Px(6.0)),
@@ -358,8 +346,8 @@ where
         commands.spawn((
             Text::new(text),
             TextFont {
-                font: font.clone(),
-                font_size: 14.0,
+                font: FontSource::Handle(font.clone()),
+                font_size: FontSize::Px(14.0),
                 ..default()
             },
             TextColor(COLOR_TEXT_PRIMARY),
@@ -403,8 +391,8 @@ pub fn spawn_tab_button(
     commands.spawn((
         Text::new(label),
         TextFont {
-            font: font.clone(),
-            font_size: 16.0,
+            font: FontSource::Handle(font.clone()),
+            font_size: FontSize::Px(16.0),
             ..default()
         },
         TextColor(COLOR_TEXT_PRIMARY),

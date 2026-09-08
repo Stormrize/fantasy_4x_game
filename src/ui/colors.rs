@@ -16,3 +16,4 @@ pub const COLOR_TEXT_PRIMARY: Color = Color::srgb(0.902, 0.851, 0.741);
 pub const COLOR_TEXT_MUTED: Color = Color::srgb(0.588, 0.541, 0.471);
 pub const COLOR_BUTTON_BG: Color = Color::srgb(0.157, 0.129, 0.110);
 pub const COLOR_DANGER_BG: Color = Color::srgb(0.302, 0.098, 0.098);
+pub const COLOR_APPLY_BG: Color = Color::srgb(0.102, 0.200, 0.188);

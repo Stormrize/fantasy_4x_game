@@ -8,7 +8,12 @@ use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
 use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
 use crate::ui::menus::AppState;
 use bevy::color::Color;
-use bevy::prelude::{BorderColor, BorderRadius, Bundle, Button, ChildOf, Click, Commands, Component, ContainsEntity, DespawnOnExit, DetectChangesMut, Entity, Font, Handle, MessageWriter, MouseButton, NextState, On, Pointer, Query, Res, ResMut, Text, TextColor, TextFont, UiRect};
+use bevy::prelude::{
+    BorderColor, BorderRadius, Bundle, Button, ChildOf, Click, Commands, Component, ContainsEntity,
+    DespawnOnExit, DetectChangesMut, Entity, Font, FontSize, Handle, MessageWriter, MouseButton,
+    NextState, On, Pointer, Query, Res, ResMut, Text, TextColor, TextFont, UiRect,
+};
+use bevy::text::FontSource;
 use bevy::ui::{AlignItems, BackgroundColor, FlexDirection, JustifyContent, Node, Val};
 use bevy::utils::default;
 use bevy_persistent::Persistent;
@@ -46,7 +51,6 @@ pub(super) fn spawn_main_menu(
     fonts: Res<Fonts>,
     settings: Res<Persistent<SettingsConfig>>,
 ) {
-
     // делаем панель коричневого цвета на весь экран
     let panel = commands
         .spawn((
@@ -111,15 +115,13 @@ fn spawn_text_bundle(translated_text: &str, font: &Handle<Font>) -> impl Bundle 
     (
         Text::new(translated_text),
         TextFont {
-            font: font.clone(),
-            font_size: 20.0,
+            font: FontSource::Handle(font.clone()),
+            font_size: FontSize::Px(20.0),
             ..default()
         },
         TextColor(Color::WHITE),
     )
 }
-
-
 
 fn check_button_clicked(commands: &mut Commands, container: Entity) {
     commands.entity(container).observe(

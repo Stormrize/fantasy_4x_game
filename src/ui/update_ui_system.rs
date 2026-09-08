@@ -4,9 +4,7 @@ use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::
 use bevy::prelude::{Component, DetectChanges, Query, Res, Text, TextFont};
 
 #[derive(Component)]
-pub(super) struct TranslationKey {
-    pub key: &'static str,
-}
+pub(super) struct TranslationKey(pub &'static str);
 // pub fn update_ui_system(
 //     mut text_query: Query<(&mut Text, &mut TextFont, &TranslationKey)>,
 //     localization: Res<Localization>,

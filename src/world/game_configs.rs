@@ -120,6 +120,16 @@ pub struct GameConfig {
     pub player_race: PlayerRace,
 }
 
+impl Default for GameConfig {
+    fn default() -> Self {
+        Self {
+            map_size: MapSize::Medium,
+            map_shape: MapShape::Jagged,
+            player_race: PlayerRace::default(),
+        }
+    }
+}
+
 impl GameConfig {
     pub fn new(map_size: MapSize, map_shape: MapShape, player_race: PlayerRace) -> Self {
         Self {
@@ -138,6 +148,17 @@ pub struct LocalPlayerConfig {
     pub ai_difficulty: AiDifficulty,
 }
 
+impl Default for LocalPlayerConfig {
+    fn default() -> Self {
+        Self {
+            game_config: GameConfig::default(),
+            seed: u32::MAX,
+            races: Vec::new(),
+            ai_difficulty: AiDifficulty::default(),
+        }
+    }
+}
+
 pub struct OnlinePlayerConfig {
     pub game_config: GameConfig,
     pub player_id: Id,
@@ -150,11 +171,12 @@ pub enum ConfigType {
     Multiplayer(OnlinePlayerConfig),
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 #[repr(u8)]
 pub enum MapSize {
     Tiny = 8,
     Small = 16,
+    #[default]
     Medium = 32,
     Big = 64,
     Large = 128,
@@ -166,9 +188,10 @@ impl MapSize {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum AiDifficulty {
     Easy,
+    #[default]
     Normal,
     Hard,
     Crazy,

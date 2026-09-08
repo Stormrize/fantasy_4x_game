@@ -206,40 +206,71 @@ pub fn spawn_settings_menu(
         ))
         .id();
 
+    let apply_button = commands
+        .spawn((Button, theme::button_style(2), ChildOf(footer)))
+        .id();
+    commands.spawn((
+        Text::new(localization.get("apply", settings.language)),
+        TextFont {
+            font: FontSource::Handle(font.clone()),
+            font_size: FontSize::Px(14.0),
+            ..default()
+        },
+        TranslationKey("apply"),
+        TextColor(COLOR_TEXT_PRIMARY),
+        ChildOf(apply_button),
+    ));
+
+    commands.entity(apply_button).observe(
+        |_trigger: On<Pointer<Click>>, settings: Res<Persistent<SettingsConfig>>| {
+            if let Err(err) = settings.persist() {
+                eprintln!("crazy, could not save. Error message: {:?}", err);
+            }
+        },
+    );
+
     let reset_btn = commands
-        .spawn((Button, theme::button_style(true), ChildOf(footer)))
+        .spawn((Button, theme::button_style(0), ChildOf(footer)))
         .id();
     commands.spawn((
         Text::new(localization.get("reset_to_default", settings.language)),
         TextFont {
-            font: font.clone(),
-            font_size: 14.0,
+            font: FontSource::Handle(font.clone()),
+            font_size: FontSize::Px(14.0),
             ..default()
         },
-        TranslationKey {
-            key: "reset_to_default",
-        },
+        TranslationKey("reset_to_default"),
         TextColor(COLOR_TEXT_PRIMARY),
         ChildOf(reset_btn),
     ));
 
+    commands.entity(reset_btn).observe(
+        |_trigger: On<Pointer<Click>>, mut settings: ResMut<Persistent<SettingsConfig>>| {
+            if let Err(err) = settings.revert_to_default() {
+                eprintln!(
+                    "crazy, could not revert to default. Error message: {:?}",
+                    err
+                );
+            }
+        },
+    );
+
     let close_btn = commands
-        .spawn((Button, theme::button_style(false), ChildOf(footer)))
+        .spawn((Button, theme::button_style(1), ChildOf(footer)))
         .id();
     commands.spawn((
         Text::new(localization.get("close", settings.language)),
         TextFont {
-            font: font.clone(),
-            font_size: 14.0,
+            font: FontSource::Handle(font.clone()),
+            font_size: FontSize::Px(14.0),
             ..default()
         },
-        TranslationKey { key: "close" },
+        TranslationKey("close"),
         TextColor(COLOR_TEXT_PRIMARY),
         ChildOf(close_btn),
     ));
     commands.entity(close_btn).observe(
         |_trigger: On<Pointer<Click>>, mut next_state: ResMut<NextState<AppState>>| {
-            println!("changed state");
             next_state.set(AppState::MainMenu);
         },
     );

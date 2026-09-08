@@ -87,7 +87,7 @@ pub(super) fn start_loading_game_assets(
             }
         }
     }
-
+    println!("started loading game assets");
     commands.insert_resource(RawVisualRaceHandles(vec));
 }
 

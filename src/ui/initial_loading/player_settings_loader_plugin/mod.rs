@@ -1,11 +1,8 @@
 use crate::ui::initial_loading::localization_loader_plugin::public_api::{
     CurrentLanguage, Language,
 };
-use crate::ui::initial_loading::player_settings_loader_plugin::settings_api::set_language;
 use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
-use bevy::app::{App, Plugin, PreStartup, Startup};
-use bevy::log::info;
-use bevy::prelude::{Res, ResMut};
+use bevy::app::{App, Plugin};
 use bevy_persistent::{Persistent, StorageFormat};
 use std::path::PathBuf;
 
