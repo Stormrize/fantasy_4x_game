@@ -1,8 +1,4 @@
-use crate::world::game_config::PlayerRace;
-use crate::world::game_resources::data::biome::BiomeType::{
-    Ground, LargeBiome, MediumBiome, SmallBiome, Water,
-};
-use crate::world::ui_and_graphic_resources::player_registry::Id;
+use crate::world::components::{Id, PlayerRace};
 
 #[derive(Debug, Clone, PartialEq)]
 #[repr(u8)]
@@ -36,6 +32,7 @@ impl BiomeType {
     }
 
     pub fn race_inside(self) -> Option<PlayerRace> {
+        use BiomeType::*;
         match self {
             SmallBiome(_, p) | MediumBiome(_, p) | LargeBiome(_, p) => Some(p),
 

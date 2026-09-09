@@ -1,8 +1,8 @@
-use crate::world::game_resources::data::units::Unit;
-use bevy::prelude::Resource;
+use crate::world::game_resources::data::unit::Unit;
+use bevy::prelude::{Entity, Resource};
 
 #[derive(Resource)]
 pub struct UnitsMap {
-    pub units: Vec<Unit>,
+    pub units: Vec<Entity>,
     pub size: usize,
 }

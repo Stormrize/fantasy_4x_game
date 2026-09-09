@@ -1,18 +1,15 @@
-use std::u128::MAX;
-use crate::world::game_resources::{data::biome::BiomeType, terrain_map::TerrainMap};
-
-use crate::game::generation::races_generation::players_or_bots::generate_players_positions::CapitalCoord;
-use crate::game::generation::terrain_generator::noise::{fbm, normalise};
-use crate::game::generation::{
+use crate::core_rust::generation::{
+    races_generation::players_or_bots::generate_players_positions::CapitalCoord,
     races_generation::players_or_bots::voronoi_diagram::{PlayerInfluenceCell, PlayerInfluenceMap},
     terrain_generator::PerlinPlaceholder,
+    terrain_generator::noise::{fbm, normalise},
 };
-use crate::world::game_config::PlayerRace;
+use crate::world::components::{Id, PlayerRace};
 use crate::world::game_configs::GenerationConfig;
 use crate::world::game_resources::data::biome::BiomeType::{
     LargeBiome, MediumBiome, SmallBiome, Water,
 };
-use crate::world::ui_and_graphic_resources::player_registry::Id;
+use crate::world::game_resources::{data::biome::BiomeType, terrain_map::TerrainMap};
 
 const CAPITAL_SMALL_BIOME_RADIUS: f64 = 0.05;
 

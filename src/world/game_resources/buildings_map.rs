@@ -1,8 +1,7 @@
-use crate::world::game_resources::data::buildings::BuildingType;
-use bevy::prelude::Resource;
+use bevy::prelude::{Entity, Resource};
 
 #[derive(Resource)]
 pub struct BuildingMap {
-    pub map: Vec<BuildingType>,
+    pub map: Vec<Entity>,
     pub size: usize,
 }

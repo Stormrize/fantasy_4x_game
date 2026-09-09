@@ -1,7 +1,7 @@
-use crate::game::generation::races_generation::players_or_bots::generate_players_positions::{
+use crate::core_rust::generation::races_generation::players_or_bots::generate_players_positions::{
     CapitalCoord, PlayersTerrainData,
 };
-use crate::game::generation::races_generation::players_pos_generator::helpers::{
+use crate::core_rust::generation::races_generation::players_pos_generator::helpers::{
     compute_land_components, farthest_point_seeds, flood_fill_balance, largest_component_id,
 };
 use crate::world::game_configs::GenerationConfig;

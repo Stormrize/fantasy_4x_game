@@ -10,7 +10,7 @@ use bevy_persistent::Persistent;
 fn update(settings: &mut Persistent<SettingsConfig>, apply: impl Fn(&mut SettingsConfig)) {
     settings
         .update(apply)
-        .expect("Failed to persist settings config");
+        .expect("Failed to persist settings_menu config");
 }
 
 // ---------- Звук ----------

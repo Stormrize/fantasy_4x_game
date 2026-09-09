@@ -20,7 +20,6 @@ mod initial_loading;
 mod main_menu;
 pub mod menus;
 mod settings_menu;
-mod update_ui_system;
 
 pub struct UiPlugin;
 

@@ -1,22 +1,18 @@
 use crate::ui::menus::AppState;
-use crate::world::game_configs::ConfigType;
-use crate::world::ui_and_graphic_resources::player_registry::{
-    Id, PlayerRegistry, RacesUiRegistry,
-};
 use crate::world::{
-    game_config::PlayerRace,
+    components::PlayerRace,
+    game_configs::ConfigType,
     ui_and_graphic_resources::{
         data::visual_race_data::RaceAssets, player_registry::RacesAssetsRegistry,
+        player_registry::RacesUiRegistry,
     },
 };
-use bevy::app::App;
-use bevy::asset::{Asset, LoadState};
-use bevy::color::Color;
+use bevy::asset::LoadState;
 use bevy::prelude::{
-    AppExtStates, AssetServer, Assets, Commands, Handle, IntoScheduleConfigs, NextState, OnEnter,
-    Plugin, Res, ResMut, Resource, StandardMaterial, States, TypePath, Update, in_state,
+    App, AppExtStates, Asset, AssetServer, Assets, Color, Commands, Handle, IntoScheduleConfigs,
+    NextState, OnEnter, Plugin, Res, ResMut, Resource, StandardMaterial, States, TypePath, Update,
+    default, in_state,
 };
-use bevy::utils::default;
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::Deserialize;
 
@@ -95,11 +91,9 @@ pub(super) fn check_raw_handles(
     raw_handles: Res<RawVisualRaceHandles>,
     mut raw_assets: ResMut<Assets<RawRaceAssets>>,
     mut assets_registry: ResMut<RacesAssetsRegistry>,
-    //mut player_registry: ResMut<PlayerRegistry>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mut id_counter = 0;
     for handle in &raw_handles.0 {
         if let Some(asset) = raw_assets.remove(&handle.1) {
             let RawRaceAssets {
@@ -219,12 +213,6 @@ pub(super) fn check_raw_handles(
             assets_registry
                 .0
                 .insert(handle.0.clone(), fallback_visual_race_data);
-
-            //note под вопросиком
-            // player_registry
-            //     .0
-            //     .insert(Id::LocalPlayerId(id_counter), handle.0.clone());
-            // id_counter += 1;
         }
     }
 }

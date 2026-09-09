@@ -1,9 +1,6 @@
 use crate::ui::in_game_asset_loading::game_assets_loader_plugin::{
-    GameAssetsLoadingPlugin, GameAssetsLoadingState, RawRaceAssets,
+    GameAssetsLoadingPlugin, GameAssetsLoadingState,
 };
-// use crate::ui::in_game_asset_loading::map_generation_plugin::{
-//     GameMapGenerationPlugin, MapGenerationLoadingState,
-// };
 
 use crate::ui::menus::AppState;
 use bevy::app::{App, Plugin, Update};

@@ -1,7 +1,7 @@
 use crate::world::{
     game_configs::GenerationConfig,
     game_resources::{
-        data::biome::BiomeType, data::resources::ResourceType, resource_map::ResourceMap,
+        data::biome::BiomeType, data::resource::ResourceType, resource_map::ResourceMap,
         terrain_map::TerrainMap,
     },
 };
@@ -18,7 +18,7 @@ impl ResourceMap {
     pub fn new(config: &GenerationConfig, terrain: &TerrainMap) -> Self {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let terrain_size = config.terrain_size;
-        let mut map =  Vec::with_capacity(terrain_size * terrain_size);
+        let mut map = Vec::with_capacity(terrain_size * terrain_size);
 
         let mut windows: [Vec<(usize, usize)>; 3] = Default::default();
 
@@ -29,7 +29,7 @@ impl ResourceMap {
                 let Some(resource) = resource_for_biome(biome) else {
                     continue;
                 };
-                
+
                 let index = resource.index();
                 let window = &mut windows[index];
 

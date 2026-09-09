@@ -1,11 +1,10 @@
-use bevy::prelude::Entity;
-use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
+use crate::core_rust::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
 use crate::world::game_configs::GenerationConfig;
-use crate::world::game_resources::{data::units::Unit, unit_map::UnitsMap};
+use crate::world::game_resources::{data::unit::Unit, unit_map::UnitsMap};
+use bevy::prelude::Entity;
 use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
-use smol_str::SmolStr;
 
 impl UnitsMap {
     pub fn new(config: &GenerationConfig, capital_coord: &PlayersTerrainData) -> Self {

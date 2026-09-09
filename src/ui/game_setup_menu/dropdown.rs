@@ -20,7 +20,7 @@ use crate::ui::game_setup_menu::colors::{
 use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
 use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
 use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
-use crate::ui::update_ui_system::TranslationKey;
+use crate::world::ui_and_graphic_resources::data::components::TranslationKey;
 
 #[derive(Component)]
 struct DropdownState {

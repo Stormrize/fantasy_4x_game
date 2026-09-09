@@ -14,7 +14,7 @@ use crate::ui::colors::COLOR_ACCENT_GOLD;
 use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
 use crate::ui::initial_loading::localization_loader_plugin::public_api::Localization;
 use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
-use crate::world::game_config::PlayerRace;
+use crate::world::components::PlayerRace;
 use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
 
 use super::colors::COLOR_ICON_BORDER_HOVER;

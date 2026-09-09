@@ -1,23 +1,23 @@
 //! Всплывающее окно с информацией о расе + кнопки "Начать игру" / "Закрыть".
 
+use super::build_game_config::start_local_game;
+use super::colors::*;
+use super::components::PendingGameSetup;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
 use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
 use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
 use crate::ui::menus::AppState;
-use crate::ui::update_ui_system::TranslationKey;
-use crate::world::game_config::PlayerRace;
+use crate::world::components::PlayerRace;
+use crate::world::ui_and_graphic_resources::data::components::TranslationKey;
 use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
+use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
 use bevy::prelude::{
-    AlignItems, Button, ChildOf, Click, Commands, Component, DespawnOnExit, Entity, FontSize,
-    FontSource, GlobalZIndex, ImageNode, JustifyContent, NextState, Node, On, Out, Over, Pointer,
-    PositionType, Query, Res, ResMut, Text, TextColor, TextFont, UiRect, With,
+    AlignItems, Button, ChildOf, Click, Commands, Component, Entity, FontSize, FontSource,
+    GlobalZIndex, ImageNode, JustifyContent, NextState, Node, On, Out, Over, Pointer, PositionType,
+    Query, Res, ResMut, Text, TextColor, TextFont, UiRect, With,
 };
 use bevy::ui::{BackgroundColor, BorderColor, FlexDirection, Val};
 use bevy::utils::default;
-use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
-use super::build_game_config::start_local_game;
-use super::colors::*;
-use super::components::PendingGameSetup;
 
 const START_GAME_KEY: &str = "setup_start_game";
 const CLOSE_KEY: &str = "setup_close";
@@ -155,8 +155,14 @@ fn spawn_start_button(
                   pending: Res<PendingGameSetup>,
                   popups: Query<Entity, With<RacePopupRoot>>,
                   mut next_state: ResMut<NextState<AppState>>,
-                  races_ui_registry: Res<RacesUiRegistry>, | {
-                start_local_game(&mut commands, race.clone(), &races_ui_registry, &pending, &mut next_state);
+                  races_ui_registry: Res<RacesUiRegistry>| {
+                start_local_game(
+                    &mut commands,
+                    race.clone(),
+                    &races_ui_registry,
+                    &pending,
+                    &mut next_state,
+                );
                 for popup in &popups {
                     commands.entity(popup).despawn();
                 }

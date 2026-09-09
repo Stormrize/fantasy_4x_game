@@ -1,7 +1,6 @@
 //! Ресурсы состояния меню настройки игры.
 
-use crate::world::game_config::MapShape;
-use crate::world::game_configs::{AiDifficulty, MapSize};
+use crate::world::components::{AiDifficulty, MapShape, MapSize};
 use bevy::prelude::Resource;
 
 /// "Живые" значения из сайдбара — обновляются сразу при выборе в дропдауне.

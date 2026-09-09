@@ -1,12 +1,14 @@
+//! Небольшие переиспользуемые "кирпичики" интерфейса: контейнер строки,
+//! подпись строки, заголовок секции, кнопка со стилем.
+
+use bevy::ecs::hierarchy::ChildOf;
+use bevy::prelude::*;
+
 use crate::ui::colors::{
     COLOR_ACCENT_GOLD, COLOR_APPLY_BG, COLOR_BUTTON_BG, COLOR_DANGER_BG, COLOR_TEXT_PRIMARY,
 };
-use bevy::prelude::{
-    AlignItems, BackgroundColor, BorderColor, BorderRadius, Bundle, ChildOf, Commands, Entity,
-    FlexDirection, Font, FontSource, Handle, JustifyContent, Node, Text, TextColor, TextFont,
-    UiRect, Val, default,
-};
-use bevy::text::FontSize;
+use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
+use crate::world::ui_and_graphic_resources::data::components::TranslationKey;
 
 /// Один "ряд" настройки: слева подпись, справа — сам виджет.
 /// Возвращает entity ряда — в него потом добавляют подпись и контрол.
@@ -26,49 +28,93 @@ pub fn spawn_row_container(commands: &mut Commands, parent: Entity) -> Entity {
         .id()
 }
 
-pub fn spawn_row_label(commands: &mut Commands, row: Entity, font: &Handle<Font>, label: &str) {
-    commands.spawn((
-        Text::new(label),
-        TextFont {
-            font: FontSource::Handle(font.clone()),
-            font_size: FontSize::Px(15.0),
-            ..default()
-        },
-        TextColor(COLOR_TEXT_PRIMARY),
-        ChildOf(row),
-    ));
+pub fn spawn_row_label(
+    commands: &mut Commands,
+    row: Entity,
+    font: &Handle<Font>,
+    localization: &Localization,
+    language: Language,
+    key: &'static str,
+) -> Entity {
+    commands
+        .spawn((
+            Text::new(localization.get(key, language)),
+            TextFont {
+                font: FontSource::Handle(font.clone()),
+                font_size: FontSize::Px(15.0),
+                ..default()
+            },
+            TextColor(COLOR_TEXT_PRIMARY),
+            TranslationKey(key),
+            ChildOf(row),
+        ))
+        .id()
 }
 
-/// Заголовок секции (используется и в сайдбаре, и можно переиспользовать
-/// внутри вкладки, если понадобится подзаголовок).
+/// Заголовок секции (используется в сайдбаре).
 pub fn spawn_section_title(
     commands: &mut Commands,
     parent: Entity,
     font: &Handle<Font>,
-    text: &str,
-) {
-    commands.spawn((
-        Text::new(text),
-        TextFont {
-            font: FontSource::Handle(font.clone()),
-            font_size: FontSize::Px(22.0),
-            ..default()
-        },
-        TextColor(COLOR_ACCENT_GOLD),
-        Node {
-            margin: UiRect {
-                bottom: Val::Px(14.0),
+    localization: &Localization,
+    language: Language,
+    key: &'static str,
+) -> Entity {
+    commands
+        .spawn((
+            Text::new(localization.get(key, language)),
+            TextFont {
+                font: FontSource::Handle(font.clone()),
+                font_size: FontSize::Px(22.0),
                 ..default()
             },
-            ..default()
-        },
-        ChildOf(parent),
-    ));
+            TextColor(COLOR_ACCENT_GOLD),
+            TranslationKey(key),
+            Node {
+                margin: UiRect {
+                    bottom: Val::Px(14.0),
+                    ..default()
+                },
+                ..default()
+            },
+            ChildOf(parent),
+        ))
+        .id()
 }
 
-/// Общий стиль для кнопок (Reset / Close / и т.п.) — набор компонентов,
-/// который можно вставить как один bundle.
+/// Кнопка с подписью (Apply/Reset/Close и т.п.) — сама только строит UI;
+/// observer для клика вешает вызывающий код (см. `layout.rs`), поэтому
+/// один и тот же хелпер годится для кнопок с разной логикой на клик.
+pub fn spawn_button(
+    commands: &mut Commands,
+    parent: Entity,
+    font: &Handle<Font>,
+    localization: &Localization,
+    language: Language,
+    key: &'static str,
+    color: u8,
+) -> Entity {
+    let btn = commands
+        .spawn((Button, button_style(color), ChildOf(parent)))
+        .id();
 
+    commands.spawn((
+        Text::new(localization.get(key, language)),
+        TextFont {
+            font: FontSource::Handle(font.clone()),
+            font_size: FontSize::Px(14.0),
+            ..default()
+        },
+        TranslationKey(key),
+        TextColor(COLOR_TEXT_PRIMARY),
+        ChildOf(btn),
+    ));
+
+    btn
+}
+
+/// Общий стиль для кнопок (Reset / Close / Apply) — набор компонентов,
+/// который можно вставить как один bundle.
 pub fn button_style(color: u8) -> impl Bundle {
     let bg = if color == 0 {
         COLOR_DANGER_BG
@@ -77,6 +123,7 @@ pub fn button_style(color: u8) -> impl Bundle {
     } else {
         COLOR_APPLY_BG
     };
+
     (
         Node {
             width: Val::Percent(100.0),

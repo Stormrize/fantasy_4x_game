@@ -2,20 +2,13 @@
 
 use super::components::PendingGameSetup;
 use crate::ui::menus::AppState;
-use crate::world::game_config::PlayerRace;
+use crate::world::components::{Id, PlayerRace};
 use crate::world::game_configs::{ConfigType, GameConfig, LocalPlayerConfig};
-use crate::world::ui_and_graphic_resources::player_registry::{Id, RacesUiRegistry};
+use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
 use bevy::prelude::{Commands, NextState};
 use rand::prelude::SliceRandom;
 use rand::random_range;
 
-/// Собирает [`LocalPlayerConfig`] из текущих настроек сайдбара + выбранной
-/// расы и вставляет его в мир как активный [`ConfigType`].
-///
-/// ВАЖНО: `LocalPlayerConfig::races` ждёт пары `(Id, PlayerRace)`, а способа
-/// получить/создать `Id` локального игрока в присланном коде не было —
-/// вектор пока пустой. Допиши `races: vec![(local_player_id, race)]`, когда
-/// появится подходящий `Id`.
 pub fn start_local_game(
     commands: &mut Commands,
     race: PlayerRace,

@@ -1,9 +1,10 @@
- use crate::game::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
+use bevy::prelude::Entity;
+use crate::core_rust::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
 use crate::world::{
     game_configs::GenerationConfig,
     game_resources::{
         buildings_map::BuildingMap,
-        data::{biome::BiomeType, buildings::BuildingType},
+        data::{biome::BiomeType, building::BuildingType},
         terrain_map::TerrainMap,
     },
 };
@@ -16,14 +17,14 @@ impl BuildingMap {
     ) -> BuildingMap {
         let terrain_size = config.terrain_size;
         let players_positions = &plater_terrain_data.data;
-        let mut cities = vec![BuildingType::None; terrain_size * terrain_size];
+        let mut cities: Vec<Option<Entity>> = vec![None; terrain_size * terrain_size];
         let mut blocked = vec![false; terrain_size * terrain_size];
 
         for player in players_positions {
             let x = player.1.0;
             let y = player.1.1;
             let player_id = player.0;
-            cities[x * terrain_size + y] = BuildingType::Capital(player_id);
+            cities[x * terrain_size + y] = ;
             let min_y = y.saturating_sub(3);
             let max_y = (y + 3).min(terrain_size - 1);
             let min_x = x.saturating_sub(3);

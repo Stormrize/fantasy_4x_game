@@ -1,5 +1,4 @@
-use crate::world::game_config::PlayerRace;
-use crate::world::ui_and_graphic_resources::player_registry::Id;
+use crate::world::components::{Id, PlayerRace};
 use crate::world::{
     game_configs::GenerationConfig,
     game_resources::{data::biome::BiomeType, terrain_map::TerrainMap},

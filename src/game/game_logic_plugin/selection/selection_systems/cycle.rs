@@ -1,8 +1,8 @@
 use crate::game::game_logic_plugin::events_resources_structs::components::{
     AlreadySelectedTile, JustSelectedTile, TileContent, TileLayer,
 };
-use crate::world::game_resources::data::buildings::BuildingType;
-use crate::world::game_resources::data::resources::ResourceType;
+use crate::world::game_resources::data::building::BuildingType;
+use crate::world::game_resources::data::resource::ResourceType;
 
 pub fn cycle_selection_system(
     just_selected_tile: JustSelectedTile,

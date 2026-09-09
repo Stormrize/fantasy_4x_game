@@ -2,7 +2,7 @@ use crate::world::{
     game_config::GameConfig,
     game_resources::{
         buildings_map::BuildingMap,
-        data::{biome::BiomeType, buildings::BuildingType, resources::ResourceType, units::Unit},
+        data::{biome::BiomeType, building::BuildingType, resource::ResourceType, unit::Unit},
         fog_map::FogMap,
         resource_map::ResourceMap,
         terrain_map::TerrainMap,

@@ -1,5 +1,4 @@
-use crate::world::game_config::{GameMode, MapShape, PlayerRace};
-use crate::world::ui_and_graphic_resources::player_registry::Id;
+use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace};
 use bevy::prelude::Resource;
 
 #[derive(Resource)]
@@ -12,6 +11,7 @@ pub struct CameraConfig {
     pub camera_pan_speed: f32,
     pub camera_zoom_speed: f32,
     pub invert_zoom: bool,
+    pub shadow_maps_enabled: bool,
 }
 
 // impl Default for CameraConfig {
@@ -57,7 +57,7 @@ impl GenerationConfig {
             terrain_size: game_config.map_size as usize,
             players: config.races.clone(),
 
-            //todo менять в зависимости от карты
+            // todo менять в зависимости от карты
             water_threshold: 100,
 
             global_octaves: 6,
@@ -103,14 +103,6 @@ impl RenderConfig {
             tile_size: 1.0,
         }
     }
-}
-
-#[derive(Resource)]
-pub struct SessionConfig {
-    pub seed: u32,                              //4
-    pub game_mode: GameMode,                    //1
-    pub player: PlayerRace,                     //24
-    pub current_players: Vec<(u8, PlayerRace)>, //24
 }
 
 #[derive(Debug, Resource)]
@@ -169,35 +161,4 @@ pub struct OnlinePlayerConfig {
 pub enum ConfigType {
     Local(LocalPlayerConfig),
     Multiplayer(OnlinePlayerConfig),
-}
-
-#[derive(Debug, Default, Clone, Copy)]
-#[repr(u8)]
-pub enum MapSize {
-    Tiny = 8,
-    Small = 16,
-    #[default]
-    Medium = 32,
-    Big = 64,
-    Large = 128,
-}
-
-impl MapSize {
-    pub fn len() -> usize {
-        5
-    }
-}
-
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
-pub enum AiDifficulty {
-    Easy,
-    #[default]
-    Normal,
-    Hard,
-    Crazy,
-}
-impl AiDifficulty {
-    pub fn len() -> usize {
-        4
-    }
 }

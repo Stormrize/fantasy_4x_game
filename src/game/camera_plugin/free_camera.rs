@@ -1,4 +1,3 @@
-use crate::world::game_config::GameConfig;
 use bevy::camera::ScalingMode;
 use bevy::input::mouse::{MouseMotion, MouseScrollUnit, MouseWheel};
 use bevy::prelude::*;
@@ -34,7 +33,7 @@ struct FreeCamera {
     pitch: f32,
 }
 
-fn setup_camera(mut commands: Commands, config: Res<GameConfig>) {
+fn setup_camera(mut commands: Commands) {
     let chunk_size = 32.0;
     let look_at = Vec3::new(chunk_size * 0.5, 0.0, chunk_size * 0.5);
     let dist = chunk_size * 0.85;
@@ -71,7 +70,7 @@ fn setup_camera(mut commands: Commands, config: Res<GameConfig>) {
     commands.spawn((
         DirectionalLight {
             illuminance: 8_000.0,
-            shadows_enabled: false,
+            shadow_maps_enabled: false,
             ..default()
         },
         Transform::from_xyz(-2.0, 5.0, 2.0).looking_at(Vec3::ZERO, Vec3::Y),

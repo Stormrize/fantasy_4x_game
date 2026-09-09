@@ -1,11 +1,11 @@
 use crate::ui::initial_loading::ui_assets::RaceLoadingState;
-use crate::world::game_config::PlayerRace;
+use crate::world::components::PlayerRace;
 use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
 use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
 use bevy::asset::{Asset, LoadState};
 use bevy::prelude::{
-    AssetServer, Assets, Commands, Handle, NextState, OnEnter, Plugin, Res, ResMut, Resource,
-    States, TypePath, Update, in_state,
+    AssetServer, Assets, Commands, Handle, NextState, Res, ResMut, Resource, States, TypePath,
+    Update, in_state,
 };
 use serde::Deserialize;
 use smol_str::SmolStr;

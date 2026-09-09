@@ -1,12 +1,11 @@
-use crate::game::generation::{
+use crate::core_rust::generation::{
     races_generation::players_or_bots::generate_players_positions::{
         CapitalCoord, PlayersTerrainData,
     },
     terrain_generator::PerlinPlaceholder,
 };
-use crate::world::game_config::PlayerRace;
+use crate::world::components::{Id, PlayerRace};
 use crate::world::game_configs::GenerationConfig;
-use crate::world::ui_and_graphic_resources::player_registry::Id;
 use noise::{NoiseFn, Perlin};
 use voronoice::Point;
 

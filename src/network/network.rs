@@ -1,5 +1,4 @@
 use bevy::prelude::{ResMut, Resource};
-use std::net::TcpListener;
 use std::net::TcpStream;
 
 #[derive(Resource)]

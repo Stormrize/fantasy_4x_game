@@ -1,13 +1,10 @@
 use crate::world::ui_and_graphic_resources::player_registry::PlayerRegistry;
 use crate::world::{
     game_config::GameConfig,
-    game_resources::{buildings_map::BuildingMap, data::buildings::BuildingType},
+    game_resources::{buildings_map::BuildingMap, data::building::BuildingType},
     ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
 };
-use bevy::prelude::{
-    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Res, Sphere,
-    Transform,
-};
+use bevy::prelude::{Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Res, Sphere, Transform, Visibility};
 
 #[derive(Component)]
 pub struct BuildingsMesh {

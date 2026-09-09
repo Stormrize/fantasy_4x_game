@@ -1,6 +1,4 @@
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{
-    CurrentLanguage, Language, Localization,
-};
+use crate::ui::initial_loading::localization_loader_plugin::public_api::Localization;
 use bevy::app::AppExit;
 
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_DANGER_BG, COLOR_PANEL_BG};
@@ -9,9 +7,9 @@ use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::
 use crate::ui::menus::AppState;
 use bevy::color::Color;
 use bevy::prelude::{
-    BorderColor, BorderRadius, Bundle, Button, ChildOf, Click, Commands, Component, ContainsEntity,
-    DespawnOnExit, DetectChangesMut, Entity, Font, FontSize, Handle, MessageWriter, MouseButton,
-    NextState, On, Pointer, Query, Res, ResMut, Text, TextColor, TextFont, UiRect,
+    BorderColor, BorderRadius, Bundle, Button, ChildOf, Click, Commands, Component, DespawnOnExit,
+    Entity, Font, FontSize, Handle, MessageWriter, NextState, On, Pointer, Query, Res, ResMut,
+    Text, TextColor, TextFont, UiRect,
 };
 use bevy::text::FontSource;
 use bevy::ui::{AlignItems, BackgroundColor, FlexDirection, JustifyContent, Node, Val};
@@ -40,7 +38,7 @@ impl MainMenuButtons {
         "new_game",
         "resume_game",
         "multiplayer",
-        "settings",
+        "settings_menu",
         "exit_game",
     ];
 }

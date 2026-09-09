@@ -1,7 +1,7 @@
 use crate::world::ui_and_graphic_resources::player_registry::PlayerRegistry;
 use crate::world::{
     game_config::GameConfig,
-    game_resources::{data::resources::ResourceType, resource_map::ResourceMap},
+    game_resources::{data::resource::ResourceType, resource_map::ResourceMap},
     ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
 };
 use bevy::prelude::{

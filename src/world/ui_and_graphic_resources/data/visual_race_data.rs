@@ -1,8 +1,5 @@
-use bevy::asset::{Asset, Handle};
+use bevy::asset::Handle;
 use bevy::pbr::StandardMaterial;
-use bevy::prelude::TypePath;
-use serde::Deserialize;
-
 #[derive(Debug, Clone)]
 pub struct RaceAssets {
     pub biomes: [Handle<StandardMaterial>; 4],
