@@ -2,81 +2,71 @@ use crate::ui::initial_loading::ui_assets::RaceLoadingState;
 use crate::world::components::PlayerRace;
 use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
 use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
-use bevy::asset::{Asset, LoadState};
-use bevy::prelude::{
-    AssetServer, Assets, Commands, Handle, NextState, Res, ResMut, Resource, States, TypePath,
-    Update, in_state,
-};
+use bevy::asset::LoadState;
+use bevy::prelude::{AssetServer, NextState, Res, ResMut};
 use serde::Deserialize;
 use smol_str::SmolStr;
 
 // race paths
-const RACE_MANIFESTS: [&str; 3] = [
-    "core/manifests/fire_mages_identifier.ron",
-    "core/manifests/water_mages_identifier.ron",
-    "core/manifests/stone_mages_identifier.ron",
-];
+macro_rules! define_manifests {
+    ($($path:literal),* $(,)?) => {
+        // Генерируем массив путей
+        const RACE_MANIFESTS: [&str; count_exprs!($($path)*)] = [
+            $($path),*
+        ];
+
+        // Генерируем массив содержимого самих файлов
+        const RACE_MANIFEST_CONTENTS: [&str; count_exprs!($($path)*)] = [
+            $(include_str!($path)),*
+        ];
+    };
+}
+
+macro_rules! count_exprs {
+    () => { 0 };
+    ($head:literal $($tail:literal)*) => { 1 + count_exprs!($($tail)*) };
+}
+
+// Использование:
+define_manifests!(
+    "../../../../assets/core/manifests/fire_mages_identifier.ron",
+    "../../../../assets/core/manifests/water_mages_identifier.ron",
+    "../../../../assets/core/manifests/stone_mages_identifier.ron",
+);
 
 // raw data
-#[derive(Asset, TypePath, Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct RawRaceData {
     pub id: String,
     pub description: String,
     pub ui_icon_path: String,
     pub visual_path: String,
+    pub unit_data: String,
 }
-
-#[derive(Resource, Default, Debug)]
-pub(super) struct RawRaceDataHandles(Vec<Handle<RawRaceData>>);
 
 // loading systems
-pub(super) fn start_loading_races(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let handles: Vec<Handle<RawRaceData>> = RACE_MANIFESTS
-        .into_iter()
-        .map(|path| asset_server.load(path))
-        .collect();
-    commands.insert_resource(RawRaceDataHandles(handles));
-}
-
-pub(super) fn check_raw_handles(
-    raw_handles: Res<RawRaceDataHandles>,
-    mut raw_assets: ResMut<Assets<RawRaceData>>,
+pub(super) fn start_loading_races(
     asset_server: Res<AssetServer>,
-    mut initial_races_data: ResMut<RacesUiRegistry>,
+    mut races_ui_registry: ResMut<RacesUiRegistry>,
 ) {
-    for handle in &raw_handles.0 {
-        if let Some(asset) = raw_assets.remove(handle) {
-            let RawRaceData {
-                id,
-                description,
-                ui_icon_path,
-                visual_path,
-            } = asset;
+    for content in RACE_MANIFEST_CONTENTS {
+        let data = ron::from_str::<RawRaceData>(content).unwrap();
 
-            let race_data = UiRaceData {
-                id: SmolStr::from(id),
-                description,
-                ui_icon: asset_server.load(ui_icon_path),
-                visual_path,
-            };
+        let race_data = UiRaceData {
+            id: SmolStr::from(data.id),
+            description: data.description,
+            ui_icon: asset_server.load(data.ui_icon_path),
+            visual_path: data.visual_path,
+            unit_data: data.unit_data,
+        };
 
-            initial_races_data
-                .0
-                .insert(PlayerRace::new(race_data.id.clone()), race_data);
-        }
+        races_ui_registry
+            .0
+            .insert(PlayerRace::new(race_data.id.clone()), race_data);
     }
 }
-fn all_races_loaded(
-    registry: &RacesUiRegistry,
-    asset_server: &AssetServer,
-    handles: &RawRaceDataHandles,
-) -> bool {
-    let expected = handles.0.len();
 
-    if expected == 0 || registry.0.len() < expected {
-        return false;
-    }
-
+fn all_races_loaded(registry: &RacesUiRegistry, asset_server: &AssetServer) -> bool {
     registry.0.values().all(
         |race| match asset_server.get_load_state(race.ui_icon.id()) {
             Some(LoadState::Loaded) => true,
@@ -90,15 +80,12 @@ fn all_races_loaded(
 }
 
 pub(super) fn race_loading_ready(
-    mut commands: Commands,
     mut next_state: ResMut<NextState<RaceLoadingState>>,
-    registry: Res<RacesUiRegistry>,
+    races_ui_registry: Res<RacesUiRegistry>,
     asset_server: Res<AssetServer>,
-    handles: Res<RawRaceDataHandles>,
 ) {
-    if all_races_loaded(&registry, &asset_server, &handles) {
+    if all_races_loaded(&races_ui_registry, &asset_server) {
         println!("race loaded");
-        commands.remove_resource::<RawRaceDataHandles>();
         next_state.set(RaceLoadingState::Ready);
     }
 }
