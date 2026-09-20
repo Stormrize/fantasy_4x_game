@@ -1,6 +1,15 @@
-use crate::world::components::{GoldAmount, Id, PlayerRace};
-use crate::world::game_resources::data::buffs_and_defuffs::{ActiveBuffs, ActiveDebuffs};
 use bevy::prelude::{Bundle, Component};
+use serde::Deserialize;
+
+use crate::world::components::{Cost, Id, PlayerRace};
+use crate::world::game_resources::data::buffs_and_debuffs::{Buffs, Debuffs};
+
+pub const BUILDING_LEVELS: usize = 3;
+
+pub type Gold = u16;
+pub type Food = u16;
+pub type Science = u16;
+pub type Production = u16;
 
 #[derive(Component, Debug, Clone, Copy)]
 pub enum BuildingLevel {
@@ -9,15 +18,17 @@ pub enum BuildingLevel {
     Complex = 2,
 }
 
-#[derive(Component, Debug, Clone, PartialEq)]
+#[derive(Component, Deserialize, Debug, Clone, PartialEq)]
 pub enum BuildingType {
     Capital,
-    EmptyCities,
-    MediumBuilding,
-    LargeBuilding,
+    CapturedCity,
+    BarbarianCity,
     SpawningBuilding,
     House,
+    MediumBuilding,
+    LargeBuilding,
     ResearchCenter,
+    UniqueRaceBuilding,
 }
 
 impl BuildingType {
@@ -25,64 +36,302 @@ impl BuildingType {
         use BuildingType::*;
         match self {
             Capital => 0,
-            EmptyCities => 1,
-            MediumBuilding => 2,
-            LargeBuilding => 3,
-            SpawningBuilding => 4,
-            House => 5,
-            ResearchCenter => 6,
+            CapturedCity => 1,
+            BarbarianCity => 2,
+            SpawningBuilding => 3,
+            House => 4,
+            MediumBuilding => 5,
+            LargeBuilding => 6,
+            ResearchCenter => 7,
+            UniqueRaceBuilding => 8,
         }
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum ProductionType {
-    Gold,
-    Food,
-    Production,
-    Science,
 }
 
 #[derive(Component, Debug, Clone)]
 struct ProductionAmount(pub u16);
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Deserialize, Debug, Clone)]
 pub struct BuildingStats {
     pub health: u16,
     pub defense: u16,
 }
 
-#[derive(Component, Debug, Clone)]
-pub struct Production {
-    pub production_type: ProductionType,
-    pub amount: u16,
+#[derive(Deserialize, Debug, Clone, Copy)]
+pub struct Yields {
+    pub gold: Gold,
+    pub food: Food,
+    pub production: Food,
+    pub science: Food,
 }
 
-#[derive(Component, Debug, Clone)]
-pub struct Economy {
-    pub upgrade_cost: GoldAmount,
-    pub maintenance: GoldAmount,
+impl Yields {
+    pub const NONE: Self = Self {
+        gold: 0,
+        food: 0,
+        production: 0,
+        science: 0,
+    };
+}
+
+#[derive(Deserialize, Debug, Clone, Copy)]
+pub struct BuildingUtility {
+    /// Население / жилые места.
+    pub housing: u16,
+
+    /// Сколько юнитов может одновременно спавниться
+    /// или сколько spawn capacity дает здание.
+    pub spawn_capacity: u16,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct BuildingLevelStats {
+    combat_stats: BuildingStats, // 32
+    yields: Yields, // 64
+    economy: Cost, //32
+    building_utility: BuildingUtility, //32
+}
+
+#[derive(Component, Deserialize, Debug, Clone)]
+pub struct Levels(pub [BuildingLevelStats; BUILDING_LEVELS]);
+
+#[derive(Bundle, Deserialize, Debug, Clone)]
+pub struct BuildingData {
+    pub building_type: BuildingType,
+    pub levels: Levels,
+}
+
+const fn level(
+    health: u16,
+    defense: u16,
+    gold: Gold,
+    food: Food,
+    production: Production,
+    science: Science,
+    upgrade_cost: Gold,
+    maintenance: Gold,
+    housing: u16,
+    spawn_capacity: u16,
+) -> BuildingLevelStats {
+    BuildingLevelStats {
+        combat_stats: BuildingStats { health, defense },
+        yields: Yields {
+            gold,
+            food,
+            production,
+            science,
+        },
+        economy: Cost {
+            upgrade_cost,
+            maintenance,
+        },
+        building_utility: BuildingUtility {
+            housing,
+            spawn_capacity,
+        },
+    }
 }
 
 #[derive(Bundle, Debug, Clone)]
 pub struct Building {
     pub id: Id,
     pub player_race: PlayerRace,
-    pub building_type: BuildingType,
     pub level: BuildingLevel,
-    pub stats: BuildingStats,
-    pub production: Production,
-    pub economy: Economy,
-    pub active_buffs: ActiveBuffs,
-    pub active_debuffs: ActiveDebuffs,
+    pub building_data: BuildingData,
+    pub active_buffs: Buffs,
+    pub active_debuffs: Debuffs,
 }
 
-// impl Building {
-//     fn placeholder() -> Self {
-//         Self {
-//             id: Id::default_local_id(),
-//             player_race: PlayerRace::default(),
-//             building_type: None,
-//         }
-//     }
-// }
+//---------------------------------------------------------------------------------------------------------------------------//
+
+pub const CAPITAL: BuildingData = BuildingData {
+    building_type: BuildingType::Capital,
+    levels: Levels([
+        level(
+            400, 100,
+            10, 0, 0, 0,
+            50, 0,
+            5, 0,
+        ),
+        level(
+            650, 250,
+            25, 0, 0, 0,
+            80, 0,
+            10, 0,
+        ),
+        level(
+            1000, 450,
+            40, 0, 0, 0,
+            115, 0,
+            20, 0,
+        ),
+    ])
+};
+
+pub const CAPTURED_CITY: BuildingData = BuildingData {
+    building_type: BuildingType::CapturedCity,
+    levels: Levels([
+        level(
+            250, 50,
+            4, 2, 0, 0,
+            35, 0,
+            2, 0,
+        ),
+        level(
+            450, 140,
+            10, 6, 0, 0,
+            60, 0,
+            5, 0,
+        ),
+        level(
+            700, 260,
+            20, 12, 0, 0,
+            90, 0,
+            10, 0,
+        ),
+    ])
+};
+
+pub const BARBARIAN_CITY: BuildingData = BuildingData {
+    building_type: BuildingType::BarbarianCity,
+    levels: Levels([
+        level(
+            300, 60,
+            5, 0, 0, 0,
+            40, 0,
+            0, 0,
+        ),
+        level(
+            450, 150,
+            15, 0, 0, 0,
+            65, 0,
+            0, 0,
+        ),
+        level(
+            600, 230,
+            30, 0, 0, 0,
+            100, 0,
+            0, 0,
+        ),
+    ])
+};
+
+pub const SPAWNING_BUILDING: BuildingData = BuildingData {
+    building_type: BuildingType::SpawningBuilding,
+    levels: Levels([
+        level(
+            100, 20,
+            0, 0, 0, 0,
+            15, 5,
+            0, 1,
+        ),
+        level(
+            200, 80,
+            0, 0, 0, 0,
+            30, 8,
+            0, 2,
+        ),
+        level(
+            400, 200,
+            0, 0, 0, 0,
+            55, 15,
+            0, 3,
+        ),
+    ])
+};
+
+pub const HOUSE: BuildingData = BuildingData {
+    building_type: BuildingType::House,
+    levels: Levels([
+        level(
+            80, 10,
+            0, 0, 0, 0,
+            10, 1,
+            5, 0,
+        ),
+        level(
+            160, 30,
+            0, 0, 0, 0,
+            25, 2,
+            12, 0,
+        ),
+        level(
+            300, 60,
+            0, 0, 0, 0,
+            50, 4,
+            20, 0,
+        ),
+    ])
+};
+
+pub const MEDIUM_BUILDING: BuildingData = BuildingData {
+    building_type: BuildingType::MediumBuilding,
+    levels: Levels([
+        level(
+            120, 25,
+            0, 0, 5, 0,
+            20, 2,
+            0, 0,
+        ),
+        level(
+            250, 70,
+            0, 0, 12, 0,
+            40, 4,
+            0, 0,
+        ),
+        level(
+            450, 140,
+            0, 0, 24, 0,
+            75, 7,
+            0, 0,
+        ),
+    ])
+};
+
+pub const LARGE_BUILDING: BuildingData = BuildingData {
+    building_type: BuildingType::LargeBuilding,
+    levels: Levels([
+        level(
+            200, 40,
+            0, 0, 10, 0,
+            35, 4,
+            0, 0,
+        ),
+        level(
+            400, 100,
+            0, 0, 24, 0,
+            65, 8,
+            0, 0,
+        ),
+        level(
+            700, 180,
+            0, 0, 50, 0,
+            115, 14,
+            0, 0,
+        ),
+    ])
+};
+
+pub const RESEARCH_CENTER: BuildingData = BuildingData {
+    building_type: BuildingType::ResearchCenter,
+    levels: Levels([
+        level(
+            100, 20,
+            0, 0, 0, 5,
+            30, 4,
+            0, 0,
+        ),
+        level(
+            220, 60,
+            0, 0, 0, 14,
+            60, 8,
+            0, 0,
+        ),
+        level(
+            400, 120,
+            0, 0, 0, 30,
+            105, 14,
+            0, 0,
+        ),
+    ])
+};
