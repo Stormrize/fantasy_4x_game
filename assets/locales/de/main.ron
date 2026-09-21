@@ -1,0 +1,88 @@
+({
+    // main menu
+    "new_game": "Neues Spiel",
+    "resume_game": "Spiel fortsetzen",
+    "multiplayer": "Mehrspieler",
+    "settings_menu": "Einstellungen",
+    "exit_game": "Spiel beenden",
+
+    // game setup menu
+    "setup_sidebar_title": "Spiel einrichten",
+    "setup_map_size_label": "Kartengröße",
+    "setup_map_shape_label": "Kartenform",
+    "setup_ai_difficulty_label": "KI-Schwierigkeit",
+    "bots": "Bots",
+    "setup_start_game": "Spiel starten",
+
+    // map  size
+    "setup_map_size_tiny": "winzig",
+    "setup_map_size_small": "klein",
+    "setup_map_size_medium": "mittel",
+    "setup_map_size_big": "groß",
+    "setup_map_size_large": "sehr groß",
+    //map shape
+    "setup_map_shape_jagged": "zackig",
+    "setup_map_shape_round": "rund",
+    // difficulty
+    "setup_ai_difficulty_easy": "einfach",
+    "setup_ai_difficulty_normal": "normal",
+    "setup_ai_difficulty_hard": "schwer",
+    "setup_ai_difficulty_crazy": "wahnsinnig",
+
+    // settings_menu
+    "world": "Welt",
+    "localization": "Sprache",
+    "voice": "Ton",
+    "graphic": "Grafik",
+    "gameplay": "Gameplay",
+    "camera": "Kamera",
+    "interface": "Spieloberfläche",
+    "apply": "Anwenden",
+    "reset_to_default": "Auf Standard zurücksetzen",
+    "close": "Schließen",
+
+    // world
+    "chunk_size": "Chunk-Größe",
+    "tile_size": "Tile-Größe",
+    "preload_margin_chunks": "Vorab-Ladebereich in Chunks",
+    "unload_margin_chunks": "Entladebereich in Chunks",
+
+    // localization
+    "language": "Sprache",
+
+    // volume
+    "overall_volume": "Gesamtlautstärke",
+    "music_volume": "Musiklautstärke",
+    "sound_effects_volume": "Soundeffektlautstärke",
+    "ambience_volume": "Umgebungslautstärke",
+    "ui_sounds_volume": "Lautstärke der Benutzeroberflächen-Sounds",
+    "mute_when_unfocused": "Stummschalten bei Inaktivität",
+
+    // graphic
+    "fullscreen": "Vollbild",
+    "vsync": "V-Sync",
+    "resolution": "Auflösung",
+    "ui_scale": "Skalierung der Benutzeroberfläche",
+    "show_fps": "FPS anzeigen",
+    "graphics_quality": "Grafikqualität",
+
+    // gameplay
+    "game_speed": "Spielgeschwindigkeit",
+    "autosave_interval_minutes": "Autosave-Intervall in Minuten",
+    "turn_notifications_enabled": "Rundenbenachrichtigungen aktivieren",
+    "show_tutorial_hints": "Tutorial-Hinweise anzeigen",
+    "unit_move_animation_speed": "Animationsgeschwindigkeit der Einheitenbewegung",
+
+    // camera
+    "edge_scroll_enabled": "Rand-Scrollen aktivieren",
+    "edge_scroll_speed": "Rand-Scroll-Geschwindigkeit",
+    "camera_pan_speed": "Kamera-Schwenkgeschwindigkeit",
+    "camera_zoom_speed": "Kamera-Zoomgeschwindigkeit",
+    "invert_zoom": "Zoom umkehren",
+
+    // ui
+    "show_grid_overlay": "Raster anzeigen",
+    "show_resource_icons": "Ressourcensymbole anzeigen",
+    "colorblind_mode": "Farbenblind-Modus",
+
+})

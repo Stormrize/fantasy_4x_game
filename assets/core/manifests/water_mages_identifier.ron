@@ -2,5 +2,7 @@
     id: "WaterMages",
     description: "",
     ui_icon_path: "water_mage_icon.png",
-    visual_path: "core/races/water_mages/visual.ron"
+    visual_path: "core/races/water_mages/visual.ron",
+    unit_data: "core/races/water_mages/units_data.ron",
+    building_data: "core/races/water_mages/building_data.ron"
 )

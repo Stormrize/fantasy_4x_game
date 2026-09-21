@@ -12,8 +12,8 @@
 
     //building
     capital: "0.0, 1.0, 0.0",
-    empty_cities: "0.0, 0.0, 1.0",
-    empty_cities_colonized: "0.0, 0.0, 0.0",
+    captured_city: "0.0, 0.0, 1.0",
+    barbarian_city: "0.0, 0.0, 1.0",
     medium_building: "0.0, 0.0, 0.0",
     large_building: "0.0, 0.0, 0.0",
     spawning_building: "0.0, 0.0, 0.0",

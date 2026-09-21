@@ -1,0 +1,90 @@
+({
+    // main menu
+    "new_game": "New Game",
+    "resume_game": "Resume Game",
+    "multiplayer": "Multiplayer",
+    "settings_menu": "Settings",
+    "exit_game": "Exit Game",
+
+    // game setup menu
+    "setup_sidebar_title": "Setup Game",
+    "setup_map_size_label": "Map Size",
+    "setup_map_shape_label": "Map Shape",
+    "setup_ai_difficulty_label": "AI Difficulty",
+    "bots": "Bots",
+    "setup_start_game": "Start Game",
+
+    // Game Config
+
+    // map  size
+    "setup_map_size_tiny": "tiny",
+    "setup_map_size_small": "small",
+    "setup_map_size_medium": "medium",
+    "setup_map_size_big": "big",
+    "setup_map_size_large": "large",
+    // map shape
+    "setup_map_shape_jagged": "jagged",
+    "setup_map_shape_round": "round",
+    // difficulty
+    "setup_ai_difficulty_easy": "easy",
+    "setup_ai_difficulty_normal": "normal",
+    "setup_ai_difficulty_hard": "hard",
+    "setup_ai_difficulty_crazy": "crazy",
+
+    // settings_menu
+    "world": "World",
+    "localization": "Language",
+    "voice": "Audio",
+    "graphic": "Graphics",
+    "gameplay": "Gameplay",
+    "camera": "Camera",
+    "interface": "Interface",
+    "apply": "Apply",
+    "reset_to_default": "Reset to Default",
+    "close": "Close",
+
+    // world
+    "chunk_size": "Chunk Size",
+    "tile_size": "Tile Size",
+    "preload_margin_chunks": "Preload Margin (Chunks)",
+    "unload_margin_chunks": "Unload Margin (Chunks)",
+
+    // localization
+    "language": "Language",
+
+    // volume
+    "overall_volume": "Master Volume",
+    "music_volume": "Music Volume",
+    "sound_effects_volume": "Sound Effects Volume",
+    "ambience_volume": "Ambience Volume",
+    "ui_sounds_volume": "UI Sounds Volume",
+    "mute_when_unfocused": "Mute When Unfocused",
+
+    // graphic
+    "fullscreen": "Fullscreen",
+    "vsync": "V-Sync",
+    "resolution": "Resolution",
+    "ui_scale": "UI Scale",
+    "show_fps": "Show FPS",
+    "graphics_quality": "Graphics Quality",
+
+    // gameplay
+    "game_speed": "Game Speed",
+    "autosave_interval_minutes": "Autosave Interval (Minutes)",
+    "turn_notifications_enabled": "Enable Turn Notifications",
+    "show_tutorial_hints": "Show Tutorial Hints",
+    "unit_move_animation_speed": "Unit Movement Animation Speed",
+
+    // camera
+    "edge_scroll_enabled": "Enable Edge Scrolling",
+    "edge_scroll_speed": "Edge Scroll Speed",
+    "camera_pan_speed": "Camera Pan Speed",
+    "camera_zoom_speed": "Camera Zoom Speed",
+    "invert_zoom": "Invert Zoom",
+
+    // ui
+    "show_grid_overlay": "Show Grid Overlay",
+    "show_resource_icons": "Show Resource Icons",
+    "colorblind_mode": "Colorblind Mode",
+
+})

@@ -2,5 +2,7 @@
     id: "StoneMages",
     description: "",
     ui_icon_path: "stone_mage_icon.png",
-    visual_path: "core/races/stone_mages/visual.ron"
+    visual_path: "core/races/stone_mages/visual.ron",
+    unit_data: "core/races/stone_mages/units_data.ron",
+    building_data: "core/races/stone_mages/building_data.ron",
 )

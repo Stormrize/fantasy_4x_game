@@ -2,5 +2,7 @@
     id: "FireMages",
     description: "Fire Mages are powerful spellcasters who command the raw force of flame.They can summon blazing fire, shape it into deadly attacks,and use heat to protect themselves and their allies.Feared for their destructive potential,Fire Mages are masters of both controlled magic and overwhelming power.",
     ui_icon_path: "fire_mage_icon.png",
-    visual_path: "core/races/fire_mages/visual.ron"
+    visual_path: "core/races/fire_mages/visual.ron",
+    unit_data: "core/races/fire_mages/units_data.ron",
+    building_data: "core/races/fire_mages/building_data.ron",
 )

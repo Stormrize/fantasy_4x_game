@@ -1,0 +1,89 @@
+({
+    // main menu
+    "new_game": "Новая игра",
+    "resume_game": "Продолжить игру",
+    "multiplayer": "Мультиплеер",
+    "settings_menu": "Настройки",
+    "exit_game": "Выйти из игры",
+
+    // game setup menu
+    "setup_sidebar_title": "Настроить игру",
+    "setup_map_size_label": "Размер карты",
+    "setup_map_shape_label": "Форма карты",
+    "setup_ai_difficulty_label": "Сложность ИИ",
+    "bots": "Боты",
+    "setup_start_game": "Начать игру",
+
+    // Game Config
+
+    // map  size
+    "setup_map_size_tiny": "крошечная",
+    "setup_map_size_small": "маленькая ",
+    "setup_map_size_medium": "средняя",
+    "setup_map_size_big": "большая",
+    "setup_map_size_large": "огромная",
+    // map shaper
+    "setup_map_shape_jagged": "квадратная",
+    "setup_map_shape_round": "круглая",
+    // difficulty
+    "setup_ai_difficulty_easy": "лёгкая",
+    "setup_ai_difficulty_normal": "нормальная",
+    "setup_ai_difficulty_hard": "сложная",
+    "setup_ai_difficulty_crazy": "безумная",
+
+    // settings_menu
+    "world": "Мир",
+    "localization": "Локализация",
+    "voice": "Звук",
+    "graphic": "Графика",
+    "gameplay": "Геймплей",
+    "camera": "Камера",
+    "interface": "Интерфейс",
+    "apply": "Применить",
+    "reset_to_default": "Сбросить настройки",
+    "close": "Закрыть",
+
+    // world
+    "chunk_size": "Размер чанка",
+    "tile_size": "Размер тайла",
+    "preload_margin_chunks": "Радиус предзагрузки в чанках",
+    "unload_margin_chunks": "Радиус выгрузки в чанках",
+
+    // localization
+    "language": "Язык",
+
+    // volume
+    "overall_volume": "Общая громкость",
+    "music_volume": "Громкость музыки",
+    "sound_effects_volume": "Громкость звуковых эффектов",
+    "ambience_volume": "Громкость окружения",
+    "ui_sounds_volume": "Громкость звуков интерфейса",
+    "mute_when_unfocused": "Отключать звук при потере фокуса",
+
+    // graphic
+    "fullscreen": "Полноэкранный режим",
+    "vsync": "Вертикальная синхронизация",
+    "resolution": "разрешение",
+    "ui_scale": "Масштаб интерфейса",
+    "show_fps": "Показывать FPS",
+    "graphics_quality": "Качество графики",
+
+    // gameplay
+    "game_speed": "Скорость игры",
+    "autosave_interval_minutes": "Интервал автосохранения (минуты)",
+    "turn_notifications_enabled": "Включить уведомления о ходах",
+    "show_tutorial_hints": "Показывать подсказки обучения",
+    "unit_move_animation_speed": "Скорость анимации движения юнитов",
+
+    // camera
+    "edge_scroll_enabled": "Включить прокрутку у края экрана",
+    "edge_scroll_speed": "Скорость прокрутки у края",
+    "camera_pan_speed": "Скорость перемещения камеры",
+    "camera_zoom_speed": "Скорость масштабирования камеры",
+    "invert_zoom": "Инвертировать масштабирование",
+
+    // ui
+    "show_grid_overlay": "Показывать сетку",
+    "show_resource_icons": "Показывать значки ресурсов",
+    "colorblind_mode": "Режим для дальтоников",
+})
