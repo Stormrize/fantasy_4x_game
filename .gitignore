@@ -1,6 +1,7 @@
 target/
 assets/*
-!assets/*.ron
+!assets/**/
+!assets/**/*.ron
 .idea/
 gdd.md
 notes.md
