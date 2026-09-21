@@ -8,4 +8,6 @@ pub struct UiRaceData {
     pub description: String,
     pub ui_icon: Handle<Image>,
     pub visual_path: String,
+    pub unit_data_path: String,
+    pub building_data_path: String,
 }
