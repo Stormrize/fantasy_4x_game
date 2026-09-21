@@ -3,9 +3,9 @@ use bevy::prelude::*;
 use bevy_persistent::Persistent;
 
 use super::tabs::SettingsTab;
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
-use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
-use crate::world::ui_and_graphic_resources::data::components::TranslationKey;
+use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
+use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
+use crate::ui::TranslationKey;
 
 /// Вкладки, изменённые с последнего "Применить", но ещё не разосланные.
 #[derive(Resource, Default)]

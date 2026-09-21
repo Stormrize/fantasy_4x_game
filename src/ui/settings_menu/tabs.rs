@@ -1,7 +1,7 @@
 //! Вкладки меню настроек. Тот же enum используется как "категория" для
 //! отслеживания изменений — см. `change_tracking.rs`.
 
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
+use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum SettingsTab {
@@ -43,10 +43,6 @@ impl SettingsTab {
 // небольшой хелпер на будущее, если понадобится готовая строка заголовка
 // где-то ещё, кроме кнопки вкладки:
 #[allow(dead_code)]
-pub fn tab_title<'a>(
-    tab: SettingsTab,
-    localization: &'a Localization,
-    language: Language,
-) -> &'a str {
+pub fn tab_title(tab: SettingsTab, localization: &Localization, language: Language) -> &str {
     localization.get(tab.key(), language)
 }

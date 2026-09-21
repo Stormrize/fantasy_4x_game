@@ -9,7 +9,6 @@ mod components;
 mod dropdown;
 mod popup;
 mod race_panel;
-mod scrollable;
 mod sidebar;
 
 use bevy::prelude::{
@@ -18,15 +17,14 @@ use bevy::prelude::{
 use bevy::ui::{BackgroundColor, FlexDirection, FlexWrap, Val};
 use bevy::utils::default;
 use bevy_persistent::Persistent;
-
-use crate::ui::colors::{COLOR_PANEL_BG, COLOR_SIDEBAR_BG};
-use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
-use crate::ui::initial_loading::localization_loader_plugin::public_api::Localization;
-use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
-use crate::ui::menus::AppState;
-use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
-
 pub use components::PendingGameSetup;
+
+use crate::io::startup_loading::fonts_loader_plugin::Fonts;
+use crate::io::startup_loading::localization_loader_plugin::Localization;
+use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
+use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
+use crate::ui::colors::{COLOR_PANEL_BG, COLOR_SIDEBAR_BG};
+use crate::ui::menus::AppState;
 
 pub struct GameSetupMenuPlugin;
 

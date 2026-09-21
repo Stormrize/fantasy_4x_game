@@ -11,10 +11,9 @@ mod theme;
 mod widgets;
 
 use bevy::prelude::*;
+pub use change_tracking::PendingSettingsChanges;
 
 use crate::ui::menus::AppState;
-
-pub use change_tracking::PendingSettingsChanges;
 
 pub(super) struct SettingsMenuPlugin;
 

@@ -12,16 +12,15 @@ use bevy::ui::{BackgroundColor, BorderColor, FlexDirection, Val};
 use bevy::utils::default;
 use bevy_persistent::Persistent;
 
+use crate::io::startup_loading::fonts_loader_plugin::Fonts;
+use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
+use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
+use crate::ui::TranslationKey;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
 use crate::ui::game_setup_menu::PendingGameSetup;
 use crate::ui::game_setup_menu::colors::{
     COLOR_DROPDOWN_BG, COLOR_DROPDOWN_HOVER, COLOR_DROPDOWN_OPTION_BG,
 };
-use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
-use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
-use crate::world::ui_and_graphic_resources::data::components::TranslationKey;
-
 #[derive(Component)]
 struct DropdownState {
     is_open: bool,
@@ -219,9 +218,6 @@ fn spawn_option<T>(
                 if let Ok(mut text) = texts.get_mut(value_label) {
                     *text = Text::new(localization.get(key, language));
                 }
-                // держим TranslationKey в актуальном состоянии, чтобы смена
-                // языка потом релокализовала именно выбранное значение,
-                // а не то, что было выбрано изначально
                 if let Ok(mut translation_key) = keys.get_mut(value_label) {
                     translation_key.0 = key;
                 }

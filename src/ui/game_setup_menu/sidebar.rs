@@ -1,22 +1,22 @@
 //! Сайдбар справа: заголовок + три дропдауна с дефолтными значениями
 //! (размер карты, форма карты, сложность ИИ).
 
+use std::ops::Range;
+
 use bevy::prelude::{
     ChildOf, Commands, Entity, FontSize, FontSource, Node, Text, TextColor, TextFont, UiRect,
 };
 use bevy::text::FontWeight;
 use bevy::ui::Val;
 use bevy::utils::default;
-use std::ops::Range;
 
 use super::components::PendingGameSetup;
+use crate::io::startup_loading::fonts_loader_plugin::Fonts;
+use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
+use crate::ui::TranslationKey;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
 use crate::ui::game_setup_menu::dropdown::spawn_dropdown;
-use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
 use crate::world::components::{AiDifficulty, MapShape, MapSize};
-use crate::world::ui_and_graphic_resources::data::components::TranslationKey;
-
 const TITLE_KEY: &str = "setup_sidebar_title";
 
 const MAP_SIZE_LABEL_KEY: &str = "setup_map_size_label";

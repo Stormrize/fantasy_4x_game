@@ -1,7 +1,8 @@
 //! Ресурсы состояния меню настройки игры.
 
-use crate::world::components::{AiDifficulty, MapShape, MapSize};
 use bevy::prelude::Resource;
+
+use crate::world::components::{AiDifficulty, MapShape, MapSize};
 
 /// "Живые" значения из сайдбара — обновляются сразу при выборе в дропдауне.
 /// Читаются при нажатии "Начать игру" в попапе расы.

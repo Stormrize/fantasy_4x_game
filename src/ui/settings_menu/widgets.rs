@@ -10,20 +10,18 @@ use bevy::ui_widgets::{
     Button, Checkbox, RadioButton, RadioGroup, Slider, SliderOrientation, SliderRange, SliderStep,
     SliderThumb, SliderValue, TrackClick, ValueChange,
 };
-
 use bevy_persistent::Persistent;
 
 use super::change_tracking::PendingSettingsChanges;
 use super::tabs::SettingsTab;
 use super::theme;
+use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
+use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
+use crate::ui::TranslationKey;
 use crate::ui::colors::{
     COLOR_ACCENT_CRIMSON, COLOR_ACCENT_GOLD, COLOR_TAB_ACTIVE_BG, COLOR_TAB_BG, COLOR_TEXT_MUTED,
     COLOR_TEXT_PRIMARY, COLOR_TRACK_BG,
 };
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
-use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
-use crate::world::ui_and_graphic_resources::data::components::TranslationKey;
-
 fn percent_of(value: f32, min: f32, max: f32) -> f32 {
     if max > min {
         ((value - min) / (max - min) * 100.0).clamp(0.0, 100.0)
@@ -263,7 +261,7 @@ pub enum OptionLabel {
 }
 
 impl OptionLabel {
-    fn resolve<'a>(self, localization: &'a Localization, language: Language) -> &'a str {
+    fn resolve(self, localization: &Localization, language: Language) -> &str {
         match self {
             Self::Key(key) => localization.get(key, language),
             Self::Literal(text) => text,

@@ -1,10 +1,4 @@
-use crate::ui::initial_loading::localization_loader_plugin::public_api::Localization;
 use bevy::app::AppExit;
-
-use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_DANGER_BG, COLOR_PANEL_BG};
-use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
-use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
-use crate::ui::menus::AppState;
 use bevy::color::Color;
 use bevy::prelude::{
     BorderColor, BorderRadius, Bundle, Button, ChildOf, Click, Commands, Component, DespawnOnExit,
@@ -15,6 +9,12 @@ use bevy::text::FontSource;
 use bevy::ui::{AlignItems, BackgroundColor, FlexDirection, JustifyContent, Node, Val};
 use bevy::utils::default;
 use bevy_persistent::Persistent;
+
+use crate::io::startup_loading::fonts_loader_plugin::Fonts;
+use crate::io::startup_loading::localization_loader_plugin::Localization;
+use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
+use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_DANGER_BG, COLOR_PANEL_BG};
+use crate::ui::menus::AppState;
 
 #[derive(Component)]
 pub(super) enum MainMenuButtons {

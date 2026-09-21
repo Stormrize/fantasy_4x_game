@@ -1,13 +1,13 @@
 //! Сборка конфига локальной игры из текущих выборов игрока.
-
-use super::components::PendingGameSetup;
-use crate::ui::menus::AppState;
-use crate::world::components::{Id, PlayerRace};
-use crate::world::game_configs::{ConfigType, GameConfig, LocalPlayerConfig};
-use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
 use bevy::prelude::{Commands, NextState};
 use rand::prelude::SliceRandom;
 use rand::random_range;
+
+use super::components::PendingGameSetup;
+use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
+use crate::ui::menus::AppState;
+use crate::world::components::{Id, PlayerRace};
+use crate::world::game_configs::{ConfigType, LocalPlayerConfig, PlayerConfig};
 
 pub fn start_local_game(
     commands: &mut Commands,
@@ -16,7 +16,7 @@ pub fn start_local_game(
     pending: &PendingGameSetup,
     next_state: &mut NextState<AppState>,
 ) {
-    let game_config = GameConfig::new(pending.map_size, pending.map_shape.clone(), race);
+    let game_config = PlayerConfig::new(pending.map_size, pending.map_shape.clone(), race);
 
     let seed = random_range(0..u32::MAX);
 
@@ -35,7 +35,7 @@ pub fn start_local_game(
         .collect::<Vec<_>>();
 
     let local_config = LocalPlayerConfig {
-        game_config,
+        player_config: game_config,
         seed,
         races,
         ai_difficulty: pending.ai_difficulty,

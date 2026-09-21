@@ -4,12 +4,11 @@
 use bevy::ecs::hierarchy::ChildOf;
 use bevy::prelude::*;
 
+use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
+use crate::ui::TranslationKey;
 use crate::ui::colors::{
     COLOR_ACCENT_GOLD, COLOR_APPLY_BG, COLOR_BUTTON_BG, COLOR_DANGER_BG, COLOR_TEXT_PRIMARY,
 };
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
-use crate::world::ui_and_graphic_resources::data::components::TranslationKey;
-
 /// Один "ряд" настройки: слева подпись, справа — сам виджет.
 /// Возвращает entity ряда — в него потом добавляют подпись и контрол.
 pub fn spawn_row_container(commands: &mut Commands, parent: Entity) -> Entity {

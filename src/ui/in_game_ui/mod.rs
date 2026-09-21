@@ -1,10 +1,11 @@
 mod mini_interactive_ui;
 mod spawn_in_game_ui;
 
-use crate::ui::in_game_ui::spawn_in_game_ui::spawn_in_game_ui;
-use crate::ui::menus::AppState;
 use bevy::app::App;
 use bevy::prelude::{OnEnter, Plugin};
+
+use crate::ui::in_game_ui::spawn_in_game_ui::spawn_in_game_ui;
+use crate::ui::menus::AppState;
 
 pub(super) struct InGameMenuPlugin;
 

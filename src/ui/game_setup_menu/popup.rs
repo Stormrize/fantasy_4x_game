@@ -1,16 +1,5 @@
 //! Всплывающее окно с информацией о расе + кнопки "Начать игру" / "Закрыть".
 
-use super::build_game_config::start_local_game;
-use super::colors::*;
-use super::components::PendingGameSetup;
-use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
-use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
-use crate::ui::menus::AppState;
-use crate::world::components::PlayerRace;
-use crate::world::ui_and_graphic_resources::data::components::TranslationKey;
-use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
-use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
 use bevy::prelude::{
     AlignItems, Button, ChildOf, Click, Commands, Component, Entity, FontSize, FontSource,
     GlobalZIndex, ImageNode, JustifyContent, NextState, Node, On, Out, Over, Pointer, PositionType,
@@ -18,6 +7,18 @@ use bevy::prelude::{
 };
 use bevy::ui::{BackgroundColor, BorderColor, FlexDirection, Val};
 use bevy::utils::default;
+
+use super::build_game_config::start_local_game;
+use super::colors::*;
+use super::components::PendingGameSetup;
+use crate::io::startup_loading::fonts_loader_plugin::Fonts;
+use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
+use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
+use crate::ui::TranslationKey;
+use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
+use crate::ui::menus::AppState;
+use crate::world::components::PlayerRace;
+use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
 
 const START_GAME_KEY: &str = "setup_start_game";
 const CLOSE_KEY: &str = "setup_close";
