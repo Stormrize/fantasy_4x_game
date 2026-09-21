@@ -1,4 +1,4 @@
-pub mod buildings_map;
+pub mod building_map;
 pub mod data;
 pub mod fog_map;
 pub mod resource_map;
