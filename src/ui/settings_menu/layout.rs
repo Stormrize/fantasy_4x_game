@@ -1,22 +1,22 @@
-//! Сборка экрана: сайдбар с вкладками + область контента + футер с
+//! Сборка экрана: sidebar с вкладками + область контента + футер с
 //! кнопками. Наполнение вкладок — в `tab_content.rs`.
 
 use bevy::ecs::hierarchy::ChildOf;
+use bevy::platform::collections::HashSet;
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;
 use bevy_persistent::Persistent;
-
-use crate::ui::colors::{COLOR_PANEL_BG, COLOR_SIDEBAR_BG, COLOR_TAB_ACTIVE_BG, COLOR_TAB_BG};
-use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
-use crate::ui::initial_loading::player_settings_loader_plugin::settings_config::SettingsConfig;
-use crate::ui::menus::AppState;
 
 use super::change_tracking::{PendingSettingsChanges, SettingsApplied};
 use super::tab_content::build_tab_content;
 use super::tabs::SettingsTab;
 use super::theme;
 use super::widgets;
+use crate::io::startup_loading::fonts_loader_plugin::Fonts;
+use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
+use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
+use crate::ui::colors::{COLOR_PANEL_BG, COLOR_SIDEBAR_BG, COLOR_TAB_ACTIVE_BG, COLOR_TAB_BG};
+use crate::ui::menus::AppState;
 
 fn tab_content_node(display: Display) -> Node {
     Node {
@@ -213,10 +213,17 @@ fn spawn_footer(
         0,
     );
     commands.entity(reset_btn).observe(
-        |_trigger: On<Pointer<Click>>, mut settings: ResMut<Persistent<SettingsConfig>>| {
-            if let Err(err) = settings.revert_to_default() {
-                eprintln!("не удалось сбросить настройки: {err:?}");
+        |_trigger: On<Pointer<Click>>,
+         mut settings: ResMut<Persistent<SettingsConfig>>,
+         mut commands: Commands| {
+            if let Err(err) = settings.set(SettingsConfig::default()) {
+                eprintln!("could reset to defaults: {err:?}");
+            };
+            let mut hashset = HashSet::new();
+            for tab in SettingsTab::ALL {
+                hashset.insert(tab);
             }
+            commands.trigger(SettingsApplied(hashset));
         },
     );
 
