@@ -1,15 +1,28 @@
-use crate::core_rust::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
-use crate::world::game_configs::GenerationConfig;
-use crate::world::game_resources::{data::unit::Unit, unit_map::UnitsMap};
-use bevy::prelude::Entity;
 use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand_chacha::ChaCha8Rng;
 
-impl UnitsMap {
-    pub fn new(config: &GenerationConfig, capital_coord: &PlayersTerrainData) -> Self {
+use crate::core_rust::generation::races_generation::capitals_generation::CapitalsPos;
+use crate::world::components::{Id, PlayerRace};
+use crate::world::game_configs::GenerationConfig;
+use crate::world::game_resources::data::unit::UnitType;
+
+#[derive(Clone)]
+struct Unit {
+    pub id: Id,
+    pub player_race: PlayerRace,
+    pub unit_type: UnitType,
+}
+
+pub struct UnitsMapNoBevy {
+    pub units: Vec<Option<Unit>>,
+    pub size: usize,
+}
+
+impl UnitsMapNoBevy {
+    pub fn new(config: &GenerationConfig, capital_coord: &CapitalsPos) -> Self {
         let terrain_size = config.terrain_size;
-        let mut data: Vec<Option<Entity>> = vec![None; terrain_size * terrain_size];
+        let mut data: Vec<Option<Unit>> = vec![None; terrain_size * terrain_size];
         let map = &capital_coord.data;
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let mut possible_positions: [(i32, i32); 8] = [
@@ -23,15 +36,18 @@ impl UnitsMap {
             (1, 1),
         ];
 
-        for coord in map {
+        for ((id, player_race), coord) in map {
             possible_positions.shuffle(&mut rng);
             for i in 0..2 {
-                let x = (coord.1.0 as i32 + possible_positions[i].0) as usize;
-                let y = (coord.1.1 as i32 + possible_positions[i].1) as usize;
+                let x = (coord.0 as i32 + possible_positions[i].0) as usize;
+                let y = (coord.1 as i32 + possible_positions[i].1) as usize;
 
                 let index = x * terrain_size + y;
-                //todo
-                data[index] = Unit::ResourceGathererBuilder(PlayerId::default());
+                data[index] = Some(Unit {
+                    id: *id,
+                    player_race: player_race.clone(),
+                    unit_type: UnitType::Helper,
+                });
             }
         }
 
@@ -39,13 +55,5 @@ impl UnitsMap {
             units: data,
             size: terrain_size,
         }
-    }
-
-    #[inline]
-    pub fn get(&self, row: usize, col: usize) -> &Unit {
-        debug_assert!(row < self.size);
-        debug_assert!(col < self.size);
-
-        &self.units[row * self.size + col]
     }
 }

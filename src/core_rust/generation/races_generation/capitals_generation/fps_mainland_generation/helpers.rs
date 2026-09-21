@@ -1,9 +1,11 @@
-use crate::world::game_resources::data::biome::BiomeType;
-use crate::world::game_resources::terrain_map::TerrainMap;
-use rand::RngExt;
-use rand_chacha::ChaCha8Rng;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
+
+use rand::RngExt;
+use rand_chacha::ChaCha8Rng;
+
+use crate::world::game_resources::data::biome::BiomeType;
+use crate::world::game_resources::terrain_map::TerrainMap;
 // ---------- 1. Компоненты связности (кто с кем на одной земле) ----------
 
 pub(super) fn compute_land_components(terrain: &TerrainMap, terrain_size: usize) -> Vec<i32> {

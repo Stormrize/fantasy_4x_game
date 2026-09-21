@@ -1,24 +1,21 @@
+use rand::SeedableRng;
+use rand::prelude::SliceRandom;
+use rand_chacha::ChaCha8Rng;
+
+use crate::core_rust::generation::races_generation::capitals_generation::{
+    CapitalCoord, CapitalsPos,
+};
 use crate::world::components::{Id, PlayerRace};
 use crate::world::{
     game_configs::GenerationConfig,
     game_resources::{data::biome::BiomeType, terrain_map::TerrainMap},
 };
-use rand::SeedableRng;
-use rand::prelude::SliceRandom;
-use rand_chacha::ChaCha8Rng;
 
-#[derive(Debug, Clone, Copy)]
-pub struct CapitalCoord(pub usize, pub usize);
-
-pub struct PlayersTerrainData {
-    pub data: Vec<((Id, PlayerRace), CapitalCoord)>,
-}
-
-impl PlayersTerrainData {
+impl CapitalsPos {
     pub fn calculate_player_positions(
         config: &GenerationConfig,
         global_terrain: &TerrainMap,
-    ) -> Option<PlayersTerrainData> {
+    ) -> Option<CapitalsPos> {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let players = &config.players;
         let terrain_size = config.terrain_size;
@@ -122,6 +119,6 @@ impl PlayersTerrainData {
             }
         }
 
-        Some(PlayersTerrainData { data: spawn_points })
+        Some(CapitalsPos { data: spawn_points })
     }
 }

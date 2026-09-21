@@ -1,30 +1,42 @@
-use bevy::prelude::Entity;
-use crate::core_rust::generation::races_generation::players_or_bots::generate_players_positions::PlayersTerrainData;
+use crate::core_rust::generation::races_generation::capitals_generation::CapitalsPos;
+use crate::world::components::{Id, PlayerRace};
+use crate::world::game_resources::data::building::BuildingType;
 use crate::world::{
     game_configs::GenerationConfig,
-    game_resources::{
-        buildings_map::BuildingMap,
-        data::{biome::BiomeType, building::BuildingType},
-        terrain_map::TerrainMap,
-    },
+    game_resources::{data::biome::BiomeType, terrain_map::TerrainMap},
 };
 
-impl BuildingMap {
+#[derive(Clone)]
+struct Building {
+    pub id: Id,
+    pub player_race: PlayerRace,
+    pub building_type: BuildingType,
+}
+
+pub struct BuildingMapNoBevy {
+    pub buildings: Vec<Option<Building>>,
+    pub size: usize,
+}
+
+impl BuildingMapNoBevy {
     pub fn new(
         config: &GenerationConfig,
-        plater_terrain_data: &PlayersTerrainData,
+        player_terrain_data: &CapitalsPos,
         terrain: &TerrainMap,
-    ) -> BuildingMap {
+    ) -> BuildingMapNoBevy {
         let terrain_size = config.terrain_size;
-        let players_positions = &plater_terrain_data.data;
-        let mut cities: Vec<Option<Entity>> = vec![None; terrain_size * terrain_size];
+        let players_positions = &player_terrain_data.data;
+        let mut cities: Vec<Option<Building>> = vec![None; terrain_size * terrain_size];
         let mut blocked = vec![false; terrain_size * terrain_size];
 
-        for player in players_positions {
-            let x = player.1.0;
-            let y = player.1.1;
-            let player_id = player.0;
-            cities[x * terrain_size + y] = ;
+        for ((id, player_race), coord) in players_positions {
+            let x = coord.0;
+            let y = coord.1;
+            cities[x * terrain_size + y] = Some(Building {
+                id: *id,
+                player_race: player_race.clone(),
+                building_type: BuildingType::Capital,
+            });
             let min_y = y.saturating_sub(3);
             let max_y = (y + 3).min(terrain_size - 1);
             let min_x = x.saturating_sub(3);
@@ -42,8 +54,8 @@ impl BuildingMap {
             for y in 3..terrain_size - 2 {
                 let biome = terrain.get(x, y);
 
-                let race = match biome {
-                    BiomeType::SmallBiome(race) => race,
+                let (id, player_race) = match biome {
+                    BiomeType::SmallBiome(id, race) => (id, race),
                     _ => continue,
                 };
 
@@ -53,8 +65,11 @@ impl BuildingMap {
                     continue;
                 }
 
-                //todo
-                cities[index] = BuildingType::EmptyCities(race.clone());
+                cities[index] = Some(Building {
+                    id: *id,
+                    player_race: player_race.clone(),
+                    building_type: BuildingType::BarbarianCity,
+                });
                 let min_y = y.saturating_sub(5);
                 let max_y = (y + 5).min(terrain_size - 1);
                 let min_x = x.saturating_sub(5);
@@ -68,16 +83,8 @@ impl BuildingMap {
             }
         }
         Self {
-            map: cities,
+            buildings: cities,
             size: terrain_size,
         }
-    }
-
-    #[inline]
-    pub fn get(&self, row: usize, col: usize) -> &BuildingType {
-        debug_assert!(col < self.size);
-        debug_assert!(row < self.size);
-
-        &self.map[row * self.size + col]
     }
 }

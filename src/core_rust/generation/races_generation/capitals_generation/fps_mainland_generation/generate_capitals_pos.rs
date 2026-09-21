@@ -1,19 +1,17 @@
-use crate::core_rust::generation::races_generation::players_or_bots::generate_players_positions::{
-    CapitalCoord, PlayersTerrainData,
-};
-use crate::core_rust::generation::races_generation::players_pos_generator::helpers::{
-    compute_land_components, farthest_point_seeds, flood_fill_balance, largest_component_id,
-};
-use crate::world::game_configs::GenerationConfig;
-use crate::world::game_resources::terrain_map::TerrainMap;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 
-impl PlayersTerrainData {
+use crate::core_rust::generation::races_generation::capitals_generation::{
+    CapitalCoord, CapitalsPos, fps_mainland_generation::helpers::*,
+};
+use crate::world::game_configs::GenerationConfig;
+use crate::world::game_resources::terrain_map::TerrainMap;
+
+impl CapitalsPos {
     pub fn calculate_player_positions_flood_fill(
         config: &GenerationConfig,
         terrain: &TerrainMap,
-    ) -> Option<PlayersTerrainData> {
+    ) -> Option<CapitalsPos> {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let players = &config.players;
         let terrain_size = config.terrain_size;
@@ -41,7 +39,7 @@ impl PlayersTerrainData {
         }
 
         let seeds = farthest_point_seeds(&land, players.len(), &mut rng);
-        let regions = flood_fill_balance(terrain, terrain_size, &seeds);
+        //let regions = flood_fill_balance(terrain, terrain_size, &seeds);
 
         // regions[i].len() — размер территории i-го игрока, можно логировать баланс
 
@@ -51,6 +49,6 @@ impl PlayersTerrainData {
             .map(|(&(id, ref race), &(x, y))| ((id, race.clone()), CapitalCoord(x, y)))
             .collect();
 
-        Some(PlayersTerrainData { data: spawn_points })
+        Some(CapitalsPos { data: spawn_points })
     }
 }
