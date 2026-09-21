@@ -1,5 +1,6 @@
-use crate::world::game_resources::data::resource::ResourceType;
 use bevy::prelude::Resource;
+
+use crate::world::game_resources::data::resource::ResourceType;
 
 #[derive(Resource)]
 pub struct ResourceMap {
