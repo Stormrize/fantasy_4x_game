@@ -1,4 +1,5 @@
 use bevy::prelude::Component;
+use serde::Deserialize;
 use smol_str::SmolStr;
 
 #[derive(Component, Clone, Debug, Eq, PartialEq, Hash)]
@@ -33,13 +34,10 @@ impl Id {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct GoldAmount(pub u16);
-
-#[derive(Component, Debug, Clone)]
-struct Economy {
-    pub upgrade_cost: GoldAmount,
-    pub maintenance: GoldAmount,
+#[derive(Component, Deserialize, Debug, Clone)]
+pub struct Cost {
+    pub upgrade_cost: u16,
+    pub maintenance: u16,
 }
 
 #[derive(Debug, Default, Clone, Copy)]
