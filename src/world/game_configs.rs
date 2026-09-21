@@ -1,5 +1,10 @@
-use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace};
+use bevy::platform::collections::HashMap;
 use bevy::prelude::Resource;
+
+use crate::io::in_game_loading::units_data_loader_plugin::UnitsData;
+use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
+use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace};
+use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 
 #[derive(Resource)]
 pub struct CameraConfig {
@@ -14,20 +19,28 @@ pub struct CameraConfig {
     pub shadow_maps_enabled: bool,
 }
 
-// impl Default for CameraConfig {
-//     fn default() -> Self {
-//         Self {
-//             min_orthographic_scale: 0.1,
-//             max_orthographic_scale: 100.0,
-//             camera_viewport_height: 32.0 * 1.5,
-//         }
-//     }
-// }
-#[derive(Debug)]
+impl CameraConfig {
+    pub fn new(settings: &SettingsConfig, game_config: &PlayerConfig) -> Self {
+        Self {
+            min_orthographic_scale: settings.tile_size,
+            max_orthographic_scale: game_config.map_size as u8 as f32 * 1.5,
+            camera_viewport_height: settings.tile_size * 2.0,
+            edge_scroll_enabled: settings.edge_scroll_enabled,
+            edge_scroll_speed: settings.edge_scroll_speed,
+            camera_pan_speed: settings.camera_pan_speed,
+            camera_zoom_speed: settings.camera_zoom_speed,
+            invert_zoom: settings.invert_zoom,
+            // note
+            shadow_maps_enabled: true,
+        }
+    }
+}
+#[derive(Resource, Debug, Default)]
 pub struct GenerationConfig {
     pub seed: u32,
     pub terrain_size: usize,
     pub players: Vec<(Id, PlayerRace)>,
+    pub units_data: HashMap<PlayerRace, UnitsData>,
     // note добавить типа структуру которая все параметры упорядывает
     pub water_threshold: u8,
     pub global_octaves: u8,
@@ -49,17 +62,17 @@ pub struct GenerationConfig {
 }
 
 impl GenerationConfig {
-    pub fn from_player_config(config: &LocalPlayerConfig) -> Self {
-        let game_config = &config.game_config;
+    pub fn new(config: &LocalPlayerConfig, units_data: HashMap<PlayerRace, UnitsData>) -> Self {
+        let game_config = &config.player_config;
 
         Self {
             seed: config.seed,
             terrain_size: game_config.map_size as usize,
             players: config.races.clone(),
+            units_data,
 
             // todo менять в зависимости от карты
             water_threshold: 100,
-
             global_octaves: 6,
             global_frequency: 8.0,
             global_persistence: 0.5,
@@ -85,6 +98,7 @@ impl GenerationConfig {
 
 #[derive(Resource)]
 pub struct RenderConfig {
+    pub assets_registry: HashMap<PlayerRace, RaceAssets>,
     pub preload_margin_chunks: u8, //1
     pub unload_margin_chunks: u8,  //1
     pub terrain_size: usize,       //8
@@ -93,26 +107,30 @@ pub struct RenderConfig {
 }
 
 impl RenderConfig {
-    pub fn from_player_config(config: &LocalPlayerConfig) -> Self {
+    pub fn new(
+        player_config: &PlayerConfig,
+        settings_config: &SettingsConfig,
+        assets_registry: HashMap<PlayerRace, RaceAssets>,
+    ) -> Self {
         Self {
-            // todo добавить загрузку с настроек
-            preload_margin_chunks: 2,
-            unload_margin_chunks: 2,
-            terrain_size: config.game_config.map_size as usize,
-            chunk_size: 4,
-            tile_size: 1.0,
+            assets_registry,
+            preload_margin_chunks: settings_config.preload_margin_chunks,
+            unload_margin_chunks: settings_config.unload_margin_chunks,
+            terrain_size: player_config.map_size as usize,
+            chunk_size: settings_config.chunk_size,
+            tile_size: settings_config.tile_size,
         }
     }
 }
 
-#[derive(Debug, Resource)]
-pub struct GameConfig {
+#[derive(Debug, Clone)]
+pub struct PlayerConfig {
     pub map_size: MapSize,
     pub map_shape: MapShape,
     pub player_race: PlayerRace,
 }
 
-impl Default for GameConfig {
+impl Default for PlayerConfig {
     fn default() -> Self {
         Self {
             map_size: MapSize::Medium,
@@ -122,7 +140,7 @@ impl Default for GameConfig {
     }
 }
 
-impl GameConfig {
+impl PlayerConfig {
     pub fn new(map_size: MapSize, map_shape: MapShape, player_race: PlayerRace) -> Self {
         Self {
             map_size,
@@ -132,9 +150,9 @@ impl GameConfig {
     }
 }
 
-#[derive(Debug, Resource)]
+#[derive(Debug)]
 pub struct LocalPlayerConfig {
-    pub game_config: GameConfig,
+    pub player_config: PlayerConfig,
     pub seed: u32,
     pub races: Vec<(Id, PlayerRace)>,
     pub ai_difficulty: AiDifficulty,
@@ -143,7 +161,7 @@ pub struct LocalPlayerConfig {
 impl Default for LocalPlayerConfig {
     fn default() -> Self {
         Self {
-            game_config: GameConfig::default(),
+            player_config: PlayerConfig::default(),
             seed: u32::MAX,
             races: Vec::new(),
             ai_difficulty: AiDifficulty::default(),
@@ -152,7 +170,7 @@ impl Default for LocalPlayerConfig {
 }
 
 pub struct OnlinePlayerConfig {
-    pub game_config: GameConfig,
+    pub player_config: PlayerConfig,
     pub player_id: Id,
     pub allowed_races: Vec<PlayerRace>,
 }
