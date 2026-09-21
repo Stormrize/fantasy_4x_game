@@ -20,14 +20,14 @@ impl ResourceType {
         }
     }
 
-    pub fn id_inside(self) -> Option<Id> {
+    pub fn id_inside(&self) -> Option<&Id> {
         use ResourceType::*;
         match self {
             Small(id, _) | Medium(id, _) | Large(id, _) => Some(id),
         }
     }
 
-    pub fn race_inside(self) -> Option<PlayerRace> {
+    pub fn race_inside(&self) -> Option<&PlayerRace> {
         use ResourceType::*;
         match self {
             Small(_, p) | Medium(_, p) | Large(_, p) => Some(p),

@@ -18,20 +18,20 @@ impl BiomeType {
             SmallBiome(_, _) => 1,
             MediumBiome(_, _) => 2,
             LargeBiome(_, _) => 3,
-            Ground => 255,
+            Ground => unreachable!(),
         }
     }
 
-    pub fn id_inside(self) -> Option<Id> {
+    pub fn id_inside(&self) -> Option<Id> {
         use BiomeType::*;
         match self {
-            SmallBiome(id, _) | MediumBiome(id, _) | LargeBiome(id, _) | Water(id, _) => Some(id),
+            SmallBiome(id, _) | MediumBiome(id, _) | LargeBiome(id, _) | Water(id, _) => Some(*id),
 
             Ground => None,
         }
     }
 
-    pub fn race_inside(self) -> Option<PlayerRace> {
+    pub fn race_inside(&self) -> Option<&PlayerRace> {
         use BiomeType::*;
         match self {
             SmallBiome(_, p) | MediumBiome(_, p) | LargeBiome(_, p) => Some(p),
