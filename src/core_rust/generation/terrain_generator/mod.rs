@@ -1,5 +1,6 @@
-use crate::world::game_configs::GenerationConfig;
 use ::noise::Perlin;
+
+use crate::world::game_configs::GenerationConfig;
 
 mod global_terrain_generation;
 mod local_terrain_generation;

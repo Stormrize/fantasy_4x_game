@@ -5,7 +5,6 @@ use bevy::reflect::TypePath;
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::{Deserialize, Serialize};
 
-
 // localization
 #[derive(Resource, Debug, Clone)]
 pub struct Localization {

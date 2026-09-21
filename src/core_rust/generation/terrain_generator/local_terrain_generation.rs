@@ -1,6 +1,8 @@
+use crate::core_rust::generation::races_generation::capitals_generation::CapitalCoord;
+use crate::core_rust::generation::races_generation::capitals_generation::voronoi_diagram::{
+    PlayerInfluenceCell, PlayerInfluenceMap,
+};
 use crate::core_rust::generation::{
-    races_generation::players_or_bots::generate_players_positions::CapitalCoord,
-    races_generation::players_or_bots::voronoi_diagram::{PlayerInfluenceCell, PlayerInfluenceMap},
     terrain_generator::PerlinPlaceholder,
     terrain_generator::noise::{fbm, normalise},
 };

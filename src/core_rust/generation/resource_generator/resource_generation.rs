@@ -1,3 +1,6 @@
+use rand::{RngExt, SeedableRng};
+use rand_chacha::ChaCha8Rng;
+
 use crate::world::{
     game_configs::GenerationConfig,
     game_resources::{
@@ -5,8 +8,6 @@ use crate::world::{
         terrain_map::TerrainMap,
     },
 };
-use rand::{RngExt, SeedableRng};
-use rand_chacha::ChaCha8Rng;
 
 pub struct ResourceWindow;
 
