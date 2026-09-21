@@ -1,7 +1,13 @@
-use crate::ui::initial_loading::localization_loader_plugin::public_api::Language;
+use std::path::PathBuf;
+
+use bevy::app::{App, Plugin};
 use bevy::prelude::Resource;
+use bevy_persistent::{Persistent, StorageFormat};
 use serde::{Deserialize, Serialize};
 
+use crate::io::startup_loading::localization_loader_plugin::Language;
+
+// config
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum GraphicsQuality {
     Low,
@@ -116,4 +122,37 @@ impl Default for SettingsConfig {
             colorblind_mode: ColorblindMode::default(),
         }
     }
+}
+
+// settings path
+const CONFIG_FILE_NAME: &str = "settings_menu.ron";
+
+// plugin
+pub struct PlayerSettingsPlugin;
+
+impl Plugin for PlayerSettingsPlugin {
+    fn build(&self, app: &mut App) {
+        let settings_config = Persistent::<SettingsConfig>::builder()
+            .name("settings_menu")
+            .format(StorageFormat::RonPrettyWithStructNames)
+            .path(resolve_config_path())
+            .default(SettingsConfig::default())
+            .revertible(true)
+            .build()
+            .expect("Failed to initialize persistent game config");
+
+        app.insert_resource(settings_config);
+    }
+}
+
+fn resolve_config_path() -> PathBuf {
+    let config_dir = if cfg!(target_arch = "wasm32") {
+        PathBuf::from("/local/settings_menu")
+    } else {
+        sysdirs::config_dir()
+            .unwrap_or_else(|| PathBuf::from("."))
+            .join("fantasy_4x_game") // note имя поменяется
+    };
+
+    config_dir.join(CONFIG_FILE_NAME)
 }

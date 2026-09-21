@@ -1,8 +1,11 @@
-use crate::ui::initial_loading::fonts_loader_plugin::FontsLoadingState;
-use crate::ui::initial_loading::localization_loader_plugin::public_api::Language;
 use bevy::asset::{AssetServer, Handle, LoadState};
 use bevy::platform::collections::HashMap;
-use bevy::prelude::{Commands, Font, NextState, Res, ResMut, Resource};
+use bevy::prelude::{
+    App, AppExtStates, Commands, Font, IntoScheduleConfigs, NextState, OnEnter, Plugin, Res,
+    ResMut, Resource, States, Update, in_state,
+};
+
+use crate::io::startup_loading::localization_loader_plugin::Language;
 
 #[derive(Resource, Default)]
 pub struct Fonts(HashMap<Language, Handle<Font>>);
@@ -23,7 +26,8 @@ impl Language {
     }
 }
 
-pub(super) fn start_loading_fonts(asset_server: Res<AssetServer>, mut commands: Commands) {
+// loading systems
+fn start_loading_fonts(asset_server: Res<AssetServer>, mut commands: Commands) {
     let mut handles = HashMap::new();
     for lang in [Language::En, Language::Ru, Language::De] {
         let handle: Handle<Font> = asset_server.load(lang.fonts_path());
@@ -56,7 +60,7 @@ fn all_fonts_loaded(asset_server: &AssetServer, handles: &Fonts) -> bool {
         })
 }
 
-pub(super) fn fonts_loading_ready(
+fn fonts_loading_ready(
     asset_server: Res<AssetServer>,
     handles: Res<Fonts>,
     mut next_state: ResMut<NextState<FontsLoadingState>>,
@@ -64,5 +68,27 @@ pub(super) fn fonts_loading_ready(
     if all_fonts_loaded(&asset_server, &handles) {
         next_state.set(FontsLoadingState::Ready);
         println!("All fonts loaded");
+    }
+}
+
+// states
+#[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub enum FontsLoadingState {
+    Loading,
+    #[default]
+    Ready,
+}
+
+// plugin
+pub struct FontsLoaderPlugin;
+
+impl Plugin for FontsLoaderPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_state::<FontsLoadingState>()
+            .add_systems(OnEnter(FontsLoadingState::Loading), start_loading_fonts)
+            .add_systems(
+                Update,
+                fonts_loading_ready.run_if(in_state(FontsLoadingState::Loading)),
+            );
     }
 }

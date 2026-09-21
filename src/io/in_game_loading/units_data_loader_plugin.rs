@@ -1,8 +1,3 @@
-use crate::ui::menus::AppState;
-use crate::world::components::PlayerRace;
-use crate::world::game_configs::ConfigType;
-use crate::world::game_resources::data::unit::UnitData;
-use crate::world::ui_and_graphic_resources::player_registry::RacesUiRegistry;
 use bevy::app::{App, Plugin, Update};
 use bevy::asset::{Asset, AssetServer, Handle, LoadState};
 use bevy::prelude::{
@@ -12,13 +7,18 @@ use bevy::prelude::{
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::Deserialize;
 
+use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
+use crate::world::components::PlayerRace;
+use crate::world::game_configs::ConfigType;
+use crate::world::game_resources::data::unit::CombatUnitData;
+
 #[derive(Resource, Debug, Default)]
-pub(super) struct RawRacesUnitsData(Vec<(PlayerRace, Handle<UnitsData>)>);
+pub struct RawRacesUnitsData(pub Vec<(PlayerRace, Handle<UnitsData>)>);
 
 #[derive(Asset, TypePath, Deserialize, Debug, Clone)]
-pub struct UnitsData(pub [UnitData; 4]);
+pub struct UnitsData(pub [CombatUnitData; 4]);
 
-pub(super) fn start_loading_units_data(
+fn start_loading_units_data(
     mut commands: Commands,
     config: Res<ConfigType>,
     races_ui_registry: Res<RacesUiRegistry>,
@@ -51,7 +51,7 @@ pub(super) fn start_loading_units_data(
     commands.insert_resource(RawRacesUnitsData(vec));
 }
 
-pub(super) fn all_units_data_loaded(
+fn all_units_data_loaded(
     raw_races_units_data: &RawRacesUnitsData,
     asset_server: &AssetServer,
 ) -> bool {
@@ -77,22 +77,20 @@ pub(super) fn all_units_data_loaded(
     })
 }
 
-pub fn units_data_ready(
+fn units_data_ready(
     raw_races_units_data: Res<RawRacesUnitsData>,
     asset_server: Res<AssetServer>,
-    mut commands: Commands,
     mut next_state: ResMut<NextState<UnitsDataLoadingState>>,
 ) {
     if all_units_data_loaded(&raw_races_units_data, &asset_server) {
-        commands.remove_resource::<RawRacesUnitsData>();
         next_state.set(UnitsDataLoadingState::Ready);
     }
 }
 
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub(super) enum UnitsDataLoadingState {
-    #[default]
+pub enum UnitsDataLoadingState {
     Loading,
+    #[default]
     Ready,
 }
 
@@ -104,14 +102,12 @@ impl Plugin for UnitsDataLoadingPlugin {
             .init_resource::<RawRacesUnitsData>()
             .add_plugins(RonAssetPlugin::<UnitsData>::new(&["ron"]))
             .add_systems(
-                OnEnter(AppState::InGameAssetLoading),
+                OnEnter(UnitsDataLoadingState::Loading),
                 start_loading_units_data,
             )
             .add_systems(
                 Update,
-                units_data_ready
-                    .run_if(in_state(UnitsDataLoadingState::Loading))
-                    .run_if(in_state(AppState::InGameAssetLoading)),
+                units_data_ready.run_if(in_state(UnitsDataLoadingState::Loading)),
             );
     }
 }

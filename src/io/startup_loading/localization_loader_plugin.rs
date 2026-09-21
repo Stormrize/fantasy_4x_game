@@ -1,20 +1,54 @@
-use crate::ui::initial_loading::localization_loader_plugin::LocalizationState;
-use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
 use bevy::asset::LoadState;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use bevy::reflect::TypePath;
-use serde::Deserialize;
+use bevy_common_assets::ron::RonAssetPlugin;
+use serde::{Deserialize, Serialize};
+
+
+// localization
+#[derive(Resource, Debug, Clone)]
+pub struct Localization {
+    pub languages: HashMap<Language, HashMap<String, String>>,
+}
+
+impl Localization {
+    pub fn get<'a>(&'a self, key: &'a str, language: Language) -> &'a str {
+        self.languages
+            .get(&language)
+            .and_then(|map| map.get(key))
+            .map(String::as_str)
+            .unwrap_or(key)
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub enum Language {
+    #[default]
+    En,
+    Ru,
+    De,
+}
+
+impl Language {
+    pub(super) fn localization_path(self) -> &'static str {
+        match self {
+            Language::En => "locales/en/main.ron",
+            Language::Ru => "locales/ru/main.ron",
+            Language::De => "locales/de/main.ron",
+        }
+    }
+}
 
 // raw data
 #[derive(Asset, TypePath, Debug, Clone, Deserialize)]
-pub(super) struct RawLocalization(pub HashMap<String, String>);
+struct RawLocalization(pub HashMap<String, String>);
 
 #[derive(Resource, Default)]
-pub(super) struct LocalizationHandles(HashMap<Language, Handle<RawLocalization>>);
+struct LocalizationHandles(HashMap<Language, Handle<RawLocalization>>);
 
 // loading systems
-pub(super) fn start_loading_localization(asset_server: Res<AssetServer>, mut commands: Commands) {
+fn start_loading_localization(asset_server: Res<AssetServer>, mut commands: Commands) {
     let mut handles = HashMap::new();
     for lang in [Language::En, Language::Ru, Language::De] {
         let handle: Handle<RawLocalization> = asset_server.load(lang.localization_path());
@@ -44,7 +78,7 @@ fn all_localizations_loaded(asset_server: &AssetServer, handles: &LocalizationHa
         })
 }
 
-pub(super) fn localization_loading_ready(
+fn localization_loading_ready(
     asset_server: Res<AssetServer>,
     localization_handles: Res<LocalizationHandles>,
     raw_assets: Res<Assets<RawLocalization>>,
@@ -65,5 +99,31 @@ pub(super) fn localization_loading_ready(
         commands.remove_resource::<LocalizationHandles>();
         next_state.set(LocalizationState::Ready);
         println!("localization loaded");
+    }
+}
+
+// states
+#[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub enum LocalizationState {
+    Loading,
+    #[default]
+    Ready,
+}
+
+// plugin
+pub struct LocalizationPlugin;
+
+impl Plugin for LocalizationPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugins(RonAssetPlugin::<RawLocalization>::new(&["ron"]))
+            .init_state::<LocalizationState>()
+            .add_systems(
+                OnEnter(LocalizationState::Loading),
+                start_loading_localization,
+            )
+            .add_systems(
+                Update,
+                localization_loading_ready.run_if(in_state(LocalizationState::Loading)),
+            );
     }
 }
