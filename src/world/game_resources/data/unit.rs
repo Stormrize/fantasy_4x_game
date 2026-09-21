@@ -1,25 +1,25 @@
-use crate::world::components::{Id, PlayerRace};
-use crate::world::game_resources::data::buffs_and_defuffs::{
-    ActiveBuffs, ActiveDebuffs, Buff, Debuff,
-};
-use crate::world::game_resources::data::building::Economy;
 use bevy::prelude::{Bundle, Component};
+use serde::Deserialize;
 use smol_str::SmolStr;
 
-#[derive(Component, Debug, Clone, Copy)]
+use crate::world::components::{Cost, Id, PlayerRace};
+use crate::world::game_resources::data::buffs_and_debuffs::{Buffs, Debuffs};
+
+#[derive(Component, Debug, Clone, Copy, Default)]
 pub enum UnitLevel {
+    #[default]
     Beginner = 0,
     Intermediate = 1,
     Master = 2,
 }
 
-#[derive(Component, Debug, Clone, Copy, PartialEq)]
+#[derive(Component, Deserialize, Debug, Clone, Copy, PartialEq)]
 pub enum UnitType {
     Support,
     DamageDealer,
     Tank,
     Skill,
-    ResourceGathererBuilder,
+    Helper,
 }
 
 impl UnitType {
@@ -30,13 +30,15 @@ impl UnitType {
             Support => 1,
             Tank => 2,
             Skill => 3,
-            ResourceGathererBuilder => 4,
+            Helper => 4,
         }
     }
 }
 
-#[derive(Component, Debug, Clone)]
-pub struct BasicStats {
+//----------------------------------------//
+
+#[derive(Component, Deserialize, Debug, Clone)]
+pub struct CombatBasicStats {
     pub health: u16,
     pub defense: u16,
     pub attack: u16,
@@ -44,28 +46,73 @@ pub struct BasicStats {
     pub movement_points: u8,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 struct UniqueLevelAbility {
     pub name: SmolStr,
-    pub range: u16,
-    pub area: u8,
+    pub buffs: Buffs,
+    pub debuffs: Debuffs,
+    pub mana_amount_needs: u16,
     pub damage: u16,
-    pub buff: Buff,
-    pub debuff: Debuff,
+    pub cool_down_turns: u16,
+    pub range: u8,
+    pub area: u8,
 }
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Deserialize, Debug, Clone)]
 pub struct LevelAbilities(pub Vec<UniqueLevelAbility>);
 
-#[derive(Bundle)]
-pub struct Unit {
+#[derive(Component, Deserialize, Debug, Clone)]
+pub struct LevelEconomy(pub Vec<Cost>);
+
+#[derive(Bundle, Deserialize, Debug, Clone)]
+pub struct CombatUnitData {
+    pub unit_type: UnitType,
+    pub level_economy: LevelEconomy,
+    pub basic_stats: CombatBasicStats,
+    pub unique_level_abilities: LevelAbilities,
+}
+
+#[derive(Bundle, Debug, Clone)]
+pub struct CombatUnit {
     pub player_id: Id,
     pub player_race: PlayerRace,
-    pub unit: UnitType,
     pub level: UnitLevel,
-    pub economy: Economy,
-    pub basic_stats: BasicStats,
-    pub unique_level_abilities: LevelAbilities,
-    pub active_buffs: ActiveBuffs,
-    pub active_debuffs: ActiveDebuffs,
+    pub unit_data: CombatUnitData, // read from config
+    pub active_buffs: Buffs,
+    pub active_debuffs: Debuffs,
+}
+
+//----------------------------------------//
+
+#[derive(Component, Debug, Clone)]
+pub struct HelperBasicStats {
+    pub health: u16,
+    pub defense: u16,
+    pub movement_points: u8,
+    pub build_gather_points: u8,
+}
+
+#[derive(Bundle, Debug, Clone)]
+pub struct HelperData {
+    pub unit_type: UnitType,
+    pub basic_stats: HelperBasicStats,
+}
+
+pub const HELPER: HelperData = HelperData {
+    unit_type: UnitType::Helper,
+    basic_stats: HelperBasicStats {
+        health: 1,
+        defense: 0,
+        movement_points: 2,
+        build_gather_points: 3,
+    },
+};
+
+#[derive(Bundle, Debug, Clone)]
+pub struct Helper {
+    pub player_id: Id,
+    pub player_race: PlayerRace,
+    pub unit_data: HelperData,
+    pub active_buffs: Buffs,
+    pub active_debuffs: Debuffs,
 }
