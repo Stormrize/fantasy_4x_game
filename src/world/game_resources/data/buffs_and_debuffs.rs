@@ -1,6 +1,7 @@
 use bevy::prelude::Component;
+use serde::Deserialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub enum Buff {
     Heal {
         health: u16,
@@ -8,7 +9,7 @@ pub enum Buff {
         turns_offset: u16,
     },
     DamageBuff {
-        health: u16,
+        damage: u16,
         duration: u16,
         turns_offset: u16,
     },
@@ -32,12 +33,17 @@ pub enum Buff {
         duration: u16,
         turns_offset: u16,
     },
+    DamageReflection {
+        damage_percentage: u16,
+        duration: u16,
+        turns_offset: u16,
+    },
 }
 
-#[derive(Component, Debug, Clone)]
-pub struct ActiveBuffs(pub Vec<Buff>);
+#[derive(Component, Deserialize, Debug, Default, Clone)]
+pub struct Buffs(pub Vec<Buff>);
 
-#[derive(Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub enum Debuff {
     SustainedDamage {
         damage: u16,
@@ -88,5 +94,5 @@ pub enum Debuff {
     },
 }
 
-#[derive(Component, Debug, Clone)]
-pub struct ActiveDebuffs(pub Vec<Debuff>);
+#[derive(Component, Deserialize, Debug, Default, Clone)]
+pub struct Debuffs(pub Vec<Debuff>);
