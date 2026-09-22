@@ -108,7 +108,7 @@ pub fn open_race_popup(
         ChildOf(card),
     ));
 
-    spawn_start_button(commands, card, race.clone(), localization, fonts, language);
+    spawn_start_button(commands, card, race, localization, fonts, language);
     spawn_close_button(commands, card, localization, fonts, language);
 }
 

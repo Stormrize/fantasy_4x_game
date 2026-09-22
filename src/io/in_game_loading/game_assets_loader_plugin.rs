@@ -9,9 +9,9 @@ use bevy_common_assets::ron::RonAssetPlugin;
 use serde::Deserialize;
 
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
+use crate::world::game_configs::ConfigType;
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 use crate::world::{components::PlayerRace, game_configs::GameMode};
-use crate::world::game_configs::ConfigType;
 
 // raw race assets
 #[derive(Asset, TypePath, Deserialize, Debug, Clone)]
