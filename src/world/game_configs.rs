@@ -124,6 +124,7 @@ pub struct GameLogicConfig {
     pub units_data: HashMap<PlayerRace, UnitsData>,
     pub buildings_data: HashMap<PlayerRace, BuildingsData>,
     pub terrain_size: usize,
+    pub map_shape: MapShape,
     pub player_id: Id
 }
 
@@ -137,6 +138,7 @@ impl GameLogicConfig {
             units_data,
             buildings_data,
             terrain_size: config.map_size as usize,
+            map_shape: config.map_shape,
             player_id: config.id,
         }
     }
