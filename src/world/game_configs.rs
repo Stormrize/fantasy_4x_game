@@ -6,7 +6,7 @@ use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::Resource;
 
-#[derive(Resource)]
+#[derive(Resource, Debug)]
 pub struct CameraConfig {
     pub min_orthographic_scale: f32, //в зависимости от настроек
     pub max_orthographic_scale: f32, //в зависимости от настроек
@@ -35,7 +35,7 @@ impl CameraConfig {
         }
     }
 }
-#[derive(Resource, Debug, Default)]
+#[derive(Resource, Debug)]
 pub struct GenerationConfig {
     pub seed: u32,
     pub terrain_size: usize,
@@ -92,7 +92,7 @@ impl GenerationConfig {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Debug)]
 pub struct RenderConfig {
     pub assets_registry: HashMap<PlayerRace, RaceAssets>,
     pub preload_margin_chunks: u8, //1
@@ -119,6 +119,7 @@ impl RenderConfig {
     }
 }
 
+#[derive(Resource, Debug)]
 pub struct GameLogicConfig {
     pub units_data: HashMap<PlayerRace, UnitsData>,
     pub buildings_data: HashMap<PlayerRace, BuildingsData>,
@@ -131,7 +132,7 @@ impl GameLogicConfig {
     pub fn new(
         units_data: HashMap<PlayerRace, UnitsData>,
         buildings_data: HashMap<PlayerRace, BuildingsData>,
-        config: PlayerConfig,
+        config: &PlayerConfig,
     ) -> Self {
         Self {
             units_data,
