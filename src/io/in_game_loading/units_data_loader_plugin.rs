@@ -1,9 +1,7 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::asset::{Asset, AssetServer, Handle, LoadState};
-use bevy::prelude::{
-    AppExtStates, Commands, IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, Resource, States,
-    TypePath, in_state,
-};
+use bevy::platform::collections::HashMap;
+use bevy::prelude::{AppExtStates, Commands, IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, Resource, States, TypePath, in_state, Assets};
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::Deserialize;
 
@@ -14,6 +12,8 @@ use crate::world::game_resources::data::unit::CombatUnitData;
 
 #[derive(Resource, Debug, Default)]
 pub struct RawRacesUnitsData(pub Vec<(PlayerRace, Handle<UnitsData>)>);
+#[derive(Resource, Debug, Default)]
+pub struct RacesUnitsData(pub HashMap<PlayerRace, UnitsData>);
 
 #[derive(Asset, TypePath, Deserialize, Debug, Clone)]
 pub struct UnitsData(pub [CombatUnitData; 4]);
@@ -78,11 +78,24 @@ fn all_units_data_loaded(
 }
 
 fn units_data_ready(
-    raw_races_units_data: Res<RawRacesUnitsData>,
+    mut raw_races_units_data: ResMut<RawRacesUnitsData>,
+    mut raw_units_assets: ResMut<Assets<UnitsData>>,
     asset_server: Res<AssetServer>,
     mut next_state: ResMut<NextState<UnitsDataLoadingState>>,
+    mut commands: Commands,
 ) {
     if all_units_data_loaded(&raw_races_units_data, &asset_server) {
+        let mut hashmap = HashMap::with_capacity(raw_races_units_data.0.len());
+        let vec = std::mem::take(&mut raw_races_units_data.0);
+        
+        for (player, handle) in vec {
+            let Some(handle) = raw_units_assets.remove(&handle) else {
+                return;
+            };
+            hashmap.insert(player, handle);
+        }
+        commands.insert_resource(RacesUnitsData(hashmap));
+        commands.remove_resource::<RawRacesUnitsData>();
         next_state.set(UnitsDataLoadingState::Ready);
     }
 }
@@ -100,6 +113,7 @@ impl Plugin for UnitsDataLoadingPlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<UnitsDataLoadingState>()
             .init_resource::<RawRacesUnitsData>()
+            .init_resource::<RacesUnitsData>()
             .add_plugins(RonAssetPlugin::<UnitsData>::new(&["ron"]))
             .add_systems(
                 OnEnter(UnitsDataLoadingState::Loading),
