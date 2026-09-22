@@ -1,10 +1,10 @@
-use bevy::platform::collections::HashMap;
-use bevy::prelude::Resource;
-
+use crate::io::in_game_loading::buildings_data_loader_plugin::BuildingsData;
 use crate::io::in_game_loading::units_data_loader_plugin::UnitsData;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace};
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
+use bevy::platform::collections::HashMap;
+use bevy::prelude::Resource;
 
 #[derive(Resource)]
 pub struct CameraConfig {
@@ -40,7 +40,6 @@ pub struct GenerationConfig {
     pub seed: u32,
     pub terrain_size: usize,
     pub players: Vec<(Id, PlayerRace)>,
-    pub units_data: HashMap<PlayerRace, UnitsData>,
     // note добавить типа структуру которая все параметры упорядывает
     pub water_threshold: u8,
     pub global_octaves: u8,
@@ -62,14 +61,13 @@ pub struct GenerationConfig {
 }
 
 impl GenerationConfig {
-    pub fn new(config: &LocalPlayerConfig, units_data: HashMap<PlayerRace, UnitsData>) -> Self {
+    pub fn new(config: &LocalPlayerConfig) -> Self {
         let game_config = &config.player_config;
 
         Self {
             seed: config.seed,
             terrain_size: game_config.map_size as usize,
             players: config.races.clone(),
-            units_data,
 
             // todo менять в зависимости от карты
             water_threshold: 100,
@@ -152,7 +150,6 @@ impl PlayerConfig {
 
 #[derive(Debug)]
 pub struct LocalPlayerConfig {
-    pub player_config: PlayerConfig,
     pub seed: u32,
     pub races: Vec<(Id, PlayerRace)>,
     pub ai_difficulty: AiDifficulty,
@@ -161,7 +158,6 @@ pub struct LocalPlayerConfig {
 impl Default for LocalPlayerConfig {
     fn default() -> Self {
         Self {
-            player_config: PlayerConfig::default(),
             seed: u32::MAX,
             races: Vec::new(),
             ai_difficulty: AiDifficulty::default(),
@@ -169,14 +165,19 @@ impl Default for LocalPlayerConfig {
     }
 }
 
+#[derive(Debug)]
 pub struct OnlinePlayerConfig {
-    pub player_config: PlayerConfig,
     pub player_id: Id,
     pub allowed_races: Vec<PlayerRace>,
 }
 
-#[derive(Resource)]
-pub enum ConfigType {
+#[derive(Debug)]
+pub enum GameMode {
     Local(LocalPlayerConfig),
     Multiplayer(OnlinePlayerConfig),
+}
+#[derive(Resource, Debug)]
+pub struct ConfigType {
+    player_config: PlayerConfig,
+    game_mode: GameMode,
 }
