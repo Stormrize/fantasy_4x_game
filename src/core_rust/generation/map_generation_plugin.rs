@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use bevy::app::App;
 use bevy::prelude::{
-    AppExtStates, Commands, Entity, IntoScheduleConfigs, NextState, OnEnter, Plugin, ResMut,
+    AppExtStates, Commands, Entity, IntoScheduleConfigs, NextState, OnEnter, Plugin, Res, ResMut,
     Resource, States, Update, in_state,
 };
 use bevy::tasks::futures_lite::future;
@@ -13,6 +13,7 @@ use crate::core_rust::generation::races_generation::capitals_generation::voronoi
 use crate::core_rust::generation::races_generation::generate_cities::BuildingMapNoBevy;
 use crate::core_rust::generation::terrain_generator::PerlinPlaceholder;
 use crate::core_rust::generation::units_generator::generate_units::UnitsMapNoBevy;
+use crate::world::game_configs::ConfigType;
 use crate::world::{
     game_configs::GenerationConfig,
     game_resources::{
@@ -66,13 +67,20 @@ fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
     }
 }
 
-fn start_map_generation(mut commands: Commands, mut generation_config: ResMut<GenerationConfig>) {
-    let generation_config = std::mem::take(&mut *generation_config);
-    let task = AsyncComputeTaskPool::get()
-        .spawn(async move { generate_map_resources(&generation_config) });
+fn start_map_generation(mut commands: Commands, config_type: Res<ConfigType>) {
+    match &*config_type {
+        ConfigType::Local(config) => {
+            let generation_config = GenerationConfig::new(config);
+            let task = AsyncComputeTaskPool::get()
+                .spawn(async move { generate_map_resources(&generation_config) });
 
-    commands.insert_resource(MapGenerationTask { task });
-    commands.remove_resource::<GenerationConfig>();
+            commands.insert_resource(MapGenerationTask { task });
+            commands.remove_resource::<GenerationConfig>();
+        }
+        ConfigType::Multiplayer(_) => {
+            // http request config body
+        }
+    }
 }
 
 fn poll_map_generation(mut commands: Commands, task: &mut MapGenerationTask) -> bool {
@@ -85,6 +93,7 @@ fn poll_map_generation(mut commands: Commands, task: &mut MapGenerationTask) -> 
         let buildings_map = spawn_building(generated.buildings, &mut commands);
         commands.insert_resource(buildings_map);
         commands.remove_resource::<MapGenerationTask>();
+        commands.remove_resource::<GenerationConfig>();
         true
     } else {
         false
