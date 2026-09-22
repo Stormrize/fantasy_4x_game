@@ -119,11 +119,34 @@ impl RenderConfig {
     }
 }
 
+
+pub struct GameLogicConfig {
+    pub units_data: HashMap<PlayerRace, UnitsData>,
+    pub buildings_data: HashMap<PlayerRace, BuildingsData>,
+    pub terrain_size: usize,
+    pub player_id: Id
+}
+
+impl GameLogicConfig {
+    pub fn new(
+        units_data: HashMap<PlayerRace, UnitsData>,
+        buildings_data: HashMap<PlayerRace, BuildingsData>,
+        config: PlayerConfig,
+    ) -> Self {
+        Self {
+            units_data,
+            buildings_data,
+            terrain_size: config.map_size as usize,
+            player_id: config.id,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct PlayerConfig {
     pub map_size: MapSize,
     pub map_shape: MapShape,
-    pub player_race: PlayerRace,
+    pub id: Id,
 }
 
 impl Default for PlayerConfig {
@@ -131,17 +154,17 @@ impl Default for PlayerConfig {
         Self {
             map_size: MapSize::Medium,
             map_shape: MapShape::Jagged,
-            player_race: PlayerRace::default(),
+            id: Id::default_local_id(),
         }
     }
 }
 
 impl PlayerConfig {
-    pub fn new(map_size: MapSize, map_shape: MapShape, player_race: PlayerRace) -> Self {
+    pub fn new(map_size: MapSize, map_shape: MapShape, id: Id) -> Self {
         Self {
             map_size,
             map_shape,
-            player_race,
+            id,
         }
     }
 }
