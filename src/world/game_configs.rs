@@ -61,13 +61,11 @@ pub struct GenerationConfig {
 }
 
 impl GenerationConfig {
-    pub fn new(config: &LocalPlayerConfig) -> Self {
-        let game_config = &config.player_config;
-
+    pub fn new(player_config: &PlayerConfig, local_player_config: &LocalPlayerConfig) -> Self {
         Self {
-            seed: config.seed,
-            terrain_size: game_config.map_size as usize,
-            players: config.races.clone(),
+            seed: local_player_config.seed,
+            terrain_size: player_config.map_size as usize,
+            players: local_player_config.races.clone(),
 
             // todo менять в зависимости от карты
             water_threshold: 100,
@@ -89,7 +87,7 @@ impl GenerationConfig {
             //borders
             noise_scale: 0.1,
             noise_strength: 8.0,
-            terrain_shape: game_config.map_shape,
+            terrain_shape: player_config.map_shape,
         }
     }
 }
@@ -178,6 +176,6 @@ pub enum GameMode {
 }
 #[derive(Resource, Debug)]
 pub struct ConfigType {
-    player_config: PlayerConfig,
-    game_mode: GameMode,
+    pub player_config: PlayerConfig,
+    pub game_mode: GameMode,
 }
