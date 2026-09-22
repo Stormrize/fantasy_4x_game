@@ -1,13 +1,16 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::asset::{Asset, AssetServer, Handle, LoadState};
 use bevy::platform::collections::HashMap;
-use bevy::prelude::{AppExtStates, Commands, IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, Resource, States, TypePath, in_state, Assets};
+use bevy::prelude::{
+    AppExtStates, Assets, Commands, IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, Resource,
+    States, TypePath, in_state,
+};
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::Deserialize;
 
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::world::components::PlayerRace;
-use crate::world::game_configs::ConfigType;
+use crate::world::game_configs::{ConfigType, GameMode};
 use crate::world::game_resources::data::unit::CombatUnitData;
 
 #[derive(Resource, Debug, Default)]
@@ -26,8 +29,8 @@ fn start_loading_units_data(
 ) {
     let mut vec;
 
-    match &*config {
-        ConfigType::Local(config) => {
+    match &config.game_mode {
+        GameMode::Local(config) => {
             let races = &config.races;
             vec = Vec::with_capacity(races.len());
 
@@ -37,7 +40,7 @@ fn start_loading_units_data(
                 vec.push((race.1.clone(), units_data));
             }
         }
-        ConfigType::Multiplayer(config) => {
+        GameMode::Multiplayer(config) => {
             let allowed_races = &config.allowed_races;
             vec = Vec::with_capacity(allowed_races.len());
 
@@ -87,7 +90,7 @@ fn units_data_ready(
     if all_units_data_loaded(&raw_races_units_data, &asset_server) {
         let mut hashmap = HashMap::with_capacity(raw_races_units_data.0.len());
         let vec = std::mem::take(&mut raw_races_units_data.0);
-        
+
         for (player, handle) in vec {
             let Some(handle) = raw_units_assets.remove(&handle) else {
                 return;

@@ -1,5 +1,6 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::asset::{Asset, AssetServer, Handle, LoadState};
+use bevy::platform::collections::HashMap;
 use bevy::prelude::{
     AppExtStates, Commands, IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, Resource, States,
     TypePath, in_state,
@@ -9,14 +10,15 @@ use serde::Deserialize;
 
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::world::components::PlayerRace;
-use crate::world::game_configs::ConfigType;
+use crate::world::game_configs::{ConfigType, GameMode};
 use crate::world::game_resources::data::building::BuildingData;
 
 #[derive(Resource, Debug, Default)]
-pub struct RawBuildingsUnitsData(pub Vec<(PlayerRace, Handle<BuildingsData>)>);
+pub struct RawRacesBuildingsData(pub Vec<(PlayerRace, Handle<BuildingsData>)>);
 
+pub struct RacesBuildingsData(pub HashMap<PlayerRace, BuildingsData>);
 #[derive(Asset, TypePath, Deserialize, Debug, Clone)]
-pub struct BuildingsData(pub [BuildingData; 8]);
+pub struct BuildingsData(pub Vec<BuildingData>);
 
 fn start_loading_buildings_data(
     mut commands: Commands,
@@ -26,8 +28,8 @@ fn start_loading_buildings_data(
 ) {
     let mut vec;
 
-    match &*config {
-        ConfigType::Local(config) => {
+    match &config.game_mode {
+        GameMode::Local(config) => {
             let races = &config.races;
             vec = Vec::with_capacity(races.len());
 
@@ -39,7 +41,7 @@ fn start_loading_buildings_data(
                 vec.push((race.1.clone(), units_data));
             }
         }
-        ConfigType::Multiplayer(config) => {
+        GameMode::Multiplayer(config) => {
             let allowed_races = &config.allowed_races;
             vec = Vec::with_capacity(allowed_races.len());
 
@@ -51,11 +53,11 @@ fn start_loading_buildings_data(
             }
         }
     }
-    commands.insert_resource(RawBuildingsUnitsData(vec));
+    commands.insert_resource(RawRacesBuildingsData(vec));
 }
 
 fn all_units_data_loaded(
-    raw_races_buildings_data: &RawBuildingsUnitsData,
+    raw_races_buildings_data: &RawRacesBuildingsData,
     asset_server: &AssetServer,
 ) -> bool {
     raw_races_buildings_data.0.iter().all(|(_, handle)| {
@@ -81,7 +83,7 @@ fn all_units_data_loaded(
 }
 
 fn units_data_ready(
-    raw_races_buildings_data: Res<RawBuildingsUnitsData>,
+    raw_races_buildings_data: Res<RawRacesBuildingsData>,
     asset_server: Res<AssetServer>,
     mut next_state: ResMut<NextState<BuildingsDataLoadingState>>,
 ) {
@@ -102,7 +104,7 @@ pub struct BuildingsDataLoadingPlugin;
 impl Plugin for BuildingsDataLoadingPlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<BuildingsDataLoadingState>()
-            .init_resource::<RawBuildingsUnitsData>()
+            .init_resource::<RawRacesBuildingsData>()
             .add_plugins(RonAssetPlugin::<BuildingsData>::new(&["ron"]))
             .add_systems(
                 OnEnter(BuildingsDataLoadingState::Loading),

@@ -13,7 +13,7 @@ use crate::core_rust::generation::races_generation::capitals_generation::voronoi
 use crate::core_rust::generation::races_generation::generate_cities::BuildingMapNoBevy;
 use crate::core_rust::generation::terrain_generator::PerlinPlaceholder;
 use crate::core_rust::generation::units_generator::generate_units::UnitsMapNoBevy;
-use crate::world::game_configs::ConfigType;
+use crate::world::game_configs::{ConfigType, GameMode};
 use crate::world::{
     game_configs::GenerationConfig,
     game_resources::{
@@ -68,16 +68,16 @@ fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
 }
 
 fn start_map_generation(mut commands: Commands, config_type: Res<ConfigType>) {
-    match &*config_type {
-        ConfigType::Local(config) => {
-            let generation_config = GenerationConfig::new(config);
+    match &config_type.game_mode {
+        GameMode::Local(config) => {
+            let generation_config = GenerationConfig::new(&config_type.player_config, config);
             let task = AsyncComputeTaskPool::get()
                 .spawn(async move { generate_map_resources(&generation_config) });
 
             commands.insert_resource(MapGenerationTask { task });
             commands.remove_resource::<GenerationConfig>();
         }
-        ConfigType::Multiplayer(_) => {
+        GameMode::Multiplayer(_) => {
             // http request config body
         }
     }

@@ -10,7 +10,8 @@ use serde::Deserialize;
 
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
-use crate::world::{components::PlayerRace, game_configs::ConfigType};
+use crate::world::{components::PlayerRace, game_configs::GameMode};
+use crate::world::game_configs::ConfigType;
 
 // raw race assets
 #[derive(Asset, TypePath, Deserialize, Debug, Clone)]
@@ -52,8 +53,8 @@ fn start_loading_game_assets(
 ) {
     let mut vec;
 
-    match &*config {
-        ConfigType::Local(config) => {
+    match &config.game_mode {
+        GameMode::Local(config) => {
             let races = &config.races;
             vec = Vec::with_capacity(races.len());
 
@@ -63,7 +64,7 @@ fn start_loading_game_assets(
                 vec.push((race.1.clone(), raw_visual_data));
             }
         }
-        ConfigType::Multiplayer(config) => {
+        GameMode::Multiplayer(config) => {
             let allowed_races = &config.allowed_races;
             vec = Vec::with_capacity(allowed_races.len());
 

@@ -7,7 +7,7 @@ use super::components::PendingGameSetup;
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::ui::menus::AppState;
 use crate::world::components::{Id, PlayerRace};
-use crate::world::game_configs::{ConfigType, LocalPlayerConfig, PlayerConfig};
+use crate::world::game_configs::{ConfigType, GameMode, LocalPlayerConfig, PlayerConfig};
 
 pub fn start_local_game(
     commands: &mut Commands,
@@ -16,7 +16,7 @@ pub fn start_local_game(
     pending: &PendingGameSetup,
     next_state: &mut NextState<AppState>,
 ) {
-    let game_config = PlayerConfig::new(pending.map_size, pending.map_shape.clone(), race);
+    let player_config = PlayerConfig::new(pending.map_size, pending.map_shape.clone(), race);
 
     let seed = random_range(0..u32::MAX);
 
@@ -35,15 +35,21 @@ pub fn start_local_game(
         .collect::<Vec<_>>();
 
     let local_config = LocalPlayerConfig {
-        player_config: game_config,
         seed,
         races,
         ai_difficulty: pending.ai_difficulty,
     };
+    
+    let game_mode = GameMode::Local(local_config);
+    
+    let config_type = ConfigType {
+        player_config,
+        game_mode,
+    };
 
-    println!("Config: {:?}", local_config);
+    println!("Config: {:?}", config_type);
 
-    commands.insert_resource(ConfigType::Local(local_config));
+    commands.insert_resource(config_type);
 
     next_state.set(AppState::InGameAssetLoading);
 }
