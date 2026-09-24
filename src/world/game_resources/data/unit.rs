@@ -37,7 +37,7 @@ impl UnitType {
 
 //----------------------------------------//
 
-#[derive(Component, Deserialize, Debug, Clone)]
+#[derive(Component, Deserialize, Debug, Clone, Copy)]
 pub struct CombatBasicStats {
     pub health: u16,
     pub defense: u16,
