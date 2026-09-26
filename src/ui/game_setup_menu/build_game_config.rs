@@ -67,8 +67,6 @@ pub fn start_local_game(
         game_mode,
     };
 
-    println!("Config: {:?}", config_type);
-
     commands.insert_resource(config_type);
 
     next_state.set(AppState::InGameAssetLoading);

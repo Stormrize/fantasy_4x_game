@@ -13,8 +13,6 @@ impl TerrainMap {
     ) -> Self {
         let terrain_size = config.terrain_size;
 
-        println!("{:#?}", config);
-
         let mut data = vec![BiomeType::Ground; terrain_size * terrain_size];
 
         //let task_pool = ComputeTaskPool::get();
@@ -56,13 +54,5 @@ impl TerrainMap {
             map: data,
             size: terrain_size,
         }
-    }
-
-    #[inline]
-    pub fn get(&self, row: usize, col: usize) -> &BiomeType {
-        debug_assert!(col < self.size);
-        debug_assert!(row < self.size);
-
-        &self.map[row * self.size + col]
     }
 }

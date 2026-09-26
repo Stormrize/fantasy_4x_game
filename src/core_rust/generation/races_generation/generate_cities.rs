@@ -7,7 +7,7 @@ use crate::world::{
 };
 
 #[derive(Clone)]
-struct Building {
+pub struct Building {
     pub id: Id,
     pub player_race: PlayerRace,
     pub building_type: BuildingType,

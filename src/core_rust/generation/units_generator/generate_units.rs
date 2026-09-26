@@ -8,7 +8,7 @@ use crate::world::game_configs::GenerationConfig;
 use crate::world::game_resources::data::unit::UnitType;
 
 #[derive(Clone)]
-struct Unit {
+pub struct Unit {
     pub id: Id,
     pub player_race: PlayerRace,
     pub unit_type: UnitType,

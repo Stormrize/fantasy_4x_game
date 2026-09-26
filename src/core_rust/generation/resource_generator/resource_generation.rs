@@ -19,7 +19,7 @@ impl ResourceMap {
     pub fn new(config: &GenerationConfig, terrain: &TerrainMap) -> Self {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let terrain_size = config.terrain_size;
-        let mut map = Vec::with_capacity(terrain_size * terrain_size);
+        let mut map = vec![None; terrain_size * terrain_size];
 
         let mut windows: [Vec<(usize, usize)>; 3] = Default::default();
 
@@ -50,14 +50,6 @@ impl ResourceMap {
             size: terrain_size,
         }
     }
-
-    #[inline]
-    pub fn get(&self, row: usize, col: usize) -> &ResourceType {
-        debug_assert!(row < self.size);
-        debug_assert!(col < self.size);
-
-        &self.map[row * self.size + col]
-    }
 }
 
 fn resource_for_biome(biome: &BiomeType) -> Option<ResourceType> {
@@ -72,12 +64,12 @@ fn resource_for_biome(biome: &BiomeType) -> Option<ResourceType> {
 }
 
 fn place_random_resource(
-    map: &mut [ResourceType],
+    map: &mut [Option<ResourceType>],
     terrain_size: usize,
     window: &[(usize, usize)],
     resource: ResourceType,
     rng: &mut ChaCha8Rng,
 ) {
     let (row, col) = window[rng.random_range(0..window.len())];
-    map[row * terrain_size + col] = resource;
+    map[row * terrain_size + col] = Some(resource);
 }

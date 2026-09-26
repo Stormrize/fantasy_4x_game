@@ -5,3 +5,12 @@ pub struct BuildingMap {
     pub map: Vec<Option<Entity>>,
     pub size: usize,
 }
+
+impl BuildingMap {
+    pub fn is_some(&self, row: usize, col: usize) -> bool {
+        self.map[row * self.size + col].is_some()
+    }
+    pub fn get(&self, row: usize, col: usize) -> Option<Entity> {
+        self.map[row * self.size + col]
+    }
+}
