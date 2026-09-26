@@ -34,9 +34,9 @@ impl BiomeType {
     pub fn race_inside(&self) -> Option<&PlayerRace> {
         use BiomeType::*;
         match self {
-            SmallBiome(_, p) | MediumBiome(_, p) | LargeBiome(_, p) => Some(p),
+            SmallBiome(_, p) | MediumBiome(_, p) | LargeBiome(_, p) | Water(_, p) => Some(p),
 
-            Ground | Water(_, _) => None,
+            Ground => None,
         }
     }
 }
