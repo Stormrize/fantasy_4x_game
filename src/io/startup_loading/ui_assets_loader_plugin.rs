@@ -39,7 +39,7 @@ pub struct RawRaceData {
     pub ui_icon_path: String,
     pub visual_path: String,
     pub unit_data: String,
-    pub buildings_data: String,
+    pub building_data: String,
 }
 
 // registry
@@ -66,7 +66,7 @@ fn start_loading_races(
             ui_icon: asset_server.load(data.ui_icon_path),
             visual_path: data.visual_path,
             unit_data_path: data.unit_data,
-            building_data_path: data.buildings_data,
+            building_data_path: data.building_data,
         };
 
         races_ui_registry
@@ -102,8 +102,9 @@ fn race_loading_ready(
 // states
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum RaceLoadingState {
-    Loading,
     #[default]
+    Disabled, 
+    Loading,
     Ready,
 }
 

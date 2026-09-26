@@ -104,8 +104,9 @@ fn localization_loading_ready(
 // states
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum LocalizationState {
-    Loading,
     #[default]
+    Disabled,
+    Loading,
     Ready,
 }
 

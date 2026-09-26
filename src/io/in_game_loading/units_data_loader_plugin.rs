@@ -105,8 +105,9 @@ fn units_data_ready(
 
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum UnitsDataLoadingState {
-    Loading,
     #[default]
+    Disabled,
+    Loading, 
     Ready,
 }
 

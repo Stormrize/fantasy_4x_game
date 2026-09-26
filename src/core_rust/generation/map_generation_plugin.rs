@@ -13,9 +13,8 @@ use crate::core_rust::generation::races_generation::capitals_generation::voronoi
 use crate::core_rust::generation::races_generation::generate_cities::BuildingMapNoBevy;
 use crate::core_rust::generation::terrain_generator::PerlinPlaceholder;
 use crate::core_rust::generation::units_generator::generate_units::UnitsMapNoBevy;
-use crate::world::game_configs::{ConfigType, GameMode};
 use crate::world::{
-    game_configs::GenerationConfig,
+    game_configs::{ConfigType, GameMode, GenerationConfig},
     game_resources::{
         building_map::BuildingMap,
         data::{
@@ -48,8 +47,7 @@ struct GeneratedMapResources {
 fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
     let perlin = PerlinPlaceholder::new(config);
     let mut terrain = TerrainMap::new_global_terrain_map(config, &perlin);
-    let capitals_pos =
-        CapitalsPos::calculate_player_positions_flood_fill(config, &terrain).unwrap();
+    let capitals_pos = CapitalsPos::calculate_player_positions(config, &terrain).unwrap();
     let influence_map =
         PlayerInfluenceMap::voronoi_diagram_for_players(config, &capitals_pos, &perlin);
     terrain.final_terrain_map(config, &perlin, &influence_map);
@@ -70,12 +68,11 @@ fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
 fn start_map_generation(mut commands: Commands, config_type: Res<ConfigType>) {
     match &config_type.game_mode {
         GameMode::Local(config) => {
-            let generation_config = GenerationConfig::new(&config_type.player_config, config);
+            let generation_config = GenerationConfig::new(config_type.player_config, config);
             let task = AsyncComputeTaskPool::get()
                 .spawn(async move { generate_map_resources(&generation_config) });
 
             commands.insert_resource(MapGenerationTask { task });
-            commands.remove_resource::<GenerationConfig>();
         }
         GameMode::Multiplayer(_) => {
             // http request config body
@@ -93,7 +90,6 @@ fn poll_map_generation(mut commands: Commands, task: &mut MapGenerationTask) -> 
         let buildings_map = spawn_building(generated.buildings, &mut commands);
         commands.insert_resource(buildings_map);
         commands.remove_resource::<MapGenerationTask>();
-        commands.remove_resource::<GenerationConfig>();
         true
     } else {
         false
@@ -183,8 +179,9 @@ fn map_ready(
 // loading states
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum MapGenerationLoadingState {
-    Loading,
     #[default]
+    Disabled,
+    Loading,
     Ready,
 }
 
