@@ -5,6 +5,28 @@ use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace};
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::Resource;
+#[derive(Debug, Clone, Copy)]
+pub struct Player {
+    pub id: Id,
+    pub mana: u32,
+    pub gold: u32,
+    pub food: u32,
+    pub production: u32,
+    pub science: u32,
+}
+
+impl Player {
+    pub fn from(player_config: PlayerConfig) -> Self {
+        Self {
+            id: player_config.id,
+            mana: 100,
+            gold: 20,
+            food: 10,
+            production: 0,
+            science: 0,
+        }
+    }
+}
 
 #[derive(Resource, Debug)]
 pub struct CameraConfig {
@@ -20,7 +42,7 @@ pub struct CameraConfig {
 }
 
 impl CameraConfig {
-    pub fn new(settings: &SettingsConfig, game_config: &PlayerConfig) -> Self {
+    pub fn new(settings: &SettingsConfig, game_config: PlayerConfig) -> Self {
         Self {
             min_orthographic_scale: settings.tile_size,
             max_orthographic_scale: game_config.map_size as u8 as f32 * 1.5,
@@ -35,7 +57,7 @@ impl CameraConfig {
         }
     }
 }
-#[derive(Resource, Debug)]
+#[derive(Debug)]
 pub struct GenerationConfig {
     pub seed: u32,
     pub terrain_size: usize,
@@ -61,7 +83,7 @@ pub struct GenerationConfig {
 }
 
 impl GenerationConfig {
-    pub fn new(player_config: &PlayerConfig, local_player_config: &LocalPlayerConfig) -> Self {
+    pub fn new(player_config: PlayerConfig, local_player_config: &LocalPlayerConfig) -> Self {
         Self {
             seed: local_player_config.seed,
             terrain_size: player_config.map_size as usize,
@@ -104,7 +126,7 @@ pub struct RenderConfig {
 
 impl RenderConfig {
     pub fn new(
-        player_config: &PlayerConfig,
+        player_config: PlayerConfig,
         settings_config: &SettingsConfig,
         assets_registry: HashMap<PlayerRace, RaceAssets>,
     ) -> Self {
@@ -125,26 +147,26 @@ pub struct GameLogicConfig {
     pub buildings_data: HashMap<PlayerRace, BuildingsData>,
     pub terrain_size: usize,
     pub map_shape: MapShape,
-    pub player_id: Id,
+    pub player: Player,
 }
 
 impl GameLogicConfig {
     pub fn new(
         units_data: HashMap<PlayerRace, UnitsData>,
         buildings_data: HashMap<PlayerRace, BuildingsData>,
-        config: &PlayerConfig,
+        config: PlayerConfig,
     ) -> Self {
         Self {
             units_data,
             buildings_data,
             terrain_size: config.map_size as usize,
             map_shape: config.map_shape,
-            player_id: config.id,
+            player: Player::from(config),
         }
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct PlayerConfig {
     pub map_size: MapSize,
     pub map_shape: MapShape,
@@ -171,7 +193,7 @@ impl PlayerConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LocalPlayerConfig {
     pub seed: u32,
     pub races: Vec<(Id, PlayerRace)>,
@@ -188,18 +210,18 @@ impl Default for LocalPlayerConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct OnlinePlayerConfig {
     pub player_id: Id,
     pub allowed_races: Vec<PlayerRace>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum GameMode {
     Local(LocalPlayerConfig),
     Multiplayer(OnlinePlayerConfig),
 }
-#[derive(Resource, Debug)]
+#[derive(Resource, Debug, Clone)]
 pub struct ConfigType {
     pub player_config: PlayerConfig,
     pub game_mode: GameMode,
