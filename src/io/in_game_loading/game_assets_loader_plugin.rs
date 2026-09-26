@@ -82,10 +82,7 @@ fn start_loading_game_assets(
 
 //---------------------------------------------------------------------------------------------------------------------------//
 
-fn all_raw_assets_loaded(
-    raw_handles: &RawRacesAssetsData,
-    asset_server: &AssetServer,
-) -> bool {
+fn all_raw_assets_loaded(raw_handles: &RawRacesAssetsData, asset_server: &AssetServer) -> bool {
     raw_handles.0.iter().all(
         |(_, handle)| match asset_server.get_load_state(handle.id()) {
             Some(LoadState::Loaded) => true,
@@ -207,7 +204,13 @@ fn raw_assets_ready(
     mut commands: Commands,
 ) {
     if all_raw_assets_loaded(&raw_handles, &asset_server) {
-        load_assets(&raw_handles, &mut raw_race_assets, &mut assets_registry, &asset_server, &mut materials);
+        load_assets(
+            &raw_handles,
+            &mut raw_race_assets,
+            &mut assets_registry,
+            &asset_server,
+            &mut materials,
+        );
         commands.remove_resource::<RawRacesAssetsData>();
         next_state.set(GameAssetsLoadingState::AssetsLoading);
     }

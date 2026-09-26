@@ -103,7 +103,7 @@ fn race_loading_ready(
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum RaceLoadingState {
     #[default]
-    Disabled, 
+    Disabled,
     Loading,
     Ready,
 }

@@ -107,7 +107,7 @@ fn units_data_ready(
 pub enum UnitsDataLoadingState {
     #[default]
     Disabled,
-    Loading, 
+    Loading,
     Ready,
 }
 
