@@ -36,6 +36,7 @@ pub struct RawRaceAssets {
     pub spawning_building: String,
     pub house: String,
     pub research_center: String,
+    pub unique_race_building: String,
 }
 #[derive(Resource, Default, Debug)]
 struct RawRacesAssetsData(pub Vec<(PlayerRace, Handle<RawRaceAssets>)>);
@@ -79,39 +80,43 @@ fn start_loading_game_assets(
     commands.insert_resource(RawRacesAssetsData(vec));
 }
 
-fn check_raw_handles(
-    raw_handles: Res<RawRacesAssetsData>,
-    mut raw_race_assets: ResMut<Assets<RawRaceAssets>>,
-    mut assets_registry: ResMut<RacesAssetsRegistry>,
-    asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+//---------------------------------------------------------------------------------------------------------------------------//
+
+fn all_raw_assets_loaded(
+    raw_handles: &RawRacesAssetsData,
+    asset_server: &AssetServer,
+) -> bool {
+    raw_handles.0.iter().all(
+        |(_, handle)| match asset_server.get_load_state(handle.id()) {
+            Some(LoadState::Loaded) => true,
+
+            Some(LoadState::Failed(err)) => {
+                eprintln!("Failed to load asset {:?}: {:?}", handle.id(), err);
+                false
+            }
+
+            Some(state) => {
+                eprintln!("Asset {:?} is not loaded yet: {:?}", handle.id(), state);
+                false
+            }
+
+            None => {
+                eprintln!("Asset {:?} has no load state", handle.id());
+                false
+            }
+        },
+    )
+}
+
+fn load_assets(
+    raw_handles: &RawRacesAssetsData,
+    raw_race_assets: &mut Assets<RawRaceAssets>,
+    assets_registry: &mut RacesAssetsRegistry,
+    asset_server: &AssetServer,
+    materials: &mut Assets<StandardMaterial>,
 ) {
     for handle in raw_handles.0.iter() {
-        let Some(race_asset) = raw_race_assets.remove(&handle.1) else {
-            return;
-        };
-
-        // let visual_race_data = VisualRaceData {
-        //     small_biome: asset_server.load(small_biome),
-        //     medium_biome: asset_server.load(medium_biome),
-        //     large_biome: asset_server.load(large_biome),
-        //
-        //     //resource
-        //     small_resource: asset_server.load(small_resource),
-        //     medium_resource: asset_server.load(medium_resource),
-        //     large_resource: asset_server.load(large_resource),
-        //
-        //     //building
-        //     capital: asset_server.load(capital),
-        //     empty_cities: asset_server.load(empty_cities),
-        //     empty_cities_colonized: asset_server.load(empty_cities_colonized),
-        //     medium_building: asset_server.load(medium_building),
-        //     large_building: asset_server.load(large_building),
-        //     spawning_building: asset_server.load(spawning_building),
-        //     house: asset_server.load(house),
-        //     research_center: asset_server.load(research_center),
-        // };
-
+        let race_asset = raw_race_assets.remove(&handle.1).unwrap();
         let fallback_visual_race_data = RaceAssets {
             biomes: [
                 materials.add(StandardMaterial {
@@ -180,12 +185,31 @@ fn check_raw_handles(
                     base_color: parse_color(parse_string(&race_asset.research_center)),
                     ..default()
                 }),
+                materials.add(StandardMaterial {
+                    base_color: parse_color(parse_string(&race_asset.unique_race_building)),
+                    ..default()
+                }),
             ],
         };
-
         assets_registry
             .0
             .insert(handle.0.clone(), fallback_visual_race_data);
+    }
+}
+
+fn raw_assets_ready(
+    raw_handles: Res<RawRacesAssetsData>,
+    mut raw_race_assets: ResMut<Assets<RawRaceAssets>>,
+    mut assets_registry: ResMut<RacesAssetsRegistry>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
+    mut next_state: ResMut<NextState<GameAssetsLoadingState>>,
+    mut commands: Commands,
+) {
+    if all_raw_assets_loaded(&raw_handles, &asset_server) {
+        load_assets(&raw_handles, &mut raw_race_assets, &mut assets_registry, &asset_server, &mut materials);
+        commands.remove_resource::<RawRacesAssetsData>();
+        next_state.set(GameAssetsLoadingState::AssetsLoading);
     }
 }
 
@@ -233,32 +257,22 @@ fn all_fields_loaded(data: &RaceAssets, asset_server: &AssetServer) -> bool {
 }
 
 fn all_game_assets_loaded(
-    races_assets_data: &RacesAssetsRegistry,
-    raw_handles: &RawRacesAssetsData,
+    races_assets_registry: &RacesAssetsRegistry,
     asset_server: &AssetServer,
 ) -> bool {
-    let expected_current_races = raw_handles.0.len();
-
-    if races_assets_data.0.len() < expected_current_races || races_assets_data.0.len() == 0 {
-        return false;
-    }
-
-    races_assets_data
+    races_assets_registry
         .0
         .values()
         .all(|race_assets| all_fields_loaded(race_assets, &asset_server))
 }
 
 fn game_assets_ready(
-    mut commands: Commands,
     assets_registry: Res<RacesAssetsRegistry>,
-    raw_handles: Res<RawRacesAssetsData>,
     asset_server: Res<AssetServer>,
     mut next_state: ResMut<NextState<GameAssetsLoadingState>>,
 ) {
-    if all_game_assets_loaded(&assets_registry, &raw_handles, &asset_server) {
+    if all_game_assets_loaded(&assets_registry, &asset_server) {
         println!("Game assets loaded");
-        commands.remove_resource::<RawRacesAssetsData>();
         next_state.set(GameAssetsLoadingState::Ready);
     }
 }
@@ -267,7 +281,7 @@ fn game_assets_ready(
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum GameAssetsLoadingState {
     Loading,
-    #[default]
+    AssetsLoading,
     Ready,
 }
 
@@ -285,9 +299,10 @@ impl Plugin for GameAssetsLoadingPlugin {
             )
             .add_systems(
                 Update,
-                (check_raw_handles, game_assets_ready)
-                    .chain()
-                    .run_if(in_state(GameAssetsLoadingState::Loading)),
+                (
+                    raw_assets_ready.run_if(in_state(GameAssetsLoadingState::Loading)),
+                    game_assets_ready.run_if(in_state(GameAssetsLoadingState::AssetsLoading)),
+                ),
             );
     }
 }
