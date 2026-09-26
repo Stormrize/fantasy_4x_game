@@ -2533,6 +2533,7 @@ dependencies = [
  "noise",
  "rand 0.10.2",
  "rand_chacha 0.10.0",
+ "ron 0.11.0",
  "serde",
  "smol_str",
  "sysdirs",
