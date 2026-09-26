@@ -48,9 +48,6 @@ impl BuildingType {
     }
 }
 
-#[derive(Component, Debug, Clone)]
-struct ProductionAmount(pub u16);
-
 #[derive(Component, Deserialize, Debug, Clone)]
 pub struct BuildingStats {
     pub health: u16,
