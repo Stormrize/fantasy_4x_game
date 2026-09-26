@@ -1,24 +1,24 @@
-(
-    [
-        UnitData(
+UnitsData(
+    (
+        CombatUnitData(
             unit_type: DamageDealer,
             level_economy: LevelEconomy(
                 [
-                    Economy(
-                        upgrade_cost: GoldAmount(50),
-                        maintenance: GoldAmount(5),
+                    Cost(
+                        upgrade_cost: 50,
+                        maintenance: 5,
                     ),
-                    Economy(
-                        upgrade_cost: GoldAmount(70),
-                        maintenance: GoldAmount(10),
+                    Cost(
+                        upgrade_cost: 70,
+                        maintenance: 10,
                     ),
-                    Economy(
-                        upgrade_cost: GoldAmount(150),
-                        maintenance: GoldAmount(25),
+                    Cost(
+                        upgrade_cost: 150,
+                        maintenance: 25,
                     ),
                 ]
             ),
-            basic_stats: BasicStats(
+            basic_stats: CombatBasicStats(
                 health: 120,
                 defense: 25,
                 attack: 50,
@@ -32,6 +32,8 @@
                         range: 2,
                         area: 1,
                         damage: 75,
+                        mana_amount_needs: 20,
+                        cool_down_turns: 3,
                         buffs: Buffs([]),
                         debuffs: Debuffs(
                             [
@@ -41,13 +43,15 @@
                                     turns_offset: 0
                                 )
                             ]
-                        )
+                        ),
                     ),
                     UniqueLevelAbility(
                         name: "Fiery land",
                         range: 3,
                         area: 1,
                         damage: 130,
+                        mana_amount_needs: 20,
+                        cool_down_turns: 3,
                         buffs: Buffs([]),
                         debuffs: Debuffs(
                             [
@@ -64,6 +68,8 @@
                         range: 3,
                         area: 2,
                         damage: 75,
+                        mana_amount_needs: 20,
+                        cool_down_turns: 3,
                         buffs: Buffs([]),
                         debuffs: Debuffs(
                             [
@@ -73,26 +79,26 @@
                                     turns_offset: 0
                                 )
                             ]
-                        )
+                        ),
                     )
                 ]
             )
         ),
-        UnitData(
+        CombatUnitData(
             unit_type: Support,
             level_economy: LevelEconomy(
                 [
-                    Economy(
-                        upgrade_cost: GoldAmount(45),
-                        maintenance: GoldAmount(3),
+                    Cost(
+                        upgrade_cost: 45,
+                        maintenance: 3,
                     ),
-                    Economy(
-                        upgrade_cost: GoldAmount(65),
-                        maintenance: GoldAmount(7),
+                    Cost(
+                        upgrade_cost: 65,
+                        maintenance: 7,
                     ),
                 ]
             ),
-            basic_stats: BasicStats(
+            basic_stats: CombatBasicStats(
                 health: 120,
                 defense: 25,
                 attack: 50,
@@ -106,6 +112,8 @@
                         range: 2,
                         area: 2,
                         damage: 0,
+                        mana_amount_needs: 20,
+                        cool_down_turns: 3,
                         buffs: Buffs(
                             [
                                 DamageBuff(
@@ -115,7 +123,7 @@
                                 )
                             ]
                         ),
-                        debuffs: Debuffs([])
+                        debuffs: Debuffs([]),
                     ),
 
                     UniqueLevelAbility(
@@ -123,6 +131,8 @@
                         range: 2,
                         area: 2,
                         damage: 0,
+                        mana_amount_needs: 20,
+                        cool_down_turns: 3,
                         buffs: Buffs(
                             [
                                 DefenseBuff(
@@ -133,34 +143,34 @@
                                 DamageReflection(
                                     damage_percentage: 30,
                                     duration: 2,
-                                    turn_offset: 0
+                                    turns_offset: 0
                                 )
                             ]
                         ),
-                        debuffs: Debuffs([])
+                        debuffs: Debuffs([]),
                     )
                 ]
             )
         ),
-        UnitData(
+        CombatUnitData(
             unit_type: Tank,
             level_economy: LevelEconomy(
                 [
-                    Economy(
-                        upgrade_cost: GoldAmount(50),
-                        maintenance: GoldAmount(5),
+                    Cost(
+                        upgrade_cost: 50,
+                        maintenance: 5,
                     ),
-                    Economy(
-                        upgrade_cost: GoldAmount(70),
-                        maintenance: GoldAmount(10),
+                    Cost(
+                        upgrade_cost: 70,
+                        maintenance: 10,
                     ),
-                    Economy(
-                        upgrade_cost: GoldAmount(100),
-                        maintenance: GoldAmount(20),
+                    Cost(
+                        upgrade_cost: 100,
+                        maintenance: 20,
                     ),
                 ]
             ),
-            basic_stats: BasicStats(
+            basic_stats: CombatBasicStats(
                 health: 120,
                 defense: 25,
                 attack: 50,
@@ -174,6 +184,8 @@
                         range: 3,
                         area: 1,
                         damage: 75,
+                        mana_amount_needs: 20,
+                        cool_down_turns: 3,
                         buffs: Buffs([]),
                         debuffs: Debuffs(
                             [
@@ -183,30 +195,30 @@
                                     turns_offset: 0
                                 )
                             ]
-                        )
+                        ),
                     )
                 ]
             )
         ),
-        UnitData(
+        CombatUnitData(
             unit_type: Skill,
             level_economy: LevelEconomy(
                 [
-                    Economy(
-                        upgrade_cost: GoldAmount(50),
-                        maintenance: GoldAmount(5),
+                    Cost(
+                        upgrade_cost: 50,
+                        maintenance: 5,
                     ),
-                    Economy(
-                        upgrade_cost: GoldAmount(70),
-                        maintenance: GoldAmount(10),
+                    Cost(
+                        upgrade_cost: 70,
+                        maintenance: 10,
                     ),
-                    Economy(
-                        upgrade_cost: GoldAmount(100),
-                        maintenance: GoldAmount(20),
+                    Cost(
+                        upgrade_cost: 100,
+                        maintenance: 20,
                     ),
                 ]
             ),
-            basic_stats: BasicStats(
+            basic_stats: CombatBasicStats(
                 health: 120,
                 defense: 25,
                 attack: 50,
@@ -220,6 +232,8 @@
                         range: 3,
                         area: 1,
                         damage: 75,
+                        mana_amount_needs: 20,
+                        cool_down_turns: 3,
                         buffs: Buffs([]),
                         debuffs: Debuffs(
                             [
@@ -229,10 +243,10 @@
                                     turns_offset: 0
                                 )
                             ]
-                        )
+                        ),
                     )
                 ]
             )
         ),
-    ]
+    )
 )

@@ -1,0 +1,71 @@
+BuildingsData(
+    [
+        BuildingData(
+            building_type: UniqueRaceBuilding,
+            levels: Levels(
+                (
+                    BuildingLevelStats(
+                        combat_stats: BuildingStats(
+                            health: 20,
+                            defense: 10,
+                        ),
+                        yields: Yields(
+                            gold: 20,
+                            food: 20,
+                            production: 20,
+                            science: 20,
+                        ),
+                        economy: Cost(
+                            upgrade_cost: 20,
+                            maintenance: 20,
+                        ),
+                        building_utility: BuildingUtility(
+                            housing: 20,
+                            spawn_capacity: 0,
+                        ),
+                    ),
+                    BuildingLevelStats(
+                        combat_stats: BuildingStats(
+                            health: 20,
+                            defense: 10,
+                        ),
+                        yields: Yields(
+                            gold: 20,
+                            food: 20,
+                            production: 20,
+                            science: 20,
+                        ),
+                        economy: Cost(
+                            upgrade_cost: 20,
+                            maintenance: 20,
+                        ),
+                        building_utility: BuildingUtility(
+                            housing: 20,
+                            spawn_capacity: 0,
+                        ),
+                    ),
+                    BuildingLevelStats(
+                        combat_stats: BuildingStats(
+                            health: 20,
+                            defense: 10,
+                        ),
+                        yields: Yields(
+                            gold: 20,
+                            food: 20,
+                            production: 20,
+                            science: 20,
+                        ),
+                        economy: Cost(
+                            upgrade_cost: 20,
+                            maintenance: 20,
+                        ),
+                        building_utility: BuildingUtility(
+                            housing: 20,
+                            spawn_capacity: 0,
+                        ),
+                    ),
+                )
+            ),
+        ),
+    ]
+)

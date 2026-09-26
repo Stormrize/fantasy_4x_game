@@ -19,4 +19,5 @@
     spawning_building: "0.0, 0.0, 0.0",
     house: "0.0, 0.0, 0.0",
     research_center: "0.0, 0.0, 0.0",
+    unique_race_building: "0.0, 0.0, 0.0",
 )
