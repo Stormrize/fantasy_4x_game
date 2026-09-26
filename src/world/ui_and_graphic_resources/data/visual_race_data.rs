@@ -6,7 +6,7 @@ pub struct RaceAssets {
 
     pub resources: [Handle<StandardMaterial>; 3],
 
-    pub buildings: [Handle<StandardMaterial>; 8],
+    pub buildings: [Handle<StandardMaterial>; 9],
 }
 
 impl RaceAssets {
@@ -27,6 +27,7 @@ impl RaceAssets {
             &self.buildings[5],
             &self.buildings[6],
             &self.buildings[7],
+            &self.buildings[8],
         ]
         .into_iter()
     }
