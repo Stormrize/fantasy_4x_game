@@ -1,13 +1,10 @@
-use crate::world::ui_and_graphic_resources::player_registry::PlayerRegistry;
-use crate::world::{
-    game_config::GameConfig,
-    game_resources::{data::resource::ResourceType, resource_map::ResourceMap},
-    ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
-};
 use bevy::prelude::{
-    Assets, Commands, Component, Cuboid, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Res,
+    Assets, Commands, Component, Cuboid, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d,
     Transform,
 };
+
+use crate::world::game_configs::RenderConfig;
+use crate::world::game_resources::{data::resource::ResourceType, resource_map::ResourceMap};
 
 #[derive(Component)]
 pub struct ResourceMesh {
@@ -22,12 +19,10 @@ pub struct SpawnedResourceMeshes {
 
 pub fn spawn_resource_meshes(
     commands: &mut Commands,
-    config: &GameConfig,
+    config: &RenderConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    assets_registry: &RacesAssetsRegistry,
     resources: &ResourceMap,
-    player_registry: &PlayerRegistry,
 ) -> SpawnedResourceMeshes {
     let chunk_size = config.chunk_size;
     let tile_size = config.tile_size;
@@ -44,28 +39,26 @@ pub fn spawn_resource_meshes(
 
     for row in min_x..max_x {
         for col in min_y..max_y {
-            let resource = resources.get(row as usize, col as usize);
-
-            let player_id = resource.inside();
-
-            if player_id.is_none() {
+            let Some(resource) = resources.get(row as usize, col as usize) else {
                 continue;
-            }
+            };
 
-            let player_race = player_registry.race_of(player_id.unwrap());
+            let player_race = resource.race_inside();
 
-            let handle = assets_registry
-                .race_assets_of(player_race)
-                .get_resource(resource.index());
+            let Some(race_assets) = config.assets_registry.get(player_race) else {
+                continue;
+            };
+
+            let handle = race_assets.get_resource(resource.index());
 
             let mesh_handle = meshes.add(Cuboid::new(0.3, 0.3, 0.3));
 
             let entity = commands
                 .spawn((
                     Transform::from_xyz(
-                        (row as f32 + 0.3) * tile_size,
-                        0.3,
-                        (col as f32 + 0.3) * tile_size,
+                        (row as f32 + 0.2) * tile_size,
+                        0.2,
+                        (col as f32 + 0.2) * tile_size,
                     ),
                     Mesh3d(mesh_handle.clone()),
                     MeshMaterial3d(handle.clone()),

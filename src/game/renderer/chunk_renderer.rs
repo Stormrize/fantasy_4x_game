@@ -1,3 +1,11 @@
+use std::time::Instant;
+
+use bevy::prelude::{
+    AssetServer, Assets, Commands, IVec2, Mesh, Projection, Query, Res, ResMut, StandardMaterial,
+    Transform, Window, With,
+};
+use bevy::window::PrimaryWindow;
+
 use crate::game::{
     camera_plugin::camera::MainCamera,
     renderer::{
@@ -9,25 +17,19 @@ use crate::game::{
         fog_renderer::{despawn_fog_meshes, spawn_fog_meshes},
         resource_renderer::{despawn_resource_meshes, spawn_resource_meshes},
         terrain_renderer::{despawn_terrain_meshes, spawn_terrain_meshes},
-        units_renderer::{despawn_units_meshes, spawn_units_meshes},
+        units_renderer::{/*despawn_units_meshes,*/ spawn_units_meshes},
     },
 };
-
-use crate::world::ui_and_graphic_resources::player_registry::PlayerRegistry;
+use crate::world::components::PlayerRace;
+use crate::world::game_resources::data::building::BuildingType;
+use crate::world::game_resources::data::unit::UnitType;
 use crate::world::{
-    game_config::GameConfig,
+    game_configs::RenderConfig,
     game_resources::{
-        buildings_map::BuildingMap, fog_map::FogMap, resource_map::ResourceMap,
+        building_map::BuildingMap, fog_map::FogMap, resource_map::ResourceMap,
         terrain_map::TerrainMap, unit_map::UnitsMap,
     },
-    ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
 };
-use bevy::prelude::{
-    AssetServer, Assets, Commands, IVec2, Mesh, Projection, Query, Res, ResMut, StandardMaterial,
-    Transform, Window, With,
-};
-use bevy::window::PrimaryWindow;
-use std::time::Instant;
 
 pub fn stream_chunks(
     mut commands: Commands,
@@ -35,9 +37,7 @@ pub fn stream_chunks(
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
     mut rendered: ResMut<Rendered>,
-    assets_registry: Res<RacesAssetsRegistry>,
-    player_registry: Res<PlayerRegistry>,
-    config: Res<GameConfig>,
+    config: Res<RenderConfig>,
     terrain: Res<TerrainMap>,
     resources: Res<ResourceMap>,
     buildings: Res<BuildingMap>,
@@ -45,6 +45,8 @@ pub fn stream_chunks(
     units: Res<UnitsMap>,
     camera_q: Query<(&Transform, &Projection), With<MainCamera>>,
     window_q: Query<&Window, With<PrimaryWindow>>,
+    visual_b_q: Query<(&PlayerRace, &BuildingType)>,
+    visual_u_q: Query<(&PlayerRace, &UnitType)>,
 ) {
     let Ok((camera_transform, projection)) = camera_q.single() else {
         return;
@@ -82,8 +84,6 @@ pub fn stream_chunks(
         &mut meshes,
         &mut rendered,
         missing_chunks,
-        &assets_registry,
-        &player_registry,
         &terrain,
         &resources,
         &buildings,
@@ -91,11 +91,13 @@ pub fn stream_chunks(
         &units,
         &asset_server,
         &mut materials,
+        visual_b_q,
+        visual_u_q,
     );
 }
 
 fn calculate_load_area(
-    config: &GameConfig,
+    config: &RenderConfig,
     camera_transform: &Transform,
     projection: &Projection,
     window: &Window,
@@ -117,7 +119,7 @@ fn calculate_load_area(
 fn unload_distant_chunks(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
-    config: &GameConfig,
+    config: &RenderConfig,
     rendered: &mut Rendered,
     load_min: IVec2,
     load_max: IVec2,
@@ -158,9 +160,9 @@ fn unload_distant_chunks(
         if let Some(fog_meshes) = rendered.fog.remove(&coord) {
             despawn_fog_meshes(commands, meshes, fog_meshes);
         }
-        if let Some(units_meshes) = rendered.units.remove(&coord) {
-            despawn_units_meshes(commands, meshes, units_meshes);
-        }
+        // if let Some(units_meshes) = rendered.units.remove(&coord) {
+        //     despawn_units_meshes(commands, meshes, units_meshes);
+        // }
     }
 }
 
@@ -193,12 +195,10 @@ fn get_sorted_missing_chunks(
 
 fn load_missing_chunks(
     commands: &mut Commands,
-    config: &GameConfig,
+    config: &RenderConfig,
     meshes: &mut ResMut<Assets<Mesh>>,
     rendered: &mut Rendered,
     missing_chunks: Vec<IVec2>,
-    assets_registry: &RacesAssetsRegistry,
-    player_registry: &PlayerRegistry,
     terrain: &TerrainMap,
     resources: &ResourceMap,
     buildings: &BuildingMap,
@@ -206,6 +206,8 @@ fn load_missing_chunks(
     units: &UnitsMap,
     asset_server: &AssetServer,
     materials: &mut Assets<StandardMaterial>,
+    visual_b_q: Query<(&PlayerRace, &BuildingType)>,
+    visual_u_q: Query<(&PlayerRace, &UnitType)>,
 ) {
     let start_time = Instant::now();
 
@@ -218,35 +220,12 @@ fn load_missing_chunks(
             continue;
         }
 
-        let terrain_meshes = spawn_terrain_meshes(
-            commands,
-            &config,
-            meshes,
-            coord,
-            assets_registry,
-            terrain,
-            player_registry,
-        );
+        let terrain_meshes = spawn_terrain_meshes(commands, &config, meshes, coord, terrain);
 
-        let resource_meshes = spawn_resource_meshes(
-            commands,
-            &config,
-            meshes,
-            coord,
-            assets_registry,
-            resources,
-            player_registry,
-        );
+        let resource_meshes = spawn_resource_meshes(commands, &config, meshes, coord, resources);
 
-        let building_meshes = spawn_buildings_meshes(
-            commands,
-            config,
-            meshes,
-            coord,
-            assets_registry,
-            buildings,
-            player_registry,
-        );
+        let building_meshes =
+            spawn_buildings_meshes(commands, config, meshes, coord, buildings, visual_b_q);
 
         let fog_meshes = spawn_fog_meshes(
             commands,
@@ -258,15 +237,7 @@ fn load_missing_chunks(
             fog,
         );
 
-        let units_meshes = spawn_units_meshes(
-            commands,
-            &config,
-            meshes,
-            coord,
-            assets_registry,
-            units,
-            player_registry,
-        );
+        let units_meshes = spawn_units_meshes(commands, &config, meshes, coord, units, visual_u_q);
 
         rendered.terrain.insert(coord, terrain_meshes);
         rendered.resources.insert(coord, resource_meshes);

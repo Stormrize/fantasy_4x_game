@@ -1,8 +1,10 @@
-use crate::world::{game_config::GameConfig, game_resources::fog_map::FogMap};
 use bevy::prelude::{
     AssetServer, Assets, Commands, Component, Entity, Handle, IVec2, Image, Mesh, Mesh3d,
     MeshMaterial3d, Meshable, Plane3d, StandardMaterial, Transform, default,
 };
+
+use crate::world::game_configs::RenderConfig;
+use crate::world::game_resources::fog_map::FogMap;
 
 #[derive(Component)]
 pub struct FogMesh {
@@ -17,7 +19,7 @@ pub struct SpawnedFogMeshes {
 
 pub fn spawn_fog_meshes(
     commands: &mut Commands,
-    config: &GameConfig,
+    config: &RenderConfig,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<StandardMaterial>,
     coord: IVec2,

@@ -1,6 +1,7 @@
-use crate::world::game_config::GameConfig;
 use bevy::camera::ScalingMode;
 use bevy::prelude::{IVec2, OrthographicProjection, Projection, Transform, Vec3, Window};
+
+use crate::world::game_configs::RenderConfig;
 
 pub fn camera_forward(transform: &Transform) -> Vec3 {
     transform.rotation * Vec3::NEG_Z
@@ -23,7 +24,7 @@ pub fn camera_ground_point(transform: &Transform) -> Vec3 {
         .unwrap_or(transform.translation)
 }
 
-pub fn chunk_coord_from_world_xz(world_x: f32, world_z: f32, config: &GameConfig) -> IVec2 {
+pub fn chunk_coord_from_world_xz(world_x: f32, world_z: f32, config: &RenderConfig) -> IVec2 {
     let chunk_size = config.chunk_size;
     let tile_size = config.tile_size;
     let chunk_world_size = chunk_size as f32 * tile_size;
@@ -75,7 +76,7 @@ pub fn camera_chunk_bounds(
     transform: &Transform,
     projection: &Projection,
     window: &Window,
-    config: &GameConfig,
+    config: &RenderConfig,
 ) -> (IVec2, IVec2) {
     let camera_ground_point = camera_ground_point(transform);
     let chunk_coord =

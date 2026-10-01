@@ -1,10 +1,11 @@
-use crate::world::ui_and_graphic_resources::player_registry::PlayerRegistry;
-use crate::world::{
-    game_config::GameConfig,
-    game_resources::{buildings_map::BuildingMap, data::building::BuildingType},
-    ui_and_graphic_resources::player_registry::RacesAssetsRegistry,
+use crate::world::components::PlayerRace;
+use crate::world::game_configs::RenderConfig;
+use crate::world::game_resources::building_map::BuildingMap;
+use crate::world::game_resources::data::building::BuildingType;
+use bevy::prelude::{
+    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Query,
+    Sphere, Transform,
 };
-use bevy::prelude::{Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Res, Sphere, Transform, Visibility};
 
 #[derive(Component)]
 pub struct BuildingsMesh {
@@ -19,12 +20,11 @@ pub struct SpawnedBuildingsMeshes {
 
 pub fn spawn_buildings_meshes(
     commands: &mut Commands,
-    config: &GameConfig,
+    config: &RenderConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    assets_registry: &RacesAssetsRegistry,
     buildings: &BuildingMap,
-    player_registry: &PlayerRegistry,
+    visual_q: Query<(&PlayerRace, &BuildingType)>,
 ) -> SpawnedBuildingsMeshes {
     let chunk_size = config.chunk_size;
     let tile_size = config.tile_size;
@@ -41,16 +41,18 @@ pub fn spawn_buildings_meshes(
     for row in min_x..max_x {
         for col in min_y..max_y {
             let building = buildings.get(row as usize, col as usize);
-
-            let player_id = building.inside();
-
-            if player_id.is_none() {
+            let Some(building) = building else {
                 continue;
-            }
-            let player_race = player_registry.race_of(player_id.unwrap());
-            let handle = assets_registry
-                .race_assets_of(player_race)
-                .get_building(building.index());
+            };
+
+            let (player_race, building_type) = visual_q.get(building).unwrap();
+
+            let Some(race_assets) = config.assets_registry.get(player_race) else {
+                continue;
+            };
+
+            let handle = race_assets.get_building(building_type.index());
+
             let mesh_handle = meshes.add(Sphere::new(0.5));
 
             let entity = commands

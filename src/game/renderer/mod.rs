@@ -1,33 +1,28 @@
-use crate::ui::menus::AppState;
-use crate::world::{
-    game_config::GameConfig,
-    game_resources::{
-        buildings_map::BuildingMap, resource_map::ResourceMap, terrain_map::TerrainMap,
-    },
-};
 use bevy::platform::collections::HashMap;
 use bevy::prelude::{
     App, Assets, ClearColor, Color, Commands, IVec2, IntoScheduleConfigs, Mesh, MessageReader,
-    OnEnter, Plugin, Res, ResMut, Resource, Update, in_state,
+    OnEnter, Plugin, ResMut, Resource, Update, in_state,
 };
 
-use crate::game::{
-    input::events::{RegenerateWorldEvent, handle_input},
-    renderer::{
-        buildings_renderer::{SpawnedBuildingsMeshes, despawn_buildings_meshes},
-        chunk_renderer::stream_chunks,
-        fog_renderer::SpawnedFogMeshes,
-        resource_renderer::{SpawnedResourceMeshes, despawn_resource_meshes},
-        terrain_renderer::{SpawnedTerrainMeshes, despawn_terrain_meshes},
-        units_renderer::{SpawnedUnitsMeshes, despawn_units_meshes},
+use crate::game::renderer::render_actions::render_move;
+use crate::game::renderer::{
+    buildings_renderer::{SpawnedBuildingsMeshes, despawn_buildings_meshes},
+    chunk_renderer::stream_chunks,
+    fog_renderer::SpawnedFogMeshes,
+    resource_renderer::{SpawnedResourceMeshes, despawn_resource_meshes},
+    terrain_renderer::{SpawnedTerrainMeshes, despawn_terrain_meshes},
+    units_renderer::{
+        SpawnedUnitsMeshes, //despawn_units_meshes},
     },
 };
-use crate::world::game_configs::ConfigType;
+use crate::ui::menus::AppState;
+use crate::utils_debug::regenerate_world::{RegenerateWorldEvent, handle_input};
 
 pub mod buildings_renderer;
 pub mod camera_math;
 pub mod chunk_renderer;
 mod fog_renderer;
+mod render_actions;
 pub mod resource_renderer;
 pub mod terrain_renderer;
 mod units_renderer;
@@ -49,7 +44,8 @@ impl Plugin for MapRenderPlugin {
             .add_systems(OnEnter(AppState::InGameRenderer), insert_assets)
             .add_systems(
                 Update,
-                (handle_input, apply_regenerate, stream_chunks)
+                (handle_input, despawn, stream_chunks, render_move)
+                    .chain()
                     .run_if(in_state(AppState::InGameRenderer)),
             );
     }
@@ -60,11 +56,11 @@ fn insert_assets(mut commands: Commands) {
     //visual note переделается
     commands.insert_resource(ClearColor(Color::BLACK))
 }
-fn apply_regenerate(
-    mut events: MessageReader<RegenerateWorldEvent>,
+fn despawn(
     mut commands: Commands,
     mut rendered: ResMut<Rendered>,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut events: MessageReader<RegenerateWorldEvent>,
 ) {
     if events.read().count() == 0 {
         return;
@@ -79,7 +75,7 @@ fn apply_regenerate(
     for (_, buildings) in &mut rendered.buildings.drain() {
         despawn_buildings_meshes(&mut commands, &mut meshes, buildings);
     }
-    for (_, units_meshes) in &mut rendered.units.drain() {
-        despawn_units_meshes(&mut commands, &mut meshes, units_meshes);
-    }
+    // for (_, units_meshes) in &mut rendered.units.drain() {
+    //     despawn_units_meshes(&mut commands, &mut meshes, units_meshes);
+    // }
 }
