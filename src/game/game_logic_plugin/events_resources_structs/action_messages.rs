@@ -1,7 +1,13 @@
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::{Entity, IVec2, Message, MessageWriter};
 
-//movement
+// tile clicked
+#[derive(Message, Debug)]
+pub struct TileClickedEvent {
+    pub pos: IVec2,
+}
+
+// attack type commands
 #[derive(Message)]
 pub struct MoveEntityCommand {
     pub entity_pos: IVec2,
@@ -14,7 +20,6 @@ pub struct AttackEntityCommand {
     pub target_pos: IVec2,
 }
 
-// render
 #[derive(Message)]
 pub struct PickResourceCommand {
     pub entity_pos: IVec2,

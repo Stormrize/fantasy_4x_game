@@ -1,16 +1,5 @@
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
-    AttackEntityCommand, BuildBuildingCommand, MoveEntityCommand, PickResourceCommand,
-    SpawnUnitCommand,
-};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
-
-#[derive(Message, Debug)]
-pub struct TileClickedEvent {
-    pub pos: IVec2,
-}
-
-//---------------------------------------------------------------------------------------------------------------------------//
 
 #[derive(Message)]
 pub struct RenderTerrain {

@@ -1,5 +1,5 @@
 use crate::game::game_logic_plugin::events_resources_structs::components::{
-    AlreadySelectedTile, JustSelectedTile, TileContent,
+    AlreadySelectedTile, JustSelectedTile,
 };
 
 pub fn new_tile_selection_system(

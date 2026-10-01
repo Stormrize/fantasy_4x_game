@@ -1,10 +1,10 @@
-use crate::game::camera_plugin::camera::MainCamera;
-use crate::game::game_logic_plugin::events_resources_structs::render_messages::TileClickedEvent;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
 use bevy::prelude::{MouseButton, Res};
 
-// TODO для телефонов + сделать правая мышь детали
+use crate::game::camera_plugin::camera::MainCamera;
+use crate::game::game_logic_plugin::events_resources_structs::action_messages::TileClickedEvent;
+
 pub fn click_to_world(
     mouse_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window>,
