@@ -1,5 +1,6 @@
 use bevy::asset::LoadState;
 use bevy::ecs::schedule::IntoScheduleConfigs;
+use bevy::image::Image;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::{
     App, AppExtStates, AssetServer, NextState, OnEnter, Plugin, Res, ResMut, Resource, States,
@@ -7,7 +8,7 @@ use bevy::prelude::{
 };
 use serde::Deserialize;
 use smol_str::SmolStr;
-
+use crate::utils_debug::loading_utils::all_values_loaded;
 use crate::world::components::PlayerRace;
 use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
 
@@ -75,17 +76,27 @@ fn start_loading_races(
     }
 }
 
-fn all_races_loaded(registry: &RacesUiRegistry, asset_server: &AssetServer) -> bool {
-    registry.0.values().all(
-        |race| match asset_server.get_load_state(race.ui_icon.id()) {
+fn all_races_loaded(handles: &RacesUiRegistry, asset_server: &AssetServer) -> bool {
+    handles.0
+        .values()
+        .all(|handle| match asset_server.get_load_state(handle.ui_icon.id()) {
             Some(LoadState::Loaded) => true,
+
             Some(LoadState::Failed(err)) => {
-                eprintln!("Failed to load race icon {:?}: {err:?}", race.ui_icon.id());
+                eprintln!("Failed to load asset {:?}: {:?}", handle.ui_icon.id(), err);
                 false
             }
-            _ => false,
-        },
-    )
+
+            Some(state) => {
+                eprintln!("Asset {:?} is not loaded yet: {:?}", handle.ui_icon.id(), state);
+                false
+            }
+
+            None => {
+                eprintln!("Asset {:?} has no load state", handle.ui_icon.id());
+                false
+            }
+        })
 }
 
 fn race_loading_ready(

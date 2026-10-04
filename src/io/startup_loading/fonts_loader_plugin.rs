@@ -1,4 +1,4 @@
-use bevy::asset::{AssetServer, Handle, LoadState};
+use bevy::asset::{AssetServer, Handle};
 use bevy::platform::collections::HashMap;
 use bevy::prelude::{
     App, AppExtStates, Commands, Font, IntoScheduleConfigs, NextState, OnEnter, Plugin, Res,
@@ -6,6 +6,7 @@ use bevy::prelude::{
 };
 
 use crate::io::startup_loading::localization_loader_plugin::Language;
+use crate::utils_debug::loading_utils::all_values_loaded;
 
 #[derive(Resource, Default)]
 pub struct Fonts(HashMap<Language, Handle<Font>>);
@@ -40,24 +41,7 @@ fn all_fonts_loaded(asset_server: &AssetServer, handles: &Fonts) -> bool {
     if handles.0.is_empty() {
         return false;
     }
-    handles
-        .0
-        .values()
-        .all(|handle| match asset_server.load_state(handle.id()) {
-            LoadState::Loaded => true,
-            LoadState::Failed(err) => {
-                eprintln!("Failed to load font {}. Error: {}", handle.id(), err);
-                false
-            }
-            LoadState::Loading => {
-                eprintln!("Loading fonts");
-                false
-            }
-            _ => {
-                eprintln!("something else");
-                false
-            }
-        })
+    all_values_loaded(&handles.0, asset_server)
 }
 
 fn fonts_loading_ready(

@@ -9,6 +9,7 @@ use bevy_common_assets::ron::RonAssetPlugin;
 use serde::Deserialize;
 
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
+use crate::utils_debug::loading_utils::{all_data_loaded, load_units_data};
 use crate::world::components::PlayerRace;
 use crate::world::game_configs::{ConfigType, GameMode};
 use crate::world::game_resources::data::unit::CombatUnitData;
@@ -33,22 +34,12 @@ fn start_loading_units_data(
         GameMode::Local(config) => {
             let races = &config.races;
             vec = Vec::with_capacity(races.len());
-
-            for race in races {
-                let units_data_path = &races_ui_registry.ui_race_data_of(&race.1).unit_data_path;
-                let units_data: Handle<UnitsData> = asset_server.load(units_data_path);
-                vec.push((race.1.clone(), units_data));
-            }
+            load_units_data(races, &races_ui_registry, &asset_server, &mut vec);
         }
         GameMode::Multiplayer(config) => {
-            let allowed_races = &config.allowed_races;
+            let allowed_races = &config.races;
             vec = Vec::with_capacity(allowed_races.len());
-
-            for race in allowed_races {
-                let units_data_path = &races_ui_registry.ui_race_data_of(&race).unit_data_path;
-                let units_data: Handle<UnitsData> = asset_server.load(units_data_path);
-                vec.push((race.clone(), units_data));
-            }
+            load_units_data(allowed_races, &races_ui_registry, &asset_server, &mut vec);
         }
     }
     commands.insert_resource(RawRacesUnitsData(vec));
@@ -58,26 +49,7 @@ fn all_units_data_loaded(
     raw_races_units_data: &RawRacesUnitsData,
     asset_server: &AssetServer,
 ) -> bool {
-    raw_races_units_data.0.iter().all(|(_, handle)| {
-        match asset_server.get_load_state(handle.id()) {
-            Some(LoadState::Loaded) => true,
-
-            Some(LoadState::Failed(err)) => {
-                eprintln!("Failed to load asset {:?}: {:?}", handle.id(), err);
-                false
-            }
-
-            Some(state) => {
-                eprintln!("Asset {:?} is not loaded yet: {:?}", handle.id(), state);
-                false
-            }
-
-            None => {
-                eprintln!("Asset {:?} has no load state", handle.id());
-                false
-            }
-        }
-    })
+    all_data_loaded(&raw_races_units_data.0, asset_server)
 }
 
 fn units_data_ready(

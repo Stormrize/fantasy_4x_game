@@ -9,6 +9,7 @@ use bevy_common_assets::ron::RonAssetPlugin;
 use serde::Deserialize;
 
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
+use crate::utils_debug::loading_utils::{all_data_loaded, load_raw_game_assets};
 use crate::world::game_configs::ConfigType;
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 use crate::world::{components::PlayerRace, game_configs::GameMode};
@@ -37,6 +38,12 @@ pub struct RawRaceAssets {
     pub house: String,
     pub research_center: String,
     pub unique_race_building: String,
+
+    //units
+    pub damage_dealer: String,
+    pub support: String,
+    pub tank: String,
+    pub skill: String,
 }
 #[derive(Resource, Default, Debug)]
 struct RawRacesAssetsData(pub Vec<(PlayerRace, Handle<RawRaceAssets>)>);
@@ -49,7 +56,7 @@ pub struct RacesAssetsRegistry(pub HashMap<PlayerRace, RaceAssets>);
 fn start_loading_game_assets(
     mut commands: Commands,
     config: Res<ConfigType>,
-    races_data: Res<RacesUiRegistry>,
+    races_ui_registry: Res<RacesUiRegistry>,
     asset_server: Res<AssetServer>,
 ) {
     let mut vec;
@@ -58,22 +65,12 @@ fn start_loading_game_assets(
         GameMode::Local(config) => {
             let races = &config.races;
             vec = Vec::with_capacity(races.len());
-
-            for race in races {
-                let visual_path = &races_data.ui_race_data_of(&race.1).visual_path;
-                let raw_visual_data: Handle<RawRaceAssets> = asset_server.load(visual_path);
-                vec.push((race.1.clone(), raw_visual_data));
-            }
+            load_raw_game_assets(races, &races_ui_registry, &asset_server, &mut vec);
         }
         GameMode::Multiplayer(config) => {
-            let allowed_races = &config.allowed_races;
+            let allowed_races = &config.races;
             vec = Vec::with_capacity(allowed_races.len());
-
-            for race in allowed_races {
-                let visual_path = &races_data.ui_race_data_of(&race).visual_path;
-                let raw_visual_data: Handle<RawRaceAssets> = asset_server.load(visual_path);
-                vec.push((race.clone(), raw_visual_data));
-            }
+            load_raw_game_assets(allowed_races, &races_ui_registry, &asset_server, &mut vec);
         }
     }
     println!("started loading game assets");
@@ -83,26 +80,7 @@ fn start_loading_game_assets(
 //---------------------------------------------------------------------------------------------------------------------------//
 
 fn all_raw_assets_loaded(raw_handles: &RawRacesAssetsData, asset_server: &AssetServer) -> bool {
-    raw_handles.0.iter().all(
-        |(_, handle)| match asset_server.get_load_state(handle.id()) {
-            Some(LoadState::Loaded) => true,
-
-            Some(LoadState::Failed(err)) => {
-                eprintln!("Failed to load asset {:?}: {:?}", handle.id(), err);
-                false
-            }
-
-            Some(state) => {
-                eprintln!("Asset {:?} is not loaded yet: {:?}", handle.id(), state);
-                false
-            }
-
-            None => {
-                eprintln!("Asset {:?} has no load state", handle.id());
-                false
-            }
-        },
-    )
+    all_data_loaded(&raw_handles.0, asset_server)
 }
 
 fn load_assets(
@@ -150,42 +128,22 @@ fn load_assets(
             ],
 
             buildings: [
-                materials.add(StandardMaterial {
-                    base_color: parse_color(parse_string(&race_asset.capital)),
-                    ..default()
-                }),
-                materials.add(StandardMaterial {
-                    base_color: parse_color(parse_string(&race_asset.captured_city)),
-                    ..default()
-                }),
-                materials.add(StandardMaterial {
-                    base_color: parse_color(parse_string(&race_asset.barbarian_city)),
-                    ..default()
-                }),
-                materials.add(StandardMaterial {
-                    base_color: parse_color(parse_string(&race_asset.medium_building)),
-                    ..default()
-                }),
-                materials.add(StandardMaterial {
-                    base_color: parse_color(parse_string(&race_asset.large_building)),
-                    ..default()
-                }),
-                materials.add(StandardMaterial {
-                    base_color: parse_color(parse_string(&race_asset.spawning_building)),
-                    ..default()
-                }),
-                materials.add(StandardMaterial {
-                    base_color: parse_color(parse_string(&race_asset.house)),
-                    ..default()
-                }),
-                materials.add(StandardMaterial {
-                    base_color: parse_color(parse_string(&race_asset.research_center)),
-                    ..default()
-                }),
-                materials.add(StandardMaterial {
-                    base_color: parse_color(parse_string(&race_asset.unique_race_building)),
-                    ..default()
-                }),
+                asset_server.load(&race_asset.capital),
+                asset_server.load(&race_asset.captured_city),
+                asset_server.load(&race_asset.barbarian_city),
+                asset_server.load(&race_asset.medium_building),
+                asset_server.load(&race_asset.large_building),
+                asset_server.load(&race_asset.spawning_building),
+                asset_server.load(&race_asset.house),
+                asset_server.load(&race_asset.research_center),
+                asset_server.load(&race_asset.unique_race_building),
+            ],
+
+            units: [
+                asset_server.load(&race_asset.damage_dealer),
+                asset_server.load(&race_asset.support),
+                asset_server.load(&race_asset.tank),
+                asset_server.load(&race_asset.skill),
             ],
         };
         assets_registry

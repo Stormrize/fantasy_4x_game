@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy::reflect::TypePath;
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::{Deserialize, Serialize};
+use crate::utils_debug::loading_utils::all_values_loaded;
 
 // localization
 #[derive(Resource, Debug, Clone)]
@@ -60,21 +61,7 @@ fn all_localizations_loaded(asset_server: &AssetServer, handles: &LocalizationHa
     if handles.0.is_empty() {
         return false;
     }
-    handles
-        .0
-        .values()
-        .all(|handle| match asset_server.load_state(handle.id()) {
-            LoadState::Loaded => true,
-            LoadState::Failed(err) => {
-                eprintln!(
-                    "Failed to load localization {}. Error: {}",
-                    handle.id(),
-                    err
-                );
-                false
-            }
-            _ => false,
-        })
+    all_values_loaded(&handles.0, asset_server)
 }
 
 fn localization_loading_ready(

@@ -12,6 +12,7 @@ use bevy::prelude::{
 };
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::Deserialize;
+use crate::utils_debug::loading_utils::{all_data_loaded, load_buildings_data};
 
 #[derive(Resource, Debug, Default)]
 pub struct RawRacesBuildingsData(pub Vec<(PlayerRace, Handle<BuildingsData>)>);
@@ -33,25 +34,12 @@ fn start_loading_buildings_data(
         GameMode::Local(config) => {
             let races = &config.races;
             vec = Vec::with_capacity(races.len());
-
-            for race in races {
-                let building_data_path = &races_ui_registry
-                    .ui_race_data_of(&race.1)
-                    .building_data_path;
-                let units_data: Handle<BuildingsData> = asset_server.load(building_data_path);
-                vec.push((race.1.clone(), units_data));
-            }
+            load_buildings_data(races, &races_ui_registry, &asset_server, &mut vec);
         }
         GameMode::Multiplayer(config) => {
-            let allowed_races = &config.allowed_races;
+            let allowed_races = &config.races;
             vec = Vec::with_capacity(allowed_races.len());
-
-            for race in allowed_races {
-                let building_data_path =
-                    &races_ui_registry.ui_race_data_of(&race).building_data_path;
-                let units_data: Handle<BuildingsData> = asset_server.load(building_data_path);
-                vec.push((race.clone(), units_data));
-            }
+            load_buildings_data(allowed_races, &races_ui_registry, &asset_server, &mut vec);
         }
     }
     commands.insert_resource(RawRacesBuildingsData(vec));
@@ -61,26 +49,7 @@ fn all_buildings_data_loaded(
     raw_races_buildings_data: &RawRacesBuildingsData,
     asset_server: &AssetServer,
 ) -> bool {
-    raw_races_buildings_data.0.iter().all(|(_, handle)| {
-        match asset_server.get_load_state(handle.id()) {
-            Some(LoadState::Loaded) => true,
-
-            Some(LoadState::Failed(err)) => {
-                eprintln!("Failed to load asset {:?}: {:?}", handle.id(), err);
-                false
-            }
-
-            Some(state) => {
-                eprintln!("Asset {:?} is not loaded yet: {:?}", handle.id(), state);
-                false
-            }
-
-            None => {
-                eprintln!("Asset {:?} has no load state", handle.id());
-                false
-            }
-        }
-    })
+    all_data_loaded(&raw_races_buildings_data.0, asset_server)
 }
 
 fn buildings_data_ready(
