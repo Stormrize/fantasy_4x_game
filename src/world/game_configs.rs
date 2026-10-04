@@ -1,7 +1,7 @@
 use crate::io::in_game_loading::buildings_data_loader_plugin::BuildingsData;
 use crate::io::in_game_loading::units_data_loader_plugin::UnitsData;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
-use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace};
+use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace, PlayerType};
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::Resource;
@@ -16,9 +16,9 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn from(player_config: PlayerConfig) -> Self {
+    pub fn new(id: Id) -> Self {
         Self {
-            id: player_config.id,
+            id,
             mana: 100,
             gold: 20,
             food: 10,
@@ -28,11 +28,63 @@ impl Player {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Players(pub Vec<(Player, PlayerType)>);
+
+impl Players {
+    pub fn new(game_mode: &GameMode, player_config: PlayerConfig) -> Self {
+        let players = match game_mode {
+            GameMode::Local(config) => Self::from_local_config(&config.races, player_config),
+            GameMode::Multiplayer(config) => Self::from_multiplayer_config(&config.races),
+        };
+
+        Self(players)
+    }
+
+    pub fn from_local_config(
+        races: &Vec<(Id, PlayerRace)>,
+        config: PlayerConfig,
+    ) -> Vec<(Player, PlayerType)> {
+        races
+            .iter()
+            .filter_map(|(id, _)| {
+                if config.id == *id {
+                    Some((Player::new(*id), PlayerType::Real))
+                } else {
+                    Some((Player::new(*id), PlayerType::Bot))
+                }
+            })
+            .collect()
+    }
+
+    pub fn from_multiplayer_config(races: &Vec<(Id, PlayerRace)>) -> Vec<(Player, PlayerType)> {
+        races
+            .iter()
+            .map(|(id, _)| (Player::new(*id), PlayerType::Real))
+            .collect()
+    }
+}
+
+#[derive(Resource, Debug)]
+pub struct PlayerTurn {
+    pub player: Player,
+    pub player_type: PlayerType
+}
+
+impl PlayerTurn {
+    pub fn new(id: Id, player_type: PlayerType) -> Self {
+        Self{
+            player: Player::new(id),
+            player_type
+        }
+    }
+}
+
 #[derive(Resource, Debug)]
 pub struct CameraConfig {
-    pub min_orthographic_scale: f32, //в зависимости от настроек
-    pub max_orthographic_scale: f32, //в зависимости от настроек
-    pub camera_viewport_height: f32, //в зависимости от настроек
+    pub min_orthographic_scale: f32,
+    pub max_orthographic_scale: f32,
+    pub camera_viewport_height: f32,
     pub edge_scroll_enabled: bool,
     pub edge_scroll_speed: f32,
     pub camera_pan_speed: f32,
@@ -62,7 +114,7 @@ pub struct GenerationConfig {
     pub seed: u32,
     pub terrain_size: usize,
     pub players: Vec<(Id, PlayerRace)>,
-    // note добавить типа структуру которая все параметры упорядывает
+    // note add struct to group all that
     pub water_threshold: u8,
     pub global_octaves: u8,
     pub global_frequency: f64,        //8
@@ -89,7 +141,7 @@ impl GenerationConfig {
             terrain_size: player_config.map_size as usize,
             players: local_player_config.races.clone(),
 
-            // todo менять в зависимости от карты
+            // todo change based on map shape
             water_threshold: 100,
             global_octaves: 6,
             global_frequency: 8.0,
@@ -145,9 +197,10 @@ impl RenderConfig {
 pub struct GameLogicConfig {
     pub units_data: HashMap<PlayerRace, UnitsData>,
     pub buildings_data: HashMap<PlayerRace, BuildingsData>,
+    pub players: Players,
     pub terrain_size: usize,
+    pub is_multiplayer: bool,
     pub map_shape: MapShape,
-    pub player: Player,
 }
 
 impl GameLogicConfig {
@@ -155,13 +208,15 @@ impl GameLogicConfig {
         units_data: HashMap<PlayerRace, UnitsData>,
         buildings_data: HashMap<PlayerRace, BuildingsData>,
         config: PlayerConfig,
+        game_mode: &GameMode,
     ) -> Self {
         Self {
             units_data,
             buildings_data,
+            players: Players::new(game_mode, config),
             terrain_size: config.map_size as usize,
+            is_multiplayer: matches!(game_mode, GameMode::Multiplayer(_)),
             map_shape: config.map_shape,
-            player: Player::from(config),
         }
     }
 }
@@ -178,7 +233,7 @@ impl Default for PlayerConfig {
         Self {
             map_size: MapSize::Medium,
             map_shape: MapShape::Jagged,
-            id: Id::default_local_id(),
+            id: Id::default(),
         }
     }
 }
@@ -212,8 +267,7 @@ impl Default for LocalPlayerConfig {
 
 #[derive(Debug, Clone)]
 pub struct OnlinePlayerConfig {
-    pub player_id: Id,
-    pub allowed_races: Vec<PlayerRace>,
+    pub races: Vec<(Id, PlayerRace)>,
 }
 
 #[derive(Debug, Clone)]

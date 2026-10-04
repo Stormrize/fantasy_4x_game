@@ -18,20 +18,18 @@ impl Default for PlayerRace {
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Id {
-    LocalPlayerId(u8),
-    MultiPlayerId(u64),
-    Unoccupied,
+pub struct Id(pub u16);
+
+impl Default for Id {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
 }
 
-impl Id {
-    pub fn default_local_id() -> Self {
-        Self::LocalPlayerId(255)
-    }
-
-    pub fn default_multi_id() -> Self {
-        Self::MultiPlayerId(u64::MAX)
-    }
+#[derive(Debug, Clone, Copy)]
+pub enum PlayerType {
+    Real,
+    Bot,
 }
 
 #[derive(Component, Deserialize, Debug, Clone)]
