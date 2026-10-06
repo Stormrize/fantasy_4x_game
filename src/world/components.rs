@@ -26,10 +26,16 @@ impl Default for Id {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PlayerType {
-    Real,
+    Human,
     Bot,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum GameMode {
+    Online,
+    Offline,
 }
 
 #[derive(Component, Deserialize, Debug, Clone)]

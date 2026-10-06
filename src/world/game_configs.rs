@@ -5,78 +5,49 @@ use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace, 
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::Resource;
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Player {
     pub id: Id,
-    pub mana: u32,
-    pub gold: u32,
-    pub food: u32,
-    pub production: u32,
-    pub science: u32,
+    pub player_type: PlayerType,
 }
 
 impl Player {
-    pub fn new(id: Id) -> Self {
-        Self {
-            id,
-            mana: 100,
-            gold: 20,
-            food: 10,
-            production: 0,
-            science: 0,
-        }
+    pub fn new(id: Id, player_type: PlayerType) -> Self {
+        Self { id, player_type }
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct Players(pub Vec<(Player, PlayerType)>);
+pub struct Players(pub Vec<Player>);
 
 impl Players {
-    pub fn new(game_mode: &GameMode, player_config: PlayerConfig) -> Self {
+    pub fn new(game_mode: &GameModeConfig, player_config: PlayerConfig) -> Self {
         let players = match game_mode {
-            GameMode::Local(config) => Self::from_local_config(&config.races, player_config),
-            GameMode::Multiplayer(config) => Self::from_multiplayer_config(&config.races),
+            GameModeConfig::Local(config) => Self::from_local_config(&config.races, player_config),
+            GameModeConfig::Multiplayer(config) => Self::from_multiplayer_config(&config.races),
         };
 
         Self(players)
     }
 
-    pub fn from_local_config(
-        races: &Vec<(Id, PlayerRace)>,
-        config: PlayerConfig,
-    ) -> Vec<(Player, PlayerType)> {
+    pub fn from_local_config(races: &Vec<(Id, PlayerRace)>, config: PlayerConfig) -> Vec<Player> {
         races
             .iter()
             .filter_map(|(id, _)| {
                 if config.id == *id {
-                    Some((Player::new(*id), PlayerType::Real))
+                    Some(Player::new(*id, PlayerType::Human))
                 } else {
-                    Some((Player::new(*id), PlayerType::Bot))
+                    Some(Player::new(*id, PlayerType::Bot))
                 }
             })
             .collect()
     }
 
-    pub fn from_multiplayer_config(races: &Vec<(Id, PlayerRace)>) -> Vec<(Player, PlayerType)> {
+    pub fn from_multiplayer_config(races: &Vec<(Id, PlayerRace)>) -> Vec<Player> {
         races
             .iter()
-            .map(|(id, _)| (Player::new(*id), PlayerType::Real))
+            .map(|(id, _)| Player::new(*id, PlayerType::Human))
             .collect()
-    }
-}
-
-#[derive(Resource, Debug)]
-pub struct PlayerTurn {
-    pub player: Player,
-    pub player_type: PlayerType
-}
-
-impl PlayerTurn {
-    pub fn new(id: Id, player_type: PlayerType) -> Self {
-        Self{
-            player: Player::new(id),
-            player_type
-        }
     }
 }
 
@@ -199,8 +170,8 @@ pub struct GameLogicConfig {
     pub buildings_data: HashMap<PlayerRace, BuildingsData>,
     pub players: Players,
     pub terrain_size: usize,
-    pub is_multiplayer: bool,
     pub map_shape: MapShape,
+    pub player: Player,
 }
 
 impl GameLogicConfig {
@@ -208,15 +179,15 @@ impl GameLogicConfig {
         units_data: HashMap<PlayerRace, UnitsData>,
         buildings_data: HashMap<PlayerRace, BuildingsData>,
         config: PlayerConfig,
-        game_mode: &GameMode,
+        game_mode: &GameModeConfig,
     ) -> Self {
         Self {
             units_data,
             buildings_data,
             players: Players::new(game_mode, config),
             terrain_size: config.map_size as usize,
-            is_multiplayer: matches!(game_mode, GameMode::Multiplayer(_)),
             map_shape: config.map_shape,
+            player: Player::new(config.id, PlayerType::Human),
         }
     }
 }
@@ -271,12 +242,12 @@ pub struct OnlinePlayerConfig {
 }
 
 #[derive(Debug, Clone)]
-pub enum GameMode {
+pub enum GameModeConfig {
     Local(LocalPlayerConfig),
     Multiplayer(OnlinePlayerConfig),
 }
 #[derive(Resource, Debug, Clone)]
 pub struct ConfigType {
     pub player_config: PlayerConfig,
-    pub game_mode: GameMode,
+    pub game_mode: GameModeConfig,
 }

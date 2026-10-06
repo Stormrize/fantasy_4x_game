@@ -11,7 +11,7 @@ use serde::Deserialize;
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::utils_debug::loading_utils::{all_data_loaded, load_units_data};
 use crate::world::components::PlayerRace;
-use crate::world::game_configs::{ConfigType, GameMode};
+use crate::world::game_configs::{ConfigType, GameModeConfig};
 use crate::world::game_resources::data::unit::CombatUnitData;
 
 #[derive(Resource, Debug, Default)]
@@ -31,12 +31,12 @@ fn start_loading_units_data(
     let mut vec;
 
     match &config.game_mode {
-        GameMode::Local(config) => {
+        GameModeConfig::Local(config) => {
             let races = &config.races;
             vec = Vec::with_capacity(races.len());
             load_units_data(races, &races_ui_registry, &asset_server, &mut vec);
         }
-        GameMode::Multiplayer(config) => {
+        GameModeConfig::Multiplayer(config) => {
             let allowed_races = &config.races;
             vec = Vec::with_capacity(allowed_races.len());
             load_units_data(allowed_races, &races_ui_registry, &asset_server, &mut vec);

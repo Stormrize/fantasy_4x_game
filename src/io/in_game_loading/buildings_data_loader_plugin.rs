@@ -1,10 +1,10 @@
-use crate::io::in_game_loading::units_data_loader_plugin::{RacesUnitsData, RawRacesUnitsData};
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
+use crate::utils_debug::loading_utils::{all_data_loaded, load_buildings_data};
 use crate::world::components::PlayerRace;
-use crate::world::game_configs::{ConfigType, GameMode};
+use crate::world::game_configs::{ConfigType, GameModeConfig};
 use crate::world::game_resources::data::building::BuildingData;
 use bevy::app::{App, Plugin, Update};
-use bevy::asset::{Asset, AssetServer, Assets, Handle, LoadState};
+use bevy::asset::{Asset, AssetServer, Assets, Handle};
 use bevy::platform::collections::HashMap;
 use bevy::prelude::{
     AppExtStates, Commands, IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, Resource, States,
@@ -12,7 +12,6 @@ use bevy::prelude::{
 };
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::Deserialize;
-use crate::utils_debug::loading_utils::{all_data_loaded, load_buildings_data};
 
 #[derive(Resource, Debug, Default)]
 pub struct RawRacesBuildingsData(pub Vec<(PlayerRace, Handle<BuildingsData>)>);
@@ -31,12 +30,12 @@ fn start_loading_buildings_data(
     let mut vec;
 
     match &config.game_mode {
-        GameMode::Local(config) => {
+        GameModeConfig::Local(config) => {
             let races = &config.races;
             vec = Vec::with_capacity(races.len());
             load_buildings_data(races, &races_ui_registry, &asset_server, &mut vec);
         }
-        GameMode::Multiplayer(config) => {
+        GameModeConfig::Multiplayer(config) => {
             let allowed_races = &config.races;
             vec = Vec::with_capacity(allowed_races.len());
             load_buildings_data(allowed_races, &races_ui_registry, &asset_server, &mut vec);
@@ -89,7 +88,6 @@ impl Plugin for BuildingsDataLoadingPlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<BuildingsDataLoadingState>()
             .init_resource::<RawRacesBuildingsData>()
-            .init_resource::<RacesBuildingsData>()
             .add_plugins(RonAssetPlugin::<BuildingsData>::new(&["ron"]))
             .add_systems(
                 OnEnter(BuildingsDataLoadingState::Loading),

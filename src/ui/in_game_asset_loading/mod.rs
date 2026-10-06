@@ -1,6 +1,6 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{
-    Commands, Event, IntoScheduleConfigs, NextState, On, OnEnter, Res, ResMut, Resource, State,
+    Commands, Event, IntoScheduleConfigs, NextState, On, OnEnter, Res, ResMut, State,
     in_state,
 };
 use bevy_persistent::Persistent;
@@ -20,7 +20,7 @@ use crate::io::in_game_loading::units_data_loader_plugin::{
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::ui::menus::AppState;
 use crate::world::game_configs::{
-    CameraConfig, ConfigType, GameLogicConfig, PlayerConfig, RenderConfig,
+    CameraConfig, ConfigType, GameLogicConfig, GameModeConfig, PlayerConfig, RenderConfig,
 };
 
 pub(super) struct InGameAssetLoadingPlugin;
@@ -98,6 +98,7 @@ fn build_game_configs(
         &mut units_data,
         &mut buildings_data,
         player_config,
+        &config.game_mode,
         &mut commands,
     );
 }
@@ -115,11 +116,13 @@ fn build_game_logic_config(
     units_data: &mut RacesUnitsData,
     buildings_data: &mut RacesBuildingsData,
     player_config: PlayerConfig,
+    game_mode: &GameModeConfig,
     commands: &mut Commands,
 ) {
     let units_data = std::mem::take(&mut units_data.0);
     let buildings_data = std::mem::take(&mut buildings_data.0);
-    let game_logic_config = GameLogicConfig::new(units_data, buildings_data, player_config);
+    let game_logic_config =
+        GameLogicConfig::new(units_data, buildings_data, player_config, game_mode);
     commands.insert_resource(game_logic_config);
     commands.remove_resource::<RacesBuildingsData>();
     commands.remove_resource::<RacesUnitsData>();
