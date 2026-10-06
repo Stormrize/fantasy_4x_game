@@ -42,8 +42,7 @@ pub struct CombatBasicStats {
     pub health: u16,
     pub defense: u16,
     pub attack: u16,
-    pub range: u8,
-    pub movement_points: u8,
+    pub range: u16,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -62,6 +61,9 @@ struct UniqueLevelAbility {
 pub struct LevelAbilities(pub Vec<UniqueLevelAbility>);
 
 #[derive(Component, Deserialize, Debug, Clone)]
+pub struct MovementPoints(pub u16);
+
+#[derive(Component, Deserialize, Debug, Clone)]
 pub struct LevelEconomy(pub Vec<Cost>);
 
 #[derive(Bundle, Deserialize, Debug, Clone)]
@@ -69,6 +71,7 @@ pub struct CombatUnitData {
     pub unit_type: UnitType,
     pub level_economy: LevelEconomy,
     pub basic_stats: CombatBasicStats,
+    pub movement_points: MovementPoints,
     pub unique_level_abilities: LevelAbilities,
 }
 
@@ -88,7 +91,6 @@ pub struct CombatUnit {
 pub struct HelperBasicStats {
     pub health: u16,
     pub defense: u16,
-    pub movement_points: u8,
     pub build_gather_points: u8,
 }
 
@@ -96,6 +98,7 @@ pub struct HelperBasicStats {
 pub struct HelperData {
     pub unit_type: UnitType,
     pub basic_stats: HelperBasicStats,
+    pub movement_points: MovementPoints,
 }
 
 pub const HELPER: HelperData = HelperData {
@@ -103,9 +106,9 @@ pub const HELPER: HelperData = HelperData {
     basic_stats: HelperBasicStats {
         health: 1,
         defense: 0,
-        movement_points: 2,
         build_gather_points: 3,
     },
+    movement_points: MovementPoints(2),
 };
 
 #[derive(Bundle, Debug, Clone)]

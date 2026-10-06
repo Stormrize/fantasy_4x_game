@@ -35,8 +35,6 @@ pub fn click_to_world(
                     click_world_pos.z.round() as i32,
                 );
                 tile_clicked_event.write(TileClickedEvent { pos: grid_pos });
-
-                println!("Tile clicked at {:?}", click_world_pos);
             }
         }
     }

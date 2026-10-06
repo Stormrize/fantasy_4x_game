@@ -1,6 +1,6 @@
 use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
-    AttackEntityCommand, BuildBuildingCommand, MoveEntityCommand, PickResourceCommand,
-    SpawnUnitCommand, TileClickedEvent,
+    Attack, Build, Clear, Cycle, Delete, EndTurn, Gather, Info, Move, NewTile, SpawnUnitCommand,
+    TileClickedEvent, Upgrade, WorldView,
 };
 use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::{
     RenderAttackEntity, RenderMoveEntity,
@@ -22,6 +22,10 @@ pub trait AppMessageExt {
 impl AppMessageExt for App {
     fn register_all_messages(&mut self) -> &mut Self {
         self.add_message::<TileClickedEvent>()
+            // selection
+            .add_message::<Cycle>()
+            .add_message::<NewTile>()
+            .add_message::<Clear>()
             // render selection messages
             .add_message::<RenderTerrain>()
             .add_message::<RenderResource>()
@@ -29,11 +33,17 @@ impl AppMessageExt for App {
             .add_message::<RenderUnit>()
             .add_message::<RenderFog>()
             // action messages
-            .add_message::<MoveEntityCommand>()
-            .add_message::<AttackEntityCommand>()
-            .add_message::<PickResourceCommand>()
-            .add_message::<BuildBuildingCommand>()
+            .add_message::<Move>()
+            .add_message::<Attack>()
+            .add_message::<Gather>()
+            .add_message::<Build>()
             .add_message::<SpawnUnitCommand>()
+            // general
+            .add_message::<WorldView>()
+            .add_message::<EndTurn>()
+            .add_message::<Info>()
+            .add_message::<Delete>()
+            .add_message::<Upgrade>()
             // render action messages
             .add_message::<RenderMoveEntity>()
             .add_message::<RenderAttackEntity>()

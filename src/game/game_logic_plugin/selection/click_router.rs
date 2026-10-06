@@ -1,15 +1,10 @@
-use bevy::prelude::{MessageReader, Res, ResMut};
+use bevy::prelude::{MessageReader, MessageWriter, Res};
 
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::MoveEntityCommand;
-use crate::game::game_logic_plugin::{
-    events_resources_structs::{
-        action_messages::{ActionCommandWriters, TileClickedEvent},
-        components::*,
-    },
-    selection::selection_systems::{
-        clear::clear_selection_system, cycle::cycle_selection_system,
-        new_tile::new_tile_selection_system,
-    },
+use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
+    Clear, Cycle, Move, NewTile,
+};
+use crate::game::game_logic_plugin::events_resources_structs::{
+    action_messages::TileClickedEvent, components::*,
 };
 use crate::world::game_configs::GameLogicConfig;
 use crate::world::game_resources::WorldMaps;
@@ -17,9 +12,12 @@ use crate::world::game_resources::WorldMaps;
 pub fn route_selection(
     world_maps: WorldMaps,
     config: Res<GameLogicConfig>,
-    mut already_selected_tile: ResMut<AlreadySelectedTile>,
+    already_selected_tile: Res<AlreadySelectedTile>,
     mut tile_clicked: MessageReader<TileClickedEvent>,
-    mut commands: ActionCommandWriters,
+    mut move_cmd: MessageWriter<Move>,
+    mut cycle: MessageWriter<Cycle>,
+    mut new_tile: MessageWriter<NewTile>,
+    mut clear: MessageWriter<Clear>,
 ) {
     for click in tile_clicked.read() {
         let clicked_pos = click.pos;
@@ -29,7 +27,7 @@ pub fn route_selection(
             || clicked_pos.x >= config.terrain_size as i32
             || clicked_pos.y >= config.terrain_size as i32
         {
-            clear_selection_system(&mut already_selected_tile);
+            clear.write(Clear);
             continue;
         }
 
@@ -56,15 +54,15 @@ pub fn route_selection(
 
         match already_selected_tile.pos {
             None => {
-                new_tile_selection_system(just_selected_tile, &mut already_selected_tile);
+                new_tile.write(NewTile(just_selected_tile));
             }
 
             Some(selected_pos) if selected_pos == clicked_pos => {
-                cycle_selection_system(just_selected_tile, &mut already_selected_tile);
+                cycle.write(Cycle(just_selected_tile));
             }
 
             Some(selected_pos) => {
-                commands.move_cmd.write(MoveEntityCommand {
+                move_cmd.write(Move {
                     entity_pos: selected_pos,
                     target_pos: clicked_pos,
                 });

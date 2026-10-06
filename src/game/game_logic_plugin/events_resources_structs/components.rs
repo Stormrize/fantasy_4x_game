@@ -9,7 +9,7 @@ pub enum TileLayer {
     Fog = 4,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 pub struct TileContent {
     pub biome: bool,
     pub unit: bool,
@@ -51,6 +51,7 @@ pub struct AlreadySelectedTile {
     pub tile_content: TileContent,
 }
 
+#[derive(Debug, Clone)]
 pub struct JustSelectedTile {
     pub pos: IVec2,
     pub tile_content: TileContent,
