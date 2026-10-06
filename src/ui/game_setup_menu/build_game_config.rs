@@ -6,8 +6,9 @@ use rand::random_range;
 use super::components::PendingGameSetup;
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::ui::menus::AppState;
-use crate::world::components::{Id, PlayerRace};
-use crate::world::game_configs::{ConfigType, GameMode, LocalPlayerConfig, PlayerConfig};
+use crate::world::components::{GameMode, Id, PlayerRace, PlayerType};
+use crate::world::game_configs::{ConfigType, GameModeConfig, LocalPlayerConfig, PlayerConfig};
+use crate::world::turn_manager::TurnManager;
 
 pub fn start_local_game(
     commands: &mut Commands,
@@ -46,8 +47,10 @@ pub fn start_local_game(
     let races = selected_races
         .into_iter()
         .enumerate()
-        .map(|(i, race)| (Id::LocalPlayerId(i as u8), race))
-        .collect();
+        .map(|(i, race)| (Id(i as u16), race))
+        .collect::<Vec<(Id, PlayerRace)>>();
+
+    let length = races.len() as u16;
 
     let local_config = LocalPlayerConfig {
         seed,
@@ -55,12 +58,16 @@ pub fn start_local_game(
         ai_difficulty: pending.ai_difficulty,
     };
 
-    let player_config = PlayerConfig::new(
-        pending.map_size,
-        pending.map_shape,
-        Id::LocalPlayerId(id as u8),
-    );
-    let game_mode = GameMode::Local(local_config);
+    let id = Id(id as u16);
+    commands.insert_resource(TurnManager::new(
+        id,
+        PlayerType::Human,
+        length,
+        GameMode::Offline,
+    ));
+
+    let player_config = PlayerConfig::new(pending.map_size, pending.map_shape, id);
+    let game_mode = GameModeConfig::Local(local_config);
 
     let config_type = ConfigType {
         player_config,
