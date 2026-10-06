@@ -140,6 +140,7 @@ fn check_button_clicked(commands: &mut Commands, container: Entity) {
                         next_state.set(AppState::GameSetupMenu);
                     }
                     MainMenuButtons::ResumeButton => {
+                        // todo not forget to load
                         next_state.set(AppState::InGameRenderer);
                     }
                 }

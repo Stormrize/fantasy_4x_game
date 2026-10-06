@@ -1,10 +1,10 @@
-use bevy::asset::{AssetServer, Handle, LoadState};
-use bevy::platform::collections::HashMap;
 use crate::io::in_game_loading::buildings_data_loader_plugin::BuildingsData;
 use crate::io::in_game_loading::game_assets_loader_plugin::RawRaceAssets;
 use crate::io::in_game_loading::units_data_loader_plugin::UnitsData;
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::world::components::{Id, PlayerRace};
+use bevy::asset::{AssetServer, Handle, LoadState};
+use bevy::platform::collections::HashMap;
 
 pub fn load_raw_game_assets(
     races: &Vec<(Id, PlayerRace)>,
@@ -26,7 +26,9 @@ pub fn load_buildings_data(
     vec: &mut Vec<(PlayerRace, Handle<BuildingsData>)>,
 ) {
     for race in races {
-        let building_data_path = &races_ui_registry.ui_race_data_of(&race.1).building_data_path;
+        let building_data_path = &races_ui_registry
+            .ui_race_data_of(&race.1)
+            .building_data_path;
         let buildings_data: Handle<BuildingsData> = asset_server.load(building_data_path);
         vec.push((race.1.clone(), buildings_data));
     }
@@ -49,8 +51,8 @@ pub fn all_data_loaded<T: bevy::asset::Asset>(
     data: &Vec<(PlayerRace, Handle<T>)>,
     asset_server: &AssetServer,
 ) -> bool {
-    data.iter().all(|(_, handle)| {
-        match asset_server.get_load_state(handle.id()) {
+    data.iter().all(
+        |(_, handle)| match asset_server.get_load_state(handle.id()) {
             Some(LoadState::Loaded) => true,
 
             Some(LoadState::Failed(err)) => {
@@ -67,8 +69,8 @@ pub fn all_data_loaded<T: bevy::asset::Asset>(
                 eprintln!("Asset {:?} has no load state", handle.id());
                 false
             }
-        }
-    })
+        },
+    )
 }
 
 pub fn all_values_loaded<K, T: bevy::asset::Asset>(

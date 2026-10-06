@@ -45,7 +45,7 @@ impl TerrainMap {
                 let index = row * terrain_size + col;
 
                 if result < config.water_threshold {
-                    data[index] = BiomeType::Water(Id::default_local_id(), PlayerRace::default());
+                    data[index] = BiomeType::Water(Id::default(), PlayerRace::default());
                 }
             }
         }

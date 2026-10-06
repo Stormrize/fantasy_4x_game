@@ -1,10 +1,9 @@
-use bevy::asset::LoadState;
+use crate::utils_debug::loading_utils::all_values_loaded;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use bevy::reflect::TypePath;
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::{Deserialize, Serialize};
-use crate::utils_debug::loading_utils::all_values_loaded;
 
 // localization
 #[derive(Resource, Debug, Clone)]
