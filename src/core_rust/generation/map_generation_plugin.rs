@@ -170,7 +170,7 @@ fn map_ready(
     mut task: ResMut<MapGenerationTask>,
     mut next_state: ResMut<NextState<MapGenerationLoadingState>>,
 ) {
-    if poll_map_generation(commands, &mut *task) {
+    if poll_map_generation(commands, &mut task) {
         println!("map ready");
         next_state.set(MapGenerationLoadingState::Ready);
     }

@@ -22,11 +22,9 @@ impl TerrainMap {
         perlin_placeholder: &PerlinPlaceholder,
         influence_map: &PlayerInfluenceMap,
     ) {
-        let mut counter = 0;
         let terrain_map = self;
-        for cell in &influence_map.cells {
-            apply_local_biomes(config, perlin_placeholder, terrain_map, cell, counter);
-            counter += 1;
+        for (counter, cell) in influence_map.cells.iter().enumerate() {
+            apply_local_biomes(config, perlin_placeholder, terrain_map, cell, counter as u8);
         }
     }
 }

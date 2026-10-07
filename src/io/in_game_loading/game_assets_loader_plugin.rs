@@ -186,10 +186,10 @@ fn parse_string(color: &str) -> Option<Color> {
 }
 
 fn parse_color(color: Option<Color>) -> Color {
-    if color.is_none() {
-        Color::srgb(0.0, 0.0, 0.0)
+    if let Some(color) = color {
+        color
     } else {
-        color.unwrap()
+        Color::srgb(0.0, 0.0, 0.0)
     }
 }
 //---------------------------------------------------------------------------------------------------------------------------//
@@ -224,7 +224,7 @@ fn all_game_assets_loaded(
     races_assets_registry
         .0
         .values()
-        .all(|race_assets| all_fields_loaded(race_assets, &asset_server))
+        .all(|race_assets| all_fields_loaded(race_assets, asset_server))
 }
 
 fn game_assets_ready(

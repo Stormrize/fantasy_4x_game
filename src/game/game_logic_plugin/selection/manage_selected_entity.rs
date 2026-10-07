@@ -12,37 +12,33 @@ pub fn manage_selected_entity(
     selected_entity: Res<AlreadySelectedTile>,
     mut render_messages: RenderMessages,
 ) {
-    match selected_entity.layer {
-        Some(_) => {
-            let layer = selected_entity.layer.unwrap();
-            match layer {
-                TileLayer::Fog => {
-                    render_messages.fog.write(RenderFog {
-                        pos: selected_entity.pos.unwrap(),
-                    });
-                }
-                TileLayer::Unit => {
-                    render_messages.unit.write(RenderUnit {
-                        pos: selected_entity.pos.unwrap(),
-                    });
-                }
-                TileLayer::Building => {
-                    render_messages.building.write(RenderBuilding {
-                        pos: selected_entity.pos.unwrap(),
-                    });
-                }
-                TileLayer::Resource => {
-                    render_messages.resource.write(RenderResource {
-                        pos: selected_entity.pos.unwrap(),
-                    });
-                }
-                TileLayer::Terrain => {
-                    render_messages.terrain.write(RenderTerrain {
-                        pos: selected_entity.pos.unwrap(),
-                    });
-                }
+    if let Some(layer) = selected_entity.layer {
+        match layer {
+            TileLayer::Fog => {
+                render_messages.fog.write(RenderFog {
+                    pos: selected_entity.pos.unwrap(),
+                });
+            }
+            TileLayer::Unit => {
+                render_messages.unit.write(RenderUnit {
+                    pos: selected_entity.pos.unwrap(),
+                });
+            }
+            TileLayer::Building => {
+                render_messages.building.write(RenderBuilding {
+                    pos: selected_entity.pos.unwrap(),
+                });
+            }
+            TileLayer::Resource => {
+                render_messages.resource.write(RenderResource {
+                    pos: selected_entity.pos.unwrap(),
+                });
+            }
+            TileLayer::Terrain => {
+                render_messages.terrain.write(RenderTerrain {
+                    pos: selected_entity.pos.unwrap(),
+                });
             }
         }
-        None => {}
     }
 }

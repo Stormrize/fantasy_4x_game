@@ -2,7 +2,7 @@ use crate::game::game_logic_plugin::events_resources_structs::components::{
     JustSelectedTile, TileLayer,
 };
 use bevy::ecs::system::SystemParam;
-use bevy::prelude::{Entity, IVec2, Message, MessageWriter};
+use bevy::prelude::{IVec2, Message, MessageWriter};
 
 // tile clicked
 #[derive(Message, Debug)]

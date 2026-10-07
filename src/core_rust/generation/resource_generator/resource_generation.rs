@@ -56,9 +56,9 @@ fn resource_for_biome(biome: &BiomeType) -> Option<ResourceType> {
     use BiomeType::*;
     use ResourceType::*;
     match biome {
-        SmallBiome(player_id, player_race) => Some(Small(player_id.clone(), player_race.clone())),
-        MediumBiome(player_id, player_race) => Some(Medium(player_id.clone(), player_race.clone())),
-        LargeBiome(player_id, player_race) => Some(Large(player_id.clone(), player_race.clone())),
+        SmallBiome(player_id, player_race) => Some(Small(*player_id, player_race.clone())),
+        MediumBiome(player_id, player_race) => Some(Medium(*player_id, player_race.clone())),
+        LargeBiome(player_id, player_race) => Some(Large(*player_id, player_race.clone())),
         _ => None,
     }
 }

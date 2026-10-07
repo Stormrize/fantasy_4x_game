@@ -87,7 +87,7 @@ pub fn spawn_settings_menu(
     theme::spawn_section_title(
         &mut commands,
         sidebar,
-        &font,
+        font,
         &localization,
         language,
         "settings_menu",
@@ -107,7 +107,7 @@ pub fn spawn_settings_menu(
         build_tab_content(
             &mut commands,
             container,
-            &font,
+            font,
             &localization,
             tab,
             &settings,
@@ -125,7 +125,7 @@ pub fn spawn_settings_menu(
         entry.button = widgets::spawn_tab_button(
             &mut commands,
             sidebar,
-            &font,
+            font,
             &localization,
             language,
             entry.tab.key(),
@@ -162,7 +162,7 @@ pub fn spawn_settings_menu(
         );
     }
 
-    spawn_footer(&mut commands, sidebar, &font, &localization, language);
+    spawn_footer(&mut commands, sidebar, font, &localization, language);
 }
 
 fn spawn_footer(

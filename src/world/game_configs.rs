@@ -30,20 +30,20 @@ impl Players {
         Self(players)
     }
 
-    pub fn from_local_config(races: &Vec<(Id, PlayerRace)>, config: PlayerConfig) -> Vec<Player> {
+    pub fn from_local_config(races: &[(Id, PlayerRace)], config: PlayerConfig) -> Vec<Player> {
         races
             .iter()
-            .filter_map(|(id, _)| {
+            .map(|(id, _)| {
                 if config.id == *id {
-                    Some(Player::new(*id, PlayerType::Human))
+                    Player::new(*id, PlayerType::Human)
                 } else {
-                    Some(Player::new(*id, PlayerType::Bot))
+                    Player::new(*id, PlayerType::Bot)
                 }
             })
             .collect()
     }
 
-    pub fn from_multiplayer_config(races: &Vec<(Id, PlayerRace)>) -> Vec<Player> {
+    pub fn from_multiplayer_config(races: &[(Id, PlayerRace)]) -> Vec<Player> {
         races
             .iter()
             .map(|(id, _)| Player::new(*id, PlayerType::Human))

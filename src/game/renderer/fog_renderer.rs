@@ -43,7 +43,7 @@ pub fn spawn_fog_meshes(
         for col in min_y..max_y {
             let fog = fog_map.get(row as usize, col as usize);
 
-            if fog == false {
+            if !fog {
                 continue;
             }
 

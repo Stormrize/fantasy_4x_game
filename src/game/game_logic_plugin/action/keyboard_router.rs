@@ -93,8 +93,6 @@ pub fn route_keyboard_actions(
                     .gather_cmd
                     .write(Gather(already_selected_tile.pos.unwrap()));
                 println!("send gather");
-            } else {
-                return ();
             }
         }
         Some(TileLayer::Building) => {
@@ -136,8 +134,6 @@ pub fn route_keyboard_actions(
                 println!("send info terrain");
             }
         }
-        _ => {
-            return;
-        }
+        _ => {}
     }
 }

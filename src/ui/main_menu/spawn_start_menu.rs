@@ -18,20 +18,20 @@ use crate::ui::menus::AppState;
 
 #[derive(Component)]
 pub(super) enum MainMenuButtons {
-    StartButton,
-    ResumeButton,
-    MultiplayerButton,
-    SettingsButton,
-    ExitButton,
+    Start,
+    Resume,
+    Multiplayer,
+    Settings,
+    Exit,
 }
 
 impl MainMenuButtons {
     const ALL_ENUMS: [MainMenuButtons; 5] = [
-        Self::StartButton,
-        Self::ResumeButton,
-        Self::MultiplayerButton,
-        Self::SettingsButton,
-        Self::ExitButton,
+        Self::Start,
+        Self::Resume,
+        Self::Multiplayer,
+        Self::Settings,
+        Self::Exit,
     ];
 
     const ALL_KEYS: [&str; 5] = [
@@ -68,7 +68,7 @@ pub(super) fn spawn_main_menu(
     // проходимся по кнопкам
     for (button_type, key) in MainMenuButtons::ALL_ENUMS
         .into_iter()
-        .zip(MainMenuButtons::ALL_KEYS.into_iter())
+        .zip(MainMenuButtons::ALL_KEYS)
     {
         // создаем контейнер для кнопок
         let container = commands
@@ -129,17 +129,17 @@ fn check_button_clicked(commands: &mut Commands, container: Entity) {
          mut exit: MessageWriter<AppExit>| {
             if let Ok(button_type) = button_type.get(trigger.entity) {
                 match button_type {
-                    MainMenuButtons::ExitButton => {
+                    MainMenuButtons::Exit => {
                         exit.write(AppExit::Success);
                     }
-                    MainMenuButtons::MultiplayerButton => {
+                    MainMenuButtons::Multiplayer => {
                         next_state.set(AppState::MultiplayerSetupMenu);
                     }
-                    MainMenuButtons::SettingsButton => next_state.set(AppState::SettingsMenu),
-                    MainMenuButtons::StartButton => {
+                    MainMenuButtons::Settings => next_state.set(AppState::SettingsMenu),
+                    MainMenuButtons::Start => {
                         next_state.set(AppState::GameSetupMenu);
                     }
-                    MainMenuButtons::ResumeButton => {
+                    MainMenuButtons::Resume => {
                         // todo not forget to load
                         next_state.set(AppState::InGameRenderer);
                     }

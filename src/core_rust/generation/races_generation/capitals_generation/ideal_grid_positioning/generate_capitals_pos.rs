@@ -22,7 +22,7 @@ impl CapitalsPos {
         let mut spawn_points: Vec<((Id, PlayerRace), CapitalCoord)> =
             Vec::with_capacity(players.len());
 
-        if players.len() == 0 {
+        if players.is_empty() {
             return None;
         }
 

@@ -12,8 +12,8 @@ pub fn check_move_validity(
     target_position: IVec2,
 ) -> bool {
     // todo biome could be more difficult to walk
-    let x_difference = (target_position.x - current_position.x).abs() as u32;
-    let y_difference = (target_position.y - current_position.y).abs() as u32;
+    let x_difference = (target_position.x - current_position.x).unsigned_abs();
+    let y_difference = (target_position.y - current_position.y).unsigned_abs();
 
     let required_points = x_difference.max(y_difference);
 

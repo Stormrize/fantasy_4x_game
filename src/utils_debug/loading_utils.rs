@@ -35,7 +35,7 @@ pub fn load_buildings_data(
 }
 
 pub fn load_units_data(
-    races: &Vec<(Id, PlayerRace)>,
+    races: &[(Id, PlayerRace)],
     races_ui_registry: &RacesUiRegistry,
     asset_server: &AssetServer,
     vec: &mut Vec<(PlayerRace, Handle<UnitsData>)>,
@@ -48,7 +48,7 @@ pub fn load_units_data(
 }
 
 pub fn all_data_loaded<T: bevy::asset::Asset>(
-    data: &Vec<(PlayerRace, Handle<T>)>,
+    data: &[(PlayerRace, Handle<T>)],
     asset_server: &AssetServer,
 ) -> bool {
     data.iter().all(
