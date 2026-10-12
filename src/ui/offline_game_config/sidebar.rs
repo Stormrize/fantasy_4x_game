@@ -15,7 +15,7 @@ use crate::io::startup_loading::fonts_loader_plugin::Fonts;
 use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
 use crate::ui::TranslationKey;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
-use crate::ui::game_setup_menu::dropdown::spawn_dropdown;
+use crate::ui::offline_game_config::dropdown::spawn_dropdown;
 use crate::world::components::{AiDifficulty, MapShape, MapSize};
 const TITLE_KEY: &str = "setup_sidebar_title";
 

@@ -36,9 +36,7 @@ pub fn start_local_game(
     let mut selected_races = Vec::with_capacity(bots_amount);
     selected_races.push(chosen_race.clone());
     selected_races.extend(possible_races.into_iter().take(bots_amount - 1));
-
-    selected_races.shuffle(&mut rng);
-
+    
     let id = selected_races
         .iter()
         .position(|race| *race == chosen_race)

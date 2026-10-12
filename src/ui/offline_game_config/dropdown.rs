@@ -17,8 +17,8 @@ use crate::io::startup_loading::localization_loader_plugin::{Language, Localizat
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::ui::TranslationKey;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
-use crate::ui::game_setup_menu::PendingGameSetup;
-use crate::ui::game_setup_menu::colors::{
+use crate::ui::offline_game_config::PendingGameSetup;
+use crate::ui::offline_game_config::colors::{
     COLOR_DROPDOWN_BG, COLOR_DROPDOWN_HOVER, COLOR_DROPDOWN_OPTION_BG,
 };
 #[derive(Component)]

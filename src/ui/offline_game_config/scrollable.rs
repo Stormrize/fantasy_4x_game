@@ -4,7 +4,7 @@
 // use bevy::prelude::{default, AlignItems, BackgroundColor, BorderColor, BorderRadius, ChildOf, Color, Commands, Entity, FlexDirection, FontSize, FontSource, Node, PositionType, Text, TextColor, TextFont, UiRect, Val};
 // use bevy::ui_widgets::{Slider, SliderOrientation, SliderRange, SliderStep, SliderThumb, TrackClick};
 // use crate::ui::colors::{COLOR_ACCENT_CRIMSON, COLOR_ACCENT_GOLD, COLOR_TEXT_MUTED};
-// use crate::ui::game_setup_menu::colors::COLOR_TRACK_BG;
+// use crate::ui::offline_game_config::colors::COLOR_TRACK_BG;
 //
 // fn percent_of(value: f32, min: f32, max: f32) -> f32 {
 //     if max > min {
