@@ -1,8 +1,8 @@
 use bevy::prelude::Component;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
 
-#[derive(Component, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Component, Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PlayerRace(pub SmolStr);
 
 impl PlayerRace {
@@ -17,7 +17,9 @@ impl Default for PlayerRace {
     }
 }
 
-#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(
+    Component, Deserialize, Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord,
+)]
 pub struct Id(pub u16);
 
 impl Default for Id {
@@ -44,7 +46,7 @@ pub struct Cost {
     pub maintenance: u16,
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, Copy)]
 #[repr(u8)]
 pub enum MapSize {
     Tiny = 8,
@@ -61,7 +63,7 @@ impl MapSize {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Deserialize, Serialize, Clone, Copy, Debug, Default)]
 #[allow(dead_code)]
 #[repr(u8)]
 pub enum MapShape {
@@ -76,7 +78,7 @@ impl MapShape {
     }
 }
 
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Serialize, Default, Debug, Clone, Copy, PartialEq)]
 pub enum AiDifficulty {
     Easy,
     #[default]

@@ -1,8 +1,8 @@
-use bevy::prelude::Resource;
-
 use crate::world::game_resources::data::resource::ResourceType;
+use bevy::prelude::Resource;
+use serde::Deserialize;
 
-#[derive(Resource)]
+#[derive(Resource, Deserialize, Debug)]
 pub struct ResourceMap {
     pub map: Vec<Option<ResourceType>>,
     pub size: usize,

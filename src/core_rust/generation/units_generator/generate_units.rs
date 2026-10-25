@@ -1,21 +1,22 @@
-use rand::SeedableRng;
-use rand::prelude::SliceRandom;
-use rand_chacha::ChaCha8Rng;
-
 use crate::core_rust::generation::races_generation::capitals_generation::CapitalsPos;
 use crate::world::components::{Id, PlayerRace};
 use crate::world::game_configs::GenerationConfig;
 use crate::world::game_resources::data::biome::BiomeType;
 use crate::world::game_resources::data::unit::UnitType;
 use crate::world::game_resources::terrain_map::TerrainMap;
+use rand::SeedableRng;
+use rand::prelude::SliceRandom;
+use rand_chacha::ChaCha8Rng;
+use serde::Deserialize;
 
-#[derive(Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Unit {
     pub id: Id,
     pub player_race: PlayerRace,
     pub unit_type: UnitType,
 }
 
+#[derive(Deserialize, Debug)]
 pub struct UnitsMapNoBevy {
     pub units: Vec<Option<Unit>>,
     pub size: usize,

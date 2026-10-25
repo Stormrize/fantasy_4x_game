@@ -1,8 +1,8 @@
-use bevy::prelude::Resource;
-
 use crate::world::game_resources::data::biome::BiomeType;
+use bevy::prelude::Resource;
+use serde::Deserialize;
 
-#[derive(Resource)]
+#[derive(Resource, Deserialize, Debug)]
 pub struct TerrainMap {
     pub map: Vec<BiomeType>,
     pub size: usize,

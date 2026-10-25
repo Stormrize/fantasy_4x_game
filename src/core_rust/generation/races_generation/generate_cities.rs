@@ -5,14 +5,16 @@ use crate::world::{
     game_configs::GenerationConfig,
     game_resources::{data::biome::BiomeType, terrain_map::TerrainMap},
 };
+use serde::Deserialize;
 
-#[derive(Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Building {
     pub id: Id,
     pub player_race: PlayerRace,
     pub building_type: BuildingType,
 }
 
+#[derive(Deserialize, Debug)]
 pub struct BuildingMapNoBevy {
     pub buildings: Vec<Option<Building>>,
     pub size: usize,

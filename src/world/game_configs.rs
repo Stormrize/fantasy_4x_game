@@ -5,6 +5,8 @@ use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace, 
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::Resource;
+use serde::{Deserialize, Serialize};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Player {
     pub id: Id,
@@ -192,7 +194,7 @@ impl GameLogicConfig {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Deserialize, Serialize, Debug, Clone, Copy)]
 pub struct PlayerConfig {
     pub map_size: MapSize,
     pub map_shape: MapShape,
@@ -219,7 +221,7 @@ impl PlayerConfig {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct LocalPlayerConfig {
     pub seed: u32,
     pub races: Vec<(Id, PlayerRace)>,
@@ -236,17 +238,17 @@ impl Default for LocalPlayerConfig {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct OnlinePlayerConfig {
     pub races: Vec<(Id, PlayerRace)>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub enum GameModeConfig {
     Local(LocalPlayerConfig),
     Multiplayer(OnlinePlayerConfig),
 }
-#[derive(Resource, Debug, Clone)]
+#[derive(Resource, Serialize, Debug, Clone)]
 pub struct ConfigType {
     pub player_config: PlayerConfig,
     pub game_mode: GameModeConfig,
