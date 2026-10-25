@@ -17,7 +17,7 @@ use crate::game::{
         fog_renderer::{despawn_fog_meshes, spawn_fog_meshes},
         resource_renderer::{despawn_resource_meshes, spawn_resource_meshes},
         terrain_renderer::{despawn_terrain_meshes, spawn_terrain_meshes},
-        units_renderer::{/*despawn_units_meshes,*/ spawn_units_meshes},
+        units_renderer::{despawn_units_meshes, spawn_units_meshes},
     },
 };
 use crate::world::components::PlayerRace;
@@ -104,7 +104,7 @@ fn calculate_load_area(
 ) -> (IVec2, IVec2) {
     let preload = config.preload_margin_chunks as i32;
 
-    let (mut min, mut max) = camera_chunk_bounds(camera_transform, projection, window, &config);
+    let (mut min, mut max) = camera_chunk_bounds(camera_transform, projection, window, config);
 
     min -= preload;
     max += preload;
@@ -118,7 +118,7 @@ fn calculate_load_area(
 
 fn unload_distant_chunks(
     commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
+    meshes: &mut Assets<Mesh>,
     config: &RenderConfig,
     rendered: &mut Rendered,
     load_min: IVec2,
@@ -155,14 +155,14 @@ fn unload_distant_chunks(
             despawn_resource_meshes(commands, meshes, resource_meshes);
         }
         if let Some(buildings_meshes) = rendered.buildings.remove(&coord) {
-            despawn_buildings_meshes(commands, meshes, buildings_meshes);
+            despawn_buildings_meshes(commands, buildings_meshes);
         }
         if let Some(fog_meshes) = rendered.fog.remove(&coord) {
             despawn_fog_meshes(commands, meshes, fog_meshes);
         }
-        // if let Some(units_meshes) = rendered.units.remove(&coord) {
-        //     despawn_units_meshes(commands, meshes, units_meshes);
-        // }
+        if let Some(units_meshes) = rendered.units.remove(&coord) {
+            despawn_units_meshes(commands, units_meshes);
+        }
     }
 }
 
@@ -220,9 +220,9 @@ fn load_missing_chunks(
             continue;
         }
 
-        let terrain_meshes = spawn_terrain_meshes(commands, &config, meshes, coord, terrain);
+        let terrain_meshes = spawn_terrain_meshes(commands, config, meshes, coord, terrain);
 
-        let resource_meshes = spawn_resource_meshes(commands, &config, meshes, coord, resources);
+        let resource_meshes = spawn_resource_meshes(commands, config, meshes, coord, resources);
 
         let building_meshes =
             spawn_buildings_meshes(commands, config, meshes, coord, buildings, visual_b_q);
@@ -237,7 +237,7 @@ fn load_missing_chunks(
             fog,
         );
 
-        let units_meshes = spawn_units_meshes(commands, &config, meshes, coord, units, visual_u_q);
+        let units_meshes = spawn_units_meshes(commands, config, coord, units, visual_u_q);
 
         rendered.terrain.insert(coord, terrain_meshes);
         rendered.resources.insert(coord, resource_meshes);

@@ -1,9 +1,3 @@
-use bevy::platform::collections::HashMap;
-use bevy::prelude::{
-    App, Assets, ClearColor, Color, Commands, IVec2, IntoScheduleConfigs, Mesh, MessageReader,
-    OnEnter, Plugin, ResMut, Resource, Update, in_state,
-};
-
 use crate::game::renderer::render_actions::render_move;
 use crate::game::renderer::{
     buildings_renderer::{SpawnedBuildingsMeshes, despawn_buildings_meshes},
@@ -11,12 +5,15 @@ use crate::game::renderer::{
     fog_renderer::SpawnedFogMeshes,
     resource_renderer::{SpawnedResourceMeshes, despawn_resource_meshes},
     terrain_renderer::{SpawnedTerrainMeshes, despawn_terrain_meshes},
-    units_renderer::{
-        SpawnedUnitsMeshes, //despawn_units_meshes},
-    },
+    units_renderer::{SpawnedUnitsMeshes, despawn_units_meshes},
 };
 use crate::ui::menus::AppState;
 use crate::utils_debug::regenerate_world::{RegenerateWorldEvent, handle_input};
+use bevy::platform::collections::HashMap;
+use bevy::prelude::{
+    App, Assets, ClearColor, Color, Commands, IVec2, IntoScheduleConfigs, Mesh, MessageReader,
+    OnEnter, Plugin, ResMut, Resource, Update, in_state,
+};
 
 pub mod buildings_renderer;
 pub mod camera_math;
@@ -73,9 +70,9 @@ fn despawn(
         despawn_resource_meshes(&mut commands, &mut meshes, resource_meshes);
     }
     for (_, buildings) in &mut rendered.buildings.drain() {
-        despawn_buildings_meshes(&mut commands, &mut meshes, buildings);
+        despawn_buildings_meshes(&mut commands, buildings);
     }
-    // for (_, units_meshes) in &mut rendered.units.drain() {
-    //     despawn_units_meshes(&mut commands, &mut meshes, units_meshes);
-    // }
+    for (_, units_meshes) in &mut rendered.units.drain() {
+        despawn_units_meshes(&mut commands, units_meshes);
+    }
 }

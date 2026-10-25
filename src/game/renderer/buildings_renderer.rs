@@ -2,9 +2,10 @@ use crate::world::components::PlayerRace;
 use crate::world::game_configs::RenderConfig;
 use crate::world::game_resources::building_map::BuildingMap;
 use crate::world::game_resources::data::building::BuildingType;
+use bevy::math::Vec3;
 use bevy::prelude::{
     Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Query,
-    Sphere, Transform,
+    Sphere, Transform, WorldAsset, WorldAssetRoot,
 };
 
 #[derive(Component)]
@@ -15,7 +16,7 @@ pub struct BuildingsMesh {
 
 pub struct SpawnedBuildingsMeshes {
     pub entities: Vec<Entity>,
-    pub mesh_handles: Vec<Handle<Mesh>>,
+    pub mesh_handles: Vec<Handle<WorldAsset>>,
 }
 
 pub fn spawn_buildings_meshes(
@@ -53,38 +54,24 @@ pub fn spawn_buildings_meshes(
 
             let handle = race_assets.get_building(building_type.index());
 
-            let mesh_handle = meshes.add(Sphere::new(0.5));
-
             let entity = commands
                 .spawn((
-                    Transform::from_xyz(
-                        (row as f32 + 0.5) * tile_size,
-                        0.5,
-                        (col as f32 + 0.5) * tile_size,
-                    ),
-                    Mesh3d(mesh_handle.clone()),
-                    MeshMaterial3d(handle.clone()),
+                    Transform::from_xyz((row as f32) * tile_size, 0.0, (col as f32) * tile_size)
+                        .with_scale(Vec3::splat(0.07)),
+                    WorldAssetRoot(handle.clone()),
                 ))
                 .id();
 
             spawned.entities.push(entity);
-            spawned.mesh_handles.push(mesh_handle);
+            spawned.mesh_handles.push(handle);
         }
     }
 
     spawned
 }
 
-pub fn despawn_buildings_meshes(
-    commands: &mut Commands,
-    meshes: &mut Assets<Mesh>,
-    spawned: SpawnedBuildingsMeshes,
-) {
+pub fn despawn_buildings_meshes(commands: &mut Commands, spawned: SpawnedBuildingsMeshes) {
     for entity in spawned.entities {
         commands.entity(entity).despawn();
-    }
-
-    for mesh_handle in spawned.mesh_handles {
-        meshes.remove(mesh_handle.id());
     }
 }

@@ -1,5 +1,5 @@
 use bevy::prelude::{
-    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Plane3d, Res,
+    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Plane3d,
     Transform,
 };
 

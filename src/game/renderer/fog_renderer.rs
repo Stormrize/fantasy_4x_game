@@ -41,9 +41,9 @@ pub fn spawn_fog_meshes(
 
     for row in min_x..max_x {
         for col in min_y..max_y {
-            let fog = fog_map.get(row as usize, col as usize);
+            let visible = fog_map.is_visible_player(row as usize, col as usize);
 
-            if !fog {
+            if visible {
                 continue;
             }
 
