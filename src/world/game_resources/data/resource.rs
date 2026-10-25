@@ -1,6 +1,7 @@
 use crate::world::components::{Id, PlayerRace};
+use serde::Deserialize;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 #[repr(u8)]
 pub enum ResourceType {
     //Common

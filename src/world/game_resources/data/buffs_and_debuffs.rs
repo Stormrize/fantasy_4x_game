@@ -8,6 +8,7 @@ pub enum Buff {
         duration: u16,
         turns_offset: u16,
     },
+    Cleanse,
     DamageBuff {
         damage: u16,
         duration: u16,
@@ -23,18 +24,25 @@ pub enum Buff {
         duration: u16,
         turns_offset: u16,
     },
-    IgnoreDefense {
-        defense: u16,
-        duration: u16,
-        turns_offset: u16,
-    },
     MovementBuff {
         movement_points: u16,
         duration: u16,
         turns_offset: u16,
     },
     DamageReflection {
-        damage_percentage: u16,
+        damage: u16,
+        duration: u16,
+        turns_offset: u16,
+    },
+    Summon {
+        attack: u8,
+        defense: u8,
+        health: u8,
+        range: u8,
+        movement_points: u8,
+        duration: u8,
+    },
+    VulnerabilityBuff {
         duration: u16,
         turns_offset: u16,
     },
@@ -52,6 +60,10 @@ pub enum Debuff {
     },
     Stun {
         duration: u16, // cant do anything
+        turns_offset: u16,
+    },
+    Freeze {
+        duration: u16,
         turns_offset: u16,
     },
     Root {
@@ -80,15 +92,21 @@ pub enum Debuff {
         duration: u16,
         turns_offset: u16,
     },
+    IgnoreDefense,
     HealthDebuff {
         // less health
         health: u16,
         duration: u16,
         turns_offset: u16,
     },
-    MovementDebuff {
+    Slowdown {
         // less movement points
         movement_points: u16,
+        duration: u16,
+        turns_offset: u16,
+    },
+    RangeDebuff {
+        range: u16,
         duration: u16,
         turns_offset: u16,
     },

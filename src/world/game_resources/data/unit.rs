@@ -17,7 +17,6 @@ pub enum UnitLevel {
 pub enum UnitType {
     Support,
     DamageDealer,
-    Tank,
     Skill,
     Helper,
 }
@@ -28,9 +27,8 @@ impl UnitType {
         match self {
             DamageDealer => 0,
             Support => 1,
-            Tank => 2,
-            Skill => 3,
-            Helper => 4,
+            Skill => 2,
+            Helper => 3,
         }
     }
 }
@@ -64,12 +62,12 @@ pub struct LevelAbilities(pub Vec<UniqueLevelAbility>);
 pub struct MovementPoints(pub u16);
 
 #[derive(Component, Deserialize, Debug, Clone)]
-pub struct LevelEconomy(pub Vec<Cost>);
+pub struct LevelCost(pub Vec<Cost>);
 
 #[derive(Bundle, Deserialize, Debug, Clone)]
 pub struct CombatUnitData {
     pub unit_type: UnitType,
-    pub level_economy: LevelEconomy,
+    pub level_economy: LevelCost,
     pub basic_stats: CombatBasicStats,
     pub movement_points: MovementPoints,
     pub unique_level_abilities: LevelAbilities,
