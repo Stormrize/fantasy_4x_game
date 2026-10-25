@@ -1,18 +1,11 @@
 use std::fmt::Debug;
 
-use bevy::app::App;
-use bevy::prelude::{
-    AppExtStates, Commands, Entity, IntoScheduleConfigs, NextState, OnEnter, Plugin, Res, ResMut,
-    Resource, States, Update, in_state,
-};
-use bevy::tasks::futures_lite::future;
-use bevy::tasks::{AsyncComputeTaskPool, Task};
-
 use crate::core_rust::generation::races_generation::capitals_generation::CapitalsPos;
 use crate::core_rust::generation::races_generation::capitals_generation::voronoi_diagram::PlayerInfluenceMap;
 use crate::core_rust::generation::races_generation::generate_cities::BuildingMapNoBevy;
 use crate::core_rust::generation::terrain_generator::PerlinPlaceholder;
 use crate::core_rust::generation::units_generator::generate_units::UnitsMapNoBevy;
+use crate::world::components::{Id, MapShape, MapSize, PlayerRace};
 use crate::world::{
     game_configs::{ConfigType, GameModeConfig, GenerationConfig},
     game_resources::{
@@ -31,12 +24,22 @@ use crate::world::{
         unit_map::UnitsMap,
     },
 };
+use bevy::app::App;
+use bevy::prelude::{
+    AppExtStates, Commands, Entity, IntoScheduleConfigs, NextState, OnEnter, Plugin, Res, ResMut,
+    Resource, States, Update, in_state,
+};
+use bevy::tasks::futures_lite::future;
+use bevy::tasks::{AsyncComputeTaskPool, Task};
+use reqwest::Error;
+use serde::{Deserialize, Serialize};
 
 #[derive(Resource)]
 struct MapGenerationTask {
     pub task: Task<GeneratedMapResources>,
 }
 
+#[derive(Deserialize, Debug)]
 struct GeneratedMapResources {
     pub terrain: TerrainMap,
     pub resources: ResourceMap,
@@ -44,6 +47,12 @@ struct GeneratedMapResources {
     pub buildings: BuildingMapNoBevy,
     pub units: UnitsMapNoBevy,
 }
+
+#[derive(Resource)]
+struct GetMapTask {
+    pub task: Task<Result<GeneratedMapResources, Error>>,
+}
+
 fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
     let perlin = PerlinPlaceholder::new(config);
     let mut terrain = TerrainMap::new_global_terrain_map(config, &perlin);
@@ -74,8 +83,40 @@ fn start_map_generation(mut commands: Commands, config_type: Res<ConfigType>) {
 
             commands.insert_resource(MapGenerationTask { task });
         }
-        GameModeConfig::Multiplayer(_) => {
-            // http request config body
+        GameModeConfig::Multiplayer(config) => {
+            #[derive(Serialize, Debug)]
+            struct MapRequestQuery {
+                pub map_size: MapSize,
+                pub map_shape: MapShape,
+                pub id: Id,
+                pub races: String,
+            }
+
+            let races_json = serde_json::to_string(&config.races).unwrap();
+
+            let config = MapRequestQuery {
+                map_size: config_type.player_config.map_size,
+                map_shape: config_type.player_config.map_shape,
+                id: config_type.player_config.id,
+                races: races_json,
+            };
+            let task = AsyncComputeTaskPool::get().spawn(async move {
+                let client = reqwest::blocking::Client::new();
+
+                let response = client
+                    .get("http://127.0.0.1:3000/map")
+                    .query(&config)
+                    .send()?
+                    .error_for_status()?;
+
+                println!("{:?}", response);
+
+                let map = response.json::<GeneratedMapResources>()?;
+
+                Ok(map)
+            });
+
+            commands.insert_resource(GetMapTask { task });
         }
     }
 }
@@ -93,6 +134,27 @@ fn poll_map_generation(mut commands: Commands, task: &mut MapGenerationTask) -> 
         true
     } else {
         false
+    }
+}
+
+fn poll_get_map(mut commands: Commands, task: &mut GetMapTask) -> Result<bool, Error> {
+    if let Some(result) = future::block_on(future::poll_once(&mut task.task)) {
+        let generated = result?;
+
+        println!("{:#?}", generated);
+
+        commands.insert_resource(generated.terrain);
+        commands.insert_resource(generated.resources);
+        commands.insert_resource(generated.fog);
+        let units_map = spawn_units(generated.units, &mut commands);
+        commands.insert_resource(units_map);
+        let buildings_map = spawn_building(generated.buildings, &mut commands);
+        commands.insert_resource(buildings_map);
+        commands.remove_resource::<GetMapTask>();
+
+        Ok(true)
+    } else {
+        Ok(false)
     }
 }
 
@@ -167,12 +229,32 @@ fn spawn_building(
 
 fn map_ready(
     commands: Commands,
-    mut task: ResMut<MapGenerationTask>,
+    task: Option<ResMut<MapGenerationTask>>,
+    get_task: Option<ResMut<GetMapTask>>,
     mut next_state: ResMut<NextState<MapGenerationLoadingState>>,
+    config_type: Res<ConfigType>,
 ) {
-    if poll_map_generation(commands, &mut task) {
-        println!("map ready");
-        next_state.set(MapGenerationLoadingState::Ready);
+    match config_type.game_mode {
+        GameModeConfig::Local(_) => {
+            let mut task = task.unwrap();
+            if poll_map_generation(commands, &mut task) {
+                println!("map ready");
+                next_state.set(MapGenerationLoadingState::Ready);
+            }
+        }
+        GameModeConfig::Multiplayer(_) => {
+            let mut get_task = get_task.unwrap();
+            match poll_get_map(commands, &mut get_task) {
+                Ok(true) => {
+                    println!("map ready");
+                    next_state.set(MapGenerationLoadingState::Ready);
+                }
+                Ok(false) => {}
+                Err(error) => {
+                    eprintln!("Failed to get map: {error:?}");
+                }
+            }
+        }
     }
 }
 

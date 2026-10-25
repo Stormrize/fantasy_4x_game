@@ -15,7 +15,7 @@ pub fn move_entity(
     turn_manager: Res<TurnManager>,
     game_logic_config: Res<GameLogicConfig>,
     mut units_map: ResMut<UnitsMap>,
-    movement_stats: Query<(&Id, &MovementPoints)>,
+    mut movement_stats: Query<(&Id, &mut MovementPoints)>,
     mut render_move: MessageWriter<RenderMoveEntity>,
     mut clear: MessageWriter<Clear>,
 ) {
@@ -28,7 +28,7 @@ pub fn move_entity(
             continue;
         };
 
-        let (id, movement_points) = movement_stats.get(selected_entity).unwrap();
+        let (id, mut movement_points) = movement_stats.get_mut(selected_entity).unwrap();
 
         if game_logic_config.player != turn_manager.current_player {
             println!("Not your turn");
@@ -67,6 +67,8 @@ pub fn move_entity(
             current_pos,
             new_pos: target_pos,
         });
+        // todo not zero rather difference
+        movement_points.0 = 0;
         clear.write(Clear);
     }
 }

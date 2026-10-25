@@ -14,12 +14,12 @@ pub fn end_turn(
         match transition {
             TurnTransition::LocalPlayerTurn(player) => {
                 turn_manager.current_player = player;
-                println!("Current player is me");
+                println!("Current player is {:#?} from local", player);
             }
             TurnTransition::TriggerBotAI(player) => {
                 turn_manager.current_player = player;
                 // start move, economy AI logic
-                println!("Current player is bot");
+                println!("Current player is {:#?} from ai", player);
             }
             TurnTransition::WaitForNetwork(player) => {
                 turn_manager.current_player = player;

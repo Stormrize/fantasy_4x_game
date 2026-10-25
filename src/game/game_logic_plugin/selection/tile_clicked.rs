@@ -24,18 +24,18 @@ pub fn click_to_world(
         return;
     };
 
-    if let Ok(ray) = camera.viewport_to_world(camera_transform, cursor_position) {
-        if ray.direction.y.abs() > f32::EPSILON {
-            let t = -ray.origin.y / ray.direction.y;
+    if let Ok(ray) = camera.viewport_to_world(camera_transform, cursor_position)
+        && ray.direction.y.abs() > f32::EPSILON
+    {
+        let t = -ray.origin.y / ray.direction.y;
 
-            if t >= 0.0 {
-                let click_world_pos = ray.origin + ray.direction * t;
-                let grid_pos = IVec2::new(
-                    click_world_pos.x.round() as i32,
-                    click_world_pos.z.round() as i32,
-                );
-                tile_clicked_event.write(TileClickedEvent { pos: grid_pos });
-            }
+        if t >= 0.0 {
+            let click_world_pos = ray.origin + ray.direction * t;
+            let grid_pos = IVec2::new(
+                click_world_pos.x.round() as i32,
+                click_world_pos.z.round() as i32,
+            );
+            tile_clicked_event.write(TileClickedEvent { pos: grid_pos });
         }
     }
 }

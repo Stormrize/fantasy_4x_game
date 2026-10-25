@@ -42,9 +42,9 @@ pub fn route_selection(
             world_maps
                 .resources
                 .is_some(clicked_pos.x as usize, clicked_pos.y as usize),
-            world_maps
+            !world_maps
                 .fog
-                .get(clicked_pos.x as usize, clicked_pos.y as usize),
+                .is_visible_player(clicked_pos.x as usize, clicked_pos.y as usize),
         );
 
         let just_selected_tile = JustSelectedTile {

@@ -19,8 +19,7 @@ impl CapitalsPos {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let players = &config.players;
         let terrain_size = config.terrain_size;
-        let mut spawn_points: Vec<((Id, PlayerRace), CapitalCoord)> =
-            Vec::with_capacity(players.len());
+        let mut spawn_points: Vec<CapitalCoord> = Vec::with_capacity(players.len());
 
         if players.is_empty() {
             return None;
@@ -104,10 +103,8 @@ impl CapitalsPos {
                 }
 
                 if let Some((final_x, final_y)) = found_pos {
-                    let id = players[player_index].0;
-                    let player_race = players[player_index].1.clone();
                     let capital_coord = CapitalCoord(final_x, final_y);
-                    spawn_points.push(((id, player_race), capital_coord));
+                    spawn_points.push(capital_coord);
                     player_index += 1;
                 } else {
                     println!(
@@ -118,7 +115,16 @@ impl CapitalsPos {
                 }
             }
         }
+        spawn_points.shuffle(&mut rng);
 
-        Some(CapitalsPos { data: spawn_points })
+        let mut capital_positions: Vec<((Id, PlayerRace), CapitalCoord)> =
+            Vec::with_capacity(spawn_points.len());
+
+        for (i, capital) in spawn_points.into_iter().enumerate() {
+            capital_positions.push(((players[i].0, players[i].1.clone()), capital));
+        }
+        Some(CapitalsPos {
+            data: capital_positions,
+        })
     }
 }
