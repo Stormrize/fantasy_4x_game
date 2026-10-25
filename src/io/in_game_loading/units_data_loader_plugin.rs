@@ -1,5 +1,5 @@
 use bevy::app::{App, Plugin, Update};
-use bevy::asset::{Asset, AssetServer, Handle, LoadState};
+use bevy::asset::{Asset, AssetServer, Handle};
 use bevy::platform::collections::HashMap;
 use bevy::prelude::{
     AppExtStates, Assets, Commands, IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, Resource,
@@ -20,7 +20,7 @@ pub struct RawRacesUnitsData(pub Vec<(PlayerRace, Handle<UnitsData>)>);
 pub struct RacesUnitsData(pub HashMap<PlayerRace, UnitsData>);
 
 #[derive(Asset, TypePath, Deserialize, Debug, Clone)]
-pub struct UnitsData(pub [CombatUnitData; 4]);
+pub struct UnitsData(pub [CombatUnitData; 3]);
 
 fn start_loading_units_data(
     mut commands: Commands,

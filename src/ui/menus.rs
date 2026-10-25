@@ -5,8 +5,8 @@ pub enum AppState {
     #[default]
     InitialAssetLoading,
     MainMenu,
-    GameSetupMenu,
-    MultiplayerSetupMenu,
+    OfflineGameSetupMenu,
+    OnlineGameSetupMenu,
     InGameAssetLoading,
     InGameRenderer,
     SettingsMenu,

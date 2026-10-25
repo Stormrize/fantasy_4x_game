@@ -1,8 +1,10 @@
 use bevy::app::App;
 use bevy::prelude::{AppExtStates, Component, Plugin};
 
-use crate::ui::game_setup_menu::GameSetupMenuPlugin;
 use crate::ui::in_game_asset_loading::InGameAssetLoadingPlugin;
+use crate::ui::in_game_ui::InGameMenuPlugin;
+use crate::ui::offline_game_config::OfflineGameConfig;
+use crate::ui::online_game_config::OnlineGameConfig;
 use crate::ui::settings_menu::SettingsMenuPlugin;
 use crate::ui::{
     fist_loading_screen::InitialLoadingPlugin, main_menu::MainMenuPlugin, menus::AppState,
@@ -10,11 +12,12 @@ use crate::ui::{
 
 mod colors;
 mod fist_loading_screen;
-mod game_setup_menu;
 mod in_game_asset_loading;
 mod in_game_ui;
 mod main_menu;
 pub mod menus;
+mod offline_game_config;
+mod online_game_config;
 mod settings_menu;
 
 pub struct UiPlugin;
@@ -28,8 +31,9 @@ impl Plugin for UiPlugin {
             .add_plugins(InitialLoadingPlugin)
             .add_plugins(MainMenuPlugin)
             .add_plugins(SettingsMenuPlugin)
-            .add_plugins(GameSetupMenuPlugin)
-            .add_plugins(InGameAssetLoadingPlugin);
-        //.add_plugins(InGameMenuPlugin);
+            .add_plugins(OfflineGameConfig)
+            .add_plugins(OnlineGameConfig)
+            .add_plugins(InGameAssetLoadingPlugin)
+            .add_plugins(InGameMenuPlugin);
     }
 }

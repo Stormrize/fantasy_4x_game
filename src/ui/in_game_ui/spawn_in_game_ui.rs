@@ -1,8 +1,6 @@
 use bevy::prelude::{BackgroundColor, Color, Commands, Node, PositionType, Text, default};
 use bevy::ui::{AlignItems, JustifyContent, Val};
 
-struct ManaBarUi;
-
 pub(crate) fn spawn_in_game_ui(mut commands: Commands) {
     commands
         .spawn((
@@ -22,6 +20,7 @@ pub(crate) fn spawn_in_game_ui(mut commands: Commands) {
         ))
         .with_children(|parent| {
             parent.spawn((Text::new("Gold"),));
+            parent.spawn((Text::new(" 100"),));
         });
 
     commands

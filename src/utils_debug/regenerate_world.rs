@@ -1,5 +1,5 @@
 use crate::core_rust::generation::map_generation_plugin::MapGenerationLoadingState;
-use crate::world::game_configs::{ConfigType, GameModeConfig, GenerationConfig};
+use crate::world::game_configs::{ConfigType, GameModeConfig};
 use bevy::prelude::*;
 
 #[derive(Message)]

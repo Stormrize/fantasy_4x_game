@@ -1,4 +1,3 @@
-
 mod build_game_config;
 mod colors;
 mod components;
@@ -22,11 +21,11 @@ use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::ui::colors::{COLOR_PANEL_BG, COLOR_SIDEBAR_BG};
 use crate::ui::menus::AppState;
 
-pub struct GameSetupMenuPlugin;
+pub struct OfflineGameConfig;
 
-impl Plugin for GameSetupMenuPlugin {
+impl Plugin for OfflineGameConfig {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(AppState::GameSetupMenu), spawn_setup_menu);
+        app.add_systems(OnEnter(AppState::OfflineGameSetupMenu), spawn_setup_menu);
     }
 }
 
@@ -49,7 +48,7 @@ fn spawn_setup_menu(
                 flex_direction: FlexDirection::Row,
                 ..default()
             },
-            DespawnOnExit(AppState::GameSetupMenu),
+            DespawnOnExit(AppState::OfflineGameSetupMenu),
         ))
         .id();
 

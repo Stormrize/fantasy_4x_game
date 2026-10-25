@@ -1,7 +1,6 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{
-    Commands, Event, IntoScheduleConfigs, NextState, On, OnEnter, Res, ResMut, State,
-    in_state,
+    Commands, Event, IntoScheduleConfigs, NextState, On, OnEnter, Res, ResMut, State, in_state,
 };
 use bevy_persistent::Persistent;
 

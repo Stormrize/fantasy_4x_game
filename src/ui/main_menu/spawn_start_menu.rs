@@ -133,11 +133,11 @@ fn check_button_clicked(commands: &mut Commands, container: Entity) {
                         exit.write(AppExit::Success);
                     }
                     MainMenuButtons::Multiplayer => {
-                        next_state.set(AppState::MultiplayerSetupMenu);
+                        next_state.set(AppState::OnlineGameSetupMenu);
                     }
                     MainMenuButtons::Settings => next_state.set(AppState::SettingsMenu),
                     MainMenuButtons::Start => {
-                        next_state.set(AppState::GameSetupMenu);
+                        next_state.set(AppState::OfflineGameSetupMenu);
                     }
                     MainMenuButtons::Resume => {
                         // todo not forget to load
