@@ -78,21 +78,21 @@ fn camera_movement(
     let iso_forward = Vec3::new(-1.0, 0.0, -1.0).normalize();
     let iso_right = Vec3::new(1.0, 0.0, -1.0).normalize();
 
-    if keyboard.pressed(KeyCode::KeyW) || keyboard.pressed(KeyCode::ArrowUp) {
+    if keyboard.pressed(KeyCode::KeyW) {
         transform.translation += iso_forward * pan_speed;
     }
-    if keyboard.pressed(KeyCode::KeyS) || keyboard.pressed(KeyCode::ArrowDown) {
+    if keyboard.pressed(KeyCode::KeyS) {
         transform.translation -= iso_forward * pan_speed;
     }
-    if keyboard.pressed(KeyCode::KeyD) || keyboard.pressed(KeyCode::ArrowRight) {
+    if keyboard.pressed(KeyCode::KeyD) {
         transform.translation += iso_right * pan_speed;
     }
-    if keyboard.pressed(KeyCode::KeyA) || keyboard.pressed(KeyCode::ArrowLeft) {
+    if keyboard.pressed(KeyCode::KeyA) {
         transform.translation -= iso_right * pan_speed;
     }
 
     let zoom_speed = 0.2 + config.camera_zoom_speed;
-    if let Projection::Orthographic(ref _ortho) = *projection {
+    if let Projection::Orthographic(_) = *projection {
         for mouse_wheel in mouse_wheel_reader.read() {
             let scroll = match mouse_wheel.unit {
                 MouseScrollUnit::Line => mouse_wheel.y * zoom_speed,
