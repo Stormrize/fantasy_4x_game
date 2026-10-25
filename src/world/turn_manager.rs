@@ -35,7 +35,7 @@ impl TurnManager {
             return TurnTransition::SimulationTime;
         }
 
-        let player = game_logic_config.players.0[new_player_index as usize];
+        let player = game_logic_config.player;
         match self.game_mode {
             GameMode::Offline => {
                 if player.id.0 == new_player_index {
