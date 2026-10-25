@@ -42,8 +42,8 @@ pub struct RawRaceAssets {
     //units
     pub damage_dealer: String,
     pub support: String,
-    pub tank: String,
     pub skill: String,
+    pub helper: String,
 }
 #[derive(Resource, Default, Debug)]
 struct RawRacesAssetsData(pub Vec<(PlayerRace, Handle<RawRaceAssets>)>);
@@ -142,8 +142,8 @@ fn load_assets(
             units: [
                 asset_server.load(&race_asset.damage_dealer),
                 asset_server.load(&race_asset.support),
-                asset_server.load(&race_asset.tank),
                 asset_server.load(&race_asset.skill),
+                asset_server.load(&race_asset.helper),
             ],
         };
         assets_registry

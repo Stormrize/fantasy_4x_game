@@ -1,10 +1,10 @@
 [package]
-name = "fantasy_4x_game"
+name = "fantasy-4x-game"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.19.1", features = ["trace", "debug"] }
+bevy = { version = "0.19.1", features = ["trace", "debug", "bevy_gltf"] }
 rand = "0.10.1"
 noise = "0.9.0"
 voronoice = "0.2.0"
@@ -16,6 +16,8 @@ smol_str = { version = "0.2.2", features = ["serde"]}
 bevy-persistent = { version = "0.11.0", features = ["ron", "pretty"] }
 sysdirs = "0.9.4"
 ron = "0.11.0"
+reqwest = { version = "0.13.5", features = ["query", "json", "blocking"] }
+serde_json = "1.0.150"
 
 [profile.dev]
 debug = 1
