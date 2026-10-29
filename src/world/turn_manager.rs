@@ -36,19 +36,24 @@ impl TurnManager {
         }
 
         let player = game_logic_config.player;
+
         match self.game_mode {
             GameMode::Offline => {
                 if player.id.0 == new_player_index {
-                    TurnTransition::LocalPlayerTurn(player)
+                    let new_player = Player::new(Id(new_player_index), PlayerType::Human);
+                    TurnTransition::LocalPlayerTurn(new_player)
                 } else {
-                    TurnTransition::TriggerBotAI(player)
+                    let new_player = Player::new(Id(new_player_index), PlayerType::Bot);
+                    TurnTransition::TriggerBotAI(new_player)
                 }
             }
             GameMode::Online => {
                 if player.id.0 == new_player_index {
-                    TurnTransition::LocalPlayerTurn(player)
+                    let new_player = Player::new(Id(new_player_index), PlayerType::Human);
+                    TurnTransition::LocalPlayerTurn(new_player)
                 } else {
-                    TurnTransition::WaitForNetwork(player)
+                    let new_player = Player::new(Id(new_player_index), PlayerType::Human);
+                    TurnTransition::WaitForNetwork(new_player)
                 }
             }
         }

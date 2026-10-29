@@ -1,7 +1,9 @@
 use crate::io::in_game_loading::buildings_data_loader_plugin::BuildingsData;
 use crate::io::in_game_loading::units_data_loader_plugin::UnitsData;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
-use crate::world::components::{AiDifficulty, Id, MapShape, MapSize, PlayerRace, PlayerType};
+use crate::world::components::{
+    AiDifficulty, Food, Gold, Id, Mana, MapShape, MapSize, PlayerRace, PlayerType, Science,
+};
 use crate::world::ui_and_graphic_resources::data::visual_race_data::RaceAssets;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::Resource;
@@ -20,36 +22,27 @@ impl Player {
 }
 
 #[derive(Debug, Clone)]
-pub struct Players(pub Vec<Player>);
+pub struct PlayerData {
+    pub id: Id,
+    pub gold: Gold,
+    pub food: Food,
+    pub science: Science,
+    pub current_mana: Mana,
+    pub maximum_man: Mana,
+    pub player_race: PlayerRace,
+}
 
-impl Players {
-    pub fn new(game_mode: &GameModeConfig, player_config: PlayerConfig) -> Self {
-        let players = match game_mode {
-            GameModeConfig::Local(config) => Self::from_local_config(&config.races, player_config),
-            GameModeConfig::Multiplayer(config) => Self::from_multiplayer_config(&config.races),
-        };
-
-        Self(players)
-    }
-
-    pub fn from_local_config(races: &[(Id, PlayerRace)], config: PlayerConfig) -> Vec<Player> {
-        races
-            .iter()
-            .map(|(id, _)| {
-                if config.id == *id {
-                    Player::new(*id, PlayerType::Human)
-                } else {
-                    Player::new(*id, PlayerType::Bot)
-                }
-            })
-            .collect()
-    }
-
-    pub fn from_multiplayer_config(races: &[(Id, PlayerRace)]) -> Vec<Player> {
-        races
-            .iter()
-            .map(|(id, _)| Player::new(*id, PlayerType::Human))
-            .collect()
+impl PlayerData {
+    pub fn new(id: Id, player_race: PlayerRace) -> Self {
+        Self {
+            id,
+            gold: 10,
+            food: 20,
+            science: 10,
+            current_mana: 40,
+            maximum_man: 40,
+            player_race,
+        }
     }
 }
 
@@ -170,8 +163,9 @@ impl RenderConfig {
 pub struct GameLogicConfig {
     pub units_data: HashMap<PlayerRace, UnitsData>,
     pub buildings_data: HashMap<PlayerRace, BuildingsData>,
-    pub players: Players,
+    pub players: Vec<PlayerData>,
     pub terrain_size: usize,
+    pub ai_difficulty: Option<AiDifficulty>,
     pub map_shape: MapShape,
     pub player: Player,
 }
@@ -183,13 +177,38 @@ impl GameLogicConfig {
         config: PlayerConfig,
         game_mode: &GameModeConfig,
     ) -> Self {
+        let ai_difficulty: Option<AiDifficulty>;
+        let players = match game_mode {
+            GameModeConfig::Local(config) => {
+                ai_difficulty = Some(config.ai_difficulty);
+                config
+                    .races
+                    .clone()
+                    .into_iter()
+                    .map(|(id, race)| PlayerData::new(id, race))
+                    .collect::<Vec<_>>()
+            }
+            GameModeConfig::Multiplayer(config) => {
+                ai_difficulty = None;
+                config
+                    .races
+                    .clone()
+                    .into_iter()
+                    .map(|(id, race)| PlayerData::new(id, race))
+                    .collect::<Vec<_>>()
+            }
+        };
+
+        let id = players[0].id;
+
         Self {
             units_data,
             buildings_data,
-            players: Players::new(game_mode, config),
+            players,
             terrain_size: config.map_size as usize,
+            ai_difficulty,
             map_shape: config.map_shape,
-            player: Player::new(config.id, PlayerType::Human),
+            player: Player::new(id, PlayerType::Human),
         }
     }
 }

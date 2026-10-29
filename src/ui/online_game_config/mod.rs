@@ -28,6 +28,7 @@ pub fn build_online_config(
         .map(|(index, race)| (Id(index as u16), race.clone()))
         .collect();
 
+    // todo get from server
     commands.insert_resource(TurnManager::new(
         Id(0),
         PlayerType::Human,
