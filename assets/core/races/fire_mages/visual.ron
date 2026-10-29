@@ -11,13 +11,19 @@
     large_resource: "0.99, 0.0, 0.0",
 
     //building
-    capital: "0.0, 1.0, 0.0",
-    captured_city: "0.0, 0.0, 1.0",
-    barbarian_city: "0.0, 0.0, 1.0",
-    medium_building: "0.0, 0.0, 0.0",
-    large_building: "0.0, 0.0, 0.0",
-    spawning_building: "0.0, 0.0, 0.0",
-    house: "0.0, 0.0, 0.0",
-    research_center: "0.0, 0.0, 0.0",
-    unique_race_building: "0.0, 0.0, 0.0",
+    capital: "core/races/fire_mages/assets/buildings/magic_castle.glb#Scene0",
+    captured_city: "core/races/fire_mages/assets/buildings/magic_castle.glb#Scene0",
+    barbarian_city: "core/races/fire_mages/assets/buildings/magic_castle.glb#Scene0",
+    medium_building: "core/races/fire_mages/assets/buildings/magic_castle.glb#Scene0",
+    large_building: "core/races/fire_mages/assets/buildings/magic_castle.glb#Scene0",
+    spawning_building: "core/races/fire_mages/assets/buildings/magic_castle.glb#Scene0",
+    house: "core/races/fire_mages/assets/buildings/magic_castle.glb#Scene0",
+    research_center: "core/races/fire_mages/assets/buildings/magic_castle.glb#Scene0",
+    unique_race_building: "core/races/fire_mages/assets/buildings/magic_castle.glb#Scene0",
+
+    //units
+    damage_dealer: "core/races/fire_mages/assets/units/dd.glb#Scene0",
+    support: "core/races/fire_mages/assets/units/dd.glb#Scene0",
+    skill: "core/races/fire_mages/assets/units/dd.glb#Scene0",
+    helper: "SwordsMen_Unit_Red.glb#Scene0"
 )

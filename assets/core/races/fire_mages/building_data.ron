@@ -16,7 +16,7 @@ BuildingsData(
                             science: 20,
                         ),
                         economy: Cost(
-                            upgrade_cost: 20,
+                            new_level_cost: 20,
                             maintenance: 20,
                         ),
                         building_utility: BuildingUtility(
@@ -36,7 +36,7 @@ BuildingsData(
                             science: 20,
                         ),
                         economy: Cost(
-                            upgrade_cost: 20,
+                            new_level_cost: 20,
                             maintenance: 20,
                         ),
                         building_utility: BuildingUtility(
@@ -56,7 +56,7 @@ BuildingsData(
                             science: 20,
                         ),
                         economy: Cost(
-                            upgrade_cost: 20,
+                            new_level_cost: 20,
                             maintenance: 20,
                         ),
                         building_utility: BuildingUtility(
