@@ -37,11 +37,6 @@ pub fn start_local_game(
     selected_races.push(chosen_race.clone());
     selected_races.extend(possible_races.into_iter().take(bots_amount - 1));
 
-    let id = selected_races
-        .iter()
-        .position(|race| *race == chosen_race)
-        .expect("chosen race was not selected");
-
     let races = selected_races
         .into_iter()
         .enumerate()
@@ -56,7 +51,7 @@ pub fn start_local_game(
         ai_difficulty: pending.ai_difficulty,
     };
 
-    let id = Id(id as u16);
+    let id = Id(0);
     commands.insert_resource(TurnManager::new(
         id,
         PlayerType::Human,
