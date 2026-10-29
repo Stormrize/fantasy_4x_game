@@ -1,13 +1,15 @@
-use bevy::prelude::Component;
+use bevy::{ecs::error::Severity::Debug, prelude::Component};
 use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
+
+use crate::io::startup_loading::localization_loader_plugin::Language::De;
 
 pub type Gold = u16;
 pub type Food = u16;
 pub type Science = u16;
 pub type Mana = u16;
 
-pub const CAPITAL_CONTROL_RADIUS: usize = 1;
+pub const CAPITAL_CONTROL_RADIUS: usize = 2;
 
 #[derive(Component, Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PlayerRace(pub SmolStr);
@@ -53,8 +55,7 @@ pub enum GameMode {
 
 #[derive(Component, Deserialize, Debug, Clone)]
 pub struct Cost {
-    pub build_cost: Gold,
-    pub upgrade_cost: Gold,
+    pub new_level_cost: Gold,
     pub maintenance: Gold,
 }
 

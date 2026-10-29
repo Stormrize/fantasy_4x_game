@@ -19,7 +19,8 @@ use crate::io::in_game_loading::units_data_loader_plugin::{
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::ui::menus::AppState;
 use crate::world::game_configs::{
-    CameraConfig, ConfigType, GameLogicConfig, GameModeConfig, PlayerConfig, RenderConfig,
+    CameraConfig, ConfigType, GameLogicConfig, GameModeConfig, PlayerConfig, PlayerData, Players,
+    RenderConfig,
 };
 
 pub(super) struct InGameAssetLoadingPlugin;
@@ -120,9 +121,26 @@ fn build_game_logic_config(
 ) {
     let units_data = std::mem::take(&mut units_data.0);
     let buildings_data = std::mem::take(&mut buildings_data.0);
-    let game_logic_config =
-        GameLogicConfig::new(units_data, buildings_data, player_config, game_mode);
-    commands.insert_resource(game_logic_config);
+
+    match game_mode {
+        GameModeConfig::Local(config) => {
+            let game_logic_config =
+                GameLogicConfig::new(units_data, buildings_data, player_config, config);
+            commands.insert_resource(game_logic_config);
+
+            let players = config
+                .races
+                .iter()
+                .map(|(id, race)| PlayerData::new(*id, race.clone()))
+                .collect();
+
+            commands.insert_resource(Players(players));
+        }
+        GameModeConfig::Multiplayer(_) => {
+            // await config
+        }
+    }
+
     commands.remove_resource::<RacesBuildingsData>();
     commands.remove_resource::<RacesUnitsData>();
 }

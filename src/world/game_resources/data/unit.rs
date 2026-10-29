@@ -9,8 +9,18 @@ use crate::world::game_resources::data::buffs_and_debuffs::{Buffs, Debuffs};
 pub enum UnitLevel {
     #[default]
     Beginner = 0,
-    Intermediate = 1,
-    Master = 2,
+    Master = 1,
+    Holy = 2,
+}
+
+impl UnitLevel {
+    pub fn next(&self) -> Option<UnitLevel> {
+        match self {
+            Self::Beginner => Some(Self::Holy),
+            Self::Master => Some(Self::Holy),
+            Self::Holy => None,
+        }
+    }
 }
 
 #[derive(Component, Deserialize, Debug, Clone, Copy, PartialEq)]
@@ -62,6 +72,9 @@ pub struct LevelAbilities(pub Vec<UniqueLevelAbility>);
 pub struct MovementPoints(pub u16);
 
 #[derive(Component, Deserialize, Debug, Clone)]
+pub struct FieldOfView(pub u16);
+
+#[derive(Component, Deserialize, Debug, Clone)]
 pub struct LevelCost(pub Vec<Cost>);
 
 #[derive(Bundle, Deserialize, Debug, Clone)]
@@ -70,6 +83,7 @@ pub struct CombatUnitData {
     pub level_economy: LevelCost,
     pub basic_stats: CombatBasicStats,
     pub movement_points: MovementPoints,
+    pub field_of_view: FieldOfView,
     pub unique_level_abilities: LevelAbilities,
 }
 
@@ -97,6 +111,7 @@ pub struct HelperData {
     pub unit_type: UnitType,
     pub basic_stats: HelperBasicStats,
     pub movement_points: MovementPoints,
+    pub field_of_view: FieldOfView,
 }
 
 pub const HELPER: HelperData = HelperData {
@@ -107,6 +122,7 @@ pub const HELPER: HelperData = HelperData {
         build_gather_points: 3,
     },
     movement_points: MovementPoints(2),
+    field_of_view: FieldOfView(2),
 };
 
 #[derive(Bundle, Debug, Clone)]

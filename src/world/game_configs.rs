@@ -28,7 +28,7 @@ pub struct PlayerData {
     pub food: Food,
     pub science: Science,
     pub current_mana: Mana,
-    pub maximum_man: Mana,
+    pub maximum_mana: Mana,
     pub player_race: PlayerRace,
 }
 
@@ -39,12 +39,15 @@ impl PlayerData {
             gold: 10,
             food: 20,
             science: 10,
-            current_mana: 40,
-            maximum_man: 40,
+            current_mana: 20,
+            maximum_mana: 40,
             player_race,
         }
     }
 }
+
+#[derive(Resource, Debug, Clone)]
+pub struct Players(pub Vec<PlayerData>);
 
 #[derive(Resource, Debug)]
 pub struct CameraConfig {
@@ -163,7 +166,7 @@ impl RenderConfig {
 pub struct GameLogicConfig {
     pub units_data: HashMap<PlayerRace, UnitsData>,
     pub buildings_data: HashMap<PlayerRace, BuildingsData>,
-    pub players: Vec<PlayerData>,
+    pub players: Vec<Player>,
     pub terrain_size: usize,
     pub ai_difficulty: Option<AiDifficulty>,
     pub map_shape: MapShape,
@@ -175,29 +178,16 @@ impl GameLogicConfig {
         units_data: HashMap<PlayerRace, UnitsData>,
         buildings_data: HashMap<PlayerRace, BuildingsData>,
         config: PlayerConfig,
-        game_mode: &GameModeConfig,
+        local_config: &LocalPlayerConfig,
     ) -> Self {
-        let ai_difficulty: Option<AiDifficulty>;
-        let players = match game_mode {
-            GameModeConfig::Local(config) => {
-                ai_difficulty = Some(config.ai_difficulty);
-                config
-                    .races
-                    .clone()
-                    .into_iter()
-                    .map(|(id, race)| PlayerData::new(id, race))
-                    .collect::<Vec<_>>()
-            }
-            GameModeConfig::Multiplayer(config) => {
-                ai_difficulty = None;
-                config
-                    .races
-                    .clone()
-                    .into_iter()
-                    .map(|(id, race)| PlayerData::new(id, race))
-                    .collect::<Vec<_>>()
-            }
-        };
+        let ai_difficulty = Some(local_config.ai_difficulty);
+
+        let players: Vec<Player> = local_config
+            .races
+            .iter()
+            .skip(1)
+            .map(|(id, _)| Player::new(*id, PlayerType::Bot))
+            .collect();
 
         let id = players[0].id;
 
