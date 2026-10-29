@@ -11,3 +11,13 @@ pub struct RenderMoveEntity {
 pub struct RenderAttackEntity {
     pub entity: Entity,
 }
+
+#[derive(Message, Clone)]
+pub struct RenderGatherEntity {
+    pub entity: Entity,
+}
+
+#[derive(Message, Clone)]
+pub struct RenderBuildEntity {
+    pub entity: Entity,
+}

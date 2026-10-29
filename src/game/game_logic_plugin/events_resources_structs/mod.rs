@@ -3,7 +3,7 @@ use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
     TileClickedEvent, Upgrade, WorldView,
 };
 use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::{
-    RenderAttackEntity, RenderMoveEntity,
+    RenderAttackEntity, RenderBuildEntity, RenderGatherEntity, RenderMoveEntity,
 };
 use crate::game::game_logic_plugin::events_resources_structs::render_selection_messages::{
     RenderBuilding, RenderFog, RenderResource, RenderTerrain, RenderUnit,
@@ -47,5 +47,7 @@ impl AppMessageExt for App {
             // render action messages
             .add_message::<RenderMoveEntity>()
             .add_message::<RenderAttackEntity>()
+            .add_message::<RenderGatherEntity>()
+            .add_message::<RenderBuildEntity>()
     }
 }
