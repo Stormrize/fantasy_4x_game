@@ -1,5 +1,5 @@
 target/
-assets/*
+assets/**
 !assets/**/
 !assets/**/*.ron
 .idea/
