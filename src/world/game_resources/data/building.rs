@@ -1,21 +1,26 @@
 use bevy::prelude::{Bundle, Component};
 use serde::Deserialize;
 
-use crate::world::components::{Cost, Id, PlayerRace};
+use crate::world::components::{Cost, Food, Gold, Id, PlayerRace, Science};
 use crate::world::game_resources::data::buffs_and_debuffs::{Buffs, Debuffs};
 
 pub const BUILDING_LEVELS: usize = 3;
-
-pub type Gold = u16;
-pub type Food = u16;
-pub type Science = u16;
-pub type Production = u16;
 
 #[derive(Component, Debug, Clone, Copy)]
 pub enum BuildingLevel {
     Standard = 0,
     Advanced = 1,
     Complex = 2,
+}
+
+impl BuildingLevel {
+    pub fn next(self) -> Option<Self> {
+        match self {
+            Self::Standard => Some(Self::Advanced),
+            Self::Advanced => Some(Self::Complex),
+            Self::Complex => None,
+        }
+    }
 }
 
 #[derive(Component, Deserialize, Debug, Clone, PartialEq)]
@@ -58,15 +63,13 @@ pub struct BuildingStats {
 pub struct Yields {
     pub gold: Gold,
     pub food: Food,
-    pub production: Food,
-    pub science: Food,
+    pub science: Science,
 }
 
 impl Yields {
     pub const NONE: Self = Self {
         gold: 0,
         food: 0,
-        production: 0,
         science: 0,
     };
 }
@@ -89,6 +92,21 @@ pub struct BuildingLevelStats {
     building_utility: BuildingUtility, // 32
 }
 
+impl BuildingLevelStats {
+    pub fn build_cost(&self) -> Gold {
+        self.economy.build_cost
+    }
+    pub fn upgrade_cost(&self) -> Gold {
+        self.economy.upgrade_cost
+    }
+    pub fn housing(&self) -> u16 {
+        self.building_utility.housing
+    }
+    pub fn spawn_capacity(&self) -> u16 {
+        self.building_utility.spawn_capacity
+    }
+}
+
 #[derive(Component, Deserialize, Debug, Clone)]
 pub struct Levels(pub [BuildingLevelStats; BUILDING_LEVELS]);
 
@@ -98,13 +116,19 @@ pub struct BuildingData {
     pub levels: Levels,
 }
 
+impl BuildingData {
+    pub fn stats(&self, level: BuildingLevel) -> &BuildingLevelStats {
+        &self.levels.0[level as usize]
+    }
+}
+
 const fn level(
     health: u16,
     defense: u16,
     gold: Gold,
     food: Food,
-    production: Production,
     science: Science,
+    build_cost: Gold,
     upgrade_cost: Gold,
     maintenance: Gold,
     housing: u16,
@@ -115,10 +139,10 @@ const fn level(
         yields: Yields {
             gold,
             food,
-            production,
             science,
         },
         economy: Cost {
+            build_cost,
             upgrade_cost,
             maintenance,
         },
@@ -144,71 +168,71 @@ pub struct Building {
 pub const CAPITAL: BuildingData = BuildingData {
     building_type: BuildingType::Capital,
     levels: Levels([
-        level(400, 100, 10, 0, 0, 0, 50, 0, 5, 0),
-        level(650, 250, 25, 0, 0, 0, 80, 0, 10, 0),
-        level(1000, 450, 40, 0, 0, 0, 115, 0, 20, 0),
+        level(400, 100, 10, 0, 0, 40, 50, 0, 5, 0),
+        level(650, 250, 25, 0, 0, 40, 80, 0, 10, 0),
+        level(1000, 450, 40, 0, 0, 40, 115, 0, 20, 0),
     ]),
 };
 
 pub const CAPTURED_CITY: BuildingData = BuildingData {
     building_type: BuildingType::CapturedCity,
     levels: Levels([
-        level(250, 50, 4, 2, 0, 0, 35, 0, 2, 0),
-        level(450, 140, 10, 6, 0, 0, 60, 0, 5, 0),
-        level(700, 260, 20, 12, 0, 0, 90, 0, 10, 0),
+        level(250, 50, 4, 2, 0, 30, 35, 0, 2, 0),
+        level(450, 140, 10, 6, 0, 30, 60, 0, 5, 0),
+        level(700, 260, 20, 12, 0, 30, 90, 0, 10, 0),
     ]),
 };
 
 pub const BARBARIAN_CITY: BuildingData = BuildingData {
     building_type: BuildingType::BarbarianCity,
     levels: Levels([
-        level(300, 60, 5, 0, 0, 0, 40, 0, 0, 0),
-        level(450, 150, 15, 0, 0, 0, 65, 0, 0, 0),
-        level(600, 230, 30, 0, 0, 0, 100, 0, 0, 0),
+        level(300, 60, 5, 0, 0, 30, 40, 0, 0, 0),
+        level(450, 150, 15, 0, 0, 30, 65, 0, 0, 0),
+        level(600, 230, 30, 0, 0, 30, 100, 0, 0, 0),
     ]),
 };
 
 pub const SPAWNING_BUILDING: BuildingData = BuildingData {
     building_type: BuildingType::SpawningBuilding,
     levels: Levels([
-        level(100, 20, 0, 0, 0, 0, 15, 5, 0, 1),
-        level(200, 80, 0, 0, 0, 0, 30, 8, 0, 2),
-        level(400, 200, 0, 0, 0, 0, 55, 15, 0, 3),
+        level(100, 20, 0, 0, 0, 10, 15, 5, 0, 1),
+        level(200, 80, 0, 0, 0, 10, 30, 8, 0, 2),
+        level(400, 200, 0, 0, 0, 10, 55, 15, 0, 3),
     ]),
 };
 
 pub const HOUSE: BuildingData = BuildingData {
     building_type: BuildingType::House,
     levels: Levels([
-        level(80, 10, 0, 0, 0, 0, 10, 1, 5, 0),
-        level(160, 30, 0, 0, 0, 0, 25, 2, 12, 0),
-        level(300, 60, 0, 0, 0, 0, 50, 4, 20, 0),
+        level(80, 10, 0, 0, 0, 5, 10, 1, 5, 0),
+        level(160, 30, 0, 0, 0, 5, 25, 2, 12, 0),
+        level(300, 60, 0, 0, 0, 5, 50, 4, 20, 0),
     ]),
 };
 
 pub const MEDIUM_BUILDING: BuildingData = BuildingData {
     building_type: BuildingType::MediumBuilding,
     levels: Levels([
-        level(120, 25, 0, 0, 5, 0, 20, 2, 0, 0),
-        level(250, 70, 0, 0, 12, 0, 40, 4, 0, 0),
-        level(450, 140, 0, 0, 24, 0, 75, 7, 0, 0),
+        level(120, 25, 5, 0, 0, 15, 20, 2, 0, 0),
+        level(250, 70, 12, 0, 0, 15, 40, 4, 0, 0),
+        level(450, 140, 24, 0, 0, 15, 75, 7, 0, 0),
     ]),
 };
 
 pub const LARGE_BUILDING: BuildingData = BuildingData {
     building_type: BuildingType::LargeBuilding,
     levels: Levels([
-        level(200, 40, 0, 0, 10, 0, 35, 4, 0, 0),
-        level(400, 100, 0, 0, 24, 0, 65, 8, 0, 0),
-        level(700, 180, 0, 0, 50, 0, 115, 14, 0, 0),
+        level(200, 40, 10, 0, 0, 25, 35, 4, 0, 0),
+        level(400, 100, 24, 0, 0, 25, 65, 8, 0, 0),
+        level(700, 180, 50, 0, 0, 25, 115, 14, 0, 0),
     ]),
 };
 
 pub const RESEARCH_CENTER: BuildingData = BuildingData {
     building_type: BuildingType::ResearchCenter,
     levels: Levels([
-        level(100, 20, 0, 0, 0, 5, 30, 4, 0, 0),
-        level(220, 60, 0, 0, 0, 14, 60, 8, 0, 0),
-        level(400, 120, 0, 0, 0, 30, 105, 14, 0, 0),
+        level(100, 20, 0, 0, 5, 20, 30, 4, 0, 0),
+        level(220, 60, 0, 0, 14, 20, 60, 8, 0, 0),
+        level(400, 120, 0, 0, 30, 20, 105, 14, 0, 0),
     ]),
 };

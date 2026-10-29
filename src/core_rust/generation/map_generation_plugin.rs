@@ -5,7 +5,7 @@ use crate::core_rust::generation::races_generation::capitals_generation::voronoi
 use crate::core_rust::generation::races_generation::generate_cities::BuildingMapNoBevy;
 use crate::core_rust::generation::terrain_generator::PerlinPlaceholder;
 use crate::core_rust::generation::units_generator::generate_units::UnitsMapNoBevy;
-use crate::world::components::{Id, MapShape, MapSize, PlayerRace};
+use crate::world::components::{MapShape, MapSize};
 use crate::world::{
     game_configs::{ConfigType, GameModeConfig, GenerationConfig},
     game_resources::{
@@ -56,13 +56,15 @@ struct GetMapTask {
 fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
     let perlin = PerlinPlaceholder::new(config);
     let mut terrain = TerrainMap::new_global_terrain_map(config, &perlin);
-    let capitals_pos = CapitalsPos::calculate_player_positions(config, &terrain).unwrap();
+    let capitals_pos: CapitalsPos =
+        CapitalsPos::calculate_player_positions(config, &terrain).unwrap();
     let influence_map =
         PlayerInfluenceMap::voronoi_diagram_for_players(config, &capitals_pos, &perlin);
     terrain.final_terrain_map(config, &perlin, &influence_map);
-    let resources = ResourceMap::new(config, &terrain);
     let fog = FogMap::new(config, &capitals_pos);
     let buildings = BuildingMapNoBevy::new(config, &capitals_pos, &terrain);
+    terrain.update_ids(&buildings);
+    let resources = ResourceMap::new(config, &terrain);
     let units = UnitsMapNoBevy::new(config, &capitals_pos, &terrain);
 
     GeneratedMapResources {
@@ -88,7 +90,6 @@ fn start_map_generation(mut commands: Commands, config_type: Res<ConfigType>) {
             struct MapRequestQuery {
                 pub map_size: MapSize,
                 pub map_shape: MapShape,
-                pub id: Id,
                 pub races: String,
             }
 
@@ -97,7 +98,6 @@ fn start_map_generation(mut commands: Commands, config_type: Res<ConfigType>) {
             let config = MapRequestQuery {
                 map_size: config_type.player_config.map_size,
                 map_shape: config_type.player_config.map_shape,
-                id: config_type.player_config.id,
                 races: races_json,
             };
             let task = AsyncComputeTaskPool::get().spawn(async move {

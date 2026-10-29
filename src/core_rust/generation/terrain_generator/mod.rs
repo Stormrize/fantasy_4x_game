@@ -5,6 +5,7 @@ use crate::world::game_configs::GenerationConfig;
 mod global_terrain_generation;
 mod local_terrain_generation;
 mod noise;
+mod update_id;
 
 pub struct PerlinPlaceholder {
     pub perlin_main: Perlin,

@@ -16,7 +16,7 @@ pub(super) fn compute_land_components(terrain: &TerrainMap, terrain_size: usize)
     for x in 0..terrain_size {
         for y in 0..terrain_size {
             let idx = x * terrain_size + y;
-            if comp[idx] != -1 || !matches!(terrain.get(x, y), BiomeType::Ground) {
+            if comp[idx] != -1 || !matches!(terrain.get_biome_type(x, y), BiomeType::Ground) {
                 continue;
             }
             // Обычный DFS-flood-fill; порядок (стек вместо очереди) роли не играет,
@@ -26,7 +26,9 @@ pub(super) fn compute_land_components(terrain: &TerrainMap, terrain_size: usize)
             while let Some((cx, cy)) = stack.pop() {
                 for (nx, ny) in neighbors4(cx, cy, terrain_size) {
                     let nidx = ny * terrain_size + nx;
-                    if comp[nidx] == -1 && matches!(terrain.get(nx, ny), BiomeType::Ground) {
+                    if comp[nidx] == -1
+                        && matches!(terrain.get_biome_type(nx, ny), BiomeType::Ground)
+                    {
                         comp[nidx] = next_id;
                         stack.push((nx, ny));
                     }
@@ -168,7 +170,11 @@ pub(super) fn flood_fill_balance(
 
     while let Some(node) = heap.pop() {
         let idx = node.y * terrain_size + node.x;
-        if owner[idx].is_some() || !matches!(global_terrain.get(node.x, node.y), BiomeType::Ground)
+        if owner[idx].is_some()
+            || !matches!(
+                global_terrain.get_biome_type(node.x, node.y),
+                BiomeType::Ground
+            )
         {
             continue; // уже занято или вода — рост тут обрывается
         }

@@ -52,14 +52,14 @@ impl BuildingMapNoBevy {
             }
         }
 
+        let mut counter = Id::BARBARIAN_RANGE.start;
         for x in 3..terrain_size - 2 {
             for y in 3..terrain_size - 2 {
-                let biome = terrain.get(x, y);
+                let biome = terrain.get_biome(x, y);
 
-                let (id, player_race) = match biome {
-                    BiomeType::SmallBiome(id, race) => (id, race),
-                    _ => continue,
-                };
+                if biome.biome_type != BiomeType::SmallBiome {
+                    continue;
+                }
 
                 let index = x * terrain_size + y;
 
@@ -68,8 +68,8 @@ impl BuildingMapNoBevy {
                 }
 
                 cities[index] = Some(Building {
-                    id: *id,
-                    player_race: player_race.clone(),
+                    id: Id(counter as u16),
+                    player_race: biome.owner_race.clone(),
                     building_type: BuildingType::BarbarianCity,
                 });
                 let min_y = y.saturating_sub(5);
@@ -82,6 +82,7 @@ impl BuildingMapNoBevy {
                         blocked[index] = true;
                     }
                 }
+                counter += 1;
             }
         }
         Self {

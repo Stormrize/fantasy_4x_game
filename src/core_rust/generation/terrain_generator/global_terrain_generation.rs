@@ -1,10 +1,14 @@
-use crate::core_rust::generation::terrain_generator::{
-    PerlinPlaceholder,
-    noise::{fbm, normalise, sample},
-};
-use crate::world::components::{Id, PlayerRace};
+use crate::world::components::PlayerRace;
+use crate::world::game_configs::GenerationConfig;
+use crate::world::game_resources::data::biome::BiomeType::Water;
 use crate::world::game_resources::terrain_map::TerrainMap;
-use crate::world::{game_configs::GenerationConfig, game_resources::data::biome::BiomeType};
+use crate::{
+    core_rust::generation::terrain_generator::{
+        PerlinPlaceholder,
+        noise::{fbm, normalise, sample},
+    },
+    world::game_resources::data::biome::Biome,
+};
 
 impl TerrainMap {
     pub fn new_global_terrain_map(
@@ -13,7 +17,7 @@ impl TerrainMap {
     ) -> Self {
         let terrain_size = config.terrain_size;
 
-        let mut data = vec![BiomeType::Ground; terrain_size * terrain_size];
+        let mut data = vec![Biome::default(); terrain_size * terrain_size];
 
         //let task_pool = ComputeTaskPool::get();
 
@@ -45,7 +49,11 @@ impl TerrainMap {
                 let index = row * terrain_size + col;
 
                 if result < config.water_threshold {
-                    data[index] = BiomeType::Water(Id::default(), PlayerRace::default());
+                    data[index] = Biome {
+                        biome_type: Water,
+                        id: None,
+                        owner_race: PlayerRace::default(),
+                    };
                 }
             }
         }

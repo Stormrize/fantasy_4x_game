@@ -2,7 +2,7 @@ use bevy::prelude::{Bundle, Component};
 use serde::Deserialize;
 use smol_str::SmolStr;
 
-use crate::world::components::{Cost, Id, PlayerRace};
+use crate::world::components::{Cost, Id, Mana, PlayerRace};
 use crate::world::game_resources::data::buffs_and_debuffs::{Buffs, Debuffs};
 
 #[derive(Component, Debug, Clone, Copy, Default)]
@@ -48,7 +48,7 @@ struct UniqueLevelAbility {
     pub name: SmolStr,
     pub buffs: Buffs,
     pub debuffs: Debuffs,
-    pub mana_amount_needs: u16,
+    pub mana_amount_needs: Mana,
     pub damage: u16,
     pub cool_down_turns: u16,
     pub range: u8,

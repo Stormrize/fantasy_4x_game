@@ -6,12 +6,9 @@ use crate::core_rust::generation::{
     terrain_generator::PerlinPlaceholder,
     terrain_generator::noise::{fbm, normalise},
 };
-use crate::world::components::{Id, PlayerRace};
 use crate::world::game_configs::GenerationConfig;
-use crate::world::game_resources::data::biome::BiomeType::{
-    LargeBiome, MediumBiome, SmallBiome, Water,
-};
-use crate::world::game_resources::{data::biome::BiomeType, terrain_map::TerrainMap};
+use crate::world::game_resources::data::biome::{Biome, BiomeType};
+use crate::world::game_resources::terrain_map::TerrainMap;
 
 const CAPITAL_SMALL_BIOME_RADIUS: f64 = 0.05;
 
@@ -22,9 +19,15 @@ impl TerrainMap {
         perlin_placeholder: &PerlinPlaceholder,
         influence_map: &PlayerInfluenceMap,
     ) {
-        let terrain_map = self;
-        for (counter, cell) in influence_map.cells.iter().enumerate() {
-            apply_local_biomes(config, perlin_placeholder, terrain_map, cell, counter as u8);
+        for (cell_index, cell) in influence_map.cells.iter().enumerate() {
+            apply_local_biomes(
+                config,
+                perlin_placeholder,
+                self,
+                cell,
+                influence_map,
+                cell_index as u8,
+            );
         }
     }
 }
@@ -34,17 +37,23 @@ fn apply_local_biomes(
     perlin_placeholder: &PerlinPlaceholder,
     terrain_map: &mut TerrainMap,
     cell: &PlayerInfluenceCell,
-    seed_offset: u8,
+    influence_map: &PlayerInfluenceMap,
+    cell_index: u8,
 ) {
     let size = config.terrain_size;
-    let seed_offset = (seed_offset as f64 + 1.0) * config.local_seed_offset;
+    let seed_offset = (cell_index as f64 + 1.0) * config.local_seed_offset;
 
     for &tile_index in &cell.tile_indices {
         let row = tile_index / size;
         let col = tile_index % size;
 
-        if matches!(terrain_map.get(row, col), Water(_, _)) {
-            terrain_map.map[tile_index] = Water(cell.player_id, cell.player_race.clone());
+        // Вода остаётся водой: игроку достаётся только та, что рядом со столицей.
+        if terrain_map.get_biome_type(row, col) == BiomeType::Water {
+            terrain_map.map[tile_index] = Biome {
+                biome_type: BiomeType::Water,
+                id: influence_map.get_id(row, col),
+                owner_race: cell.player_race.clone(),
+            };
             continue;
         }
 
@@ -62,13 +71,16 @@ fn apply_local_biomes(
             config.local_lacunarity,
         ));
 
-        // добавляем small_biome возле столицы
+        // Возле столицы биом мельче: сдвигаем значение вниз.
         let value = ((value - capital_small_biome_bias(row, col, cell.capital, size))
             .clamp(0.0, 1.0)
             * 255.0) as u8;
 
-        terrain_map.map[tile_index] =
-            choose_local_biome(value, config, cell.player_id, cell.player_race.clone());
+        terrain_map.map[tile_index] = Biome {
+            biome_type: choose_local_biome(value, config),
+            id: influence_map.get_id(row, col),
+            owner_race: cell.player_race.clone(),
+        };
     }
 }
 
@@ -78,24 +90,19 @@ fn capital_small_biome_bias(
     capital: CapitalCoord,
     terrain_size: usize,
 ) -> f64 {
-    let dx = col as f64 - capital.1 as f64;
-    let dy = row as f64 - capital.0 as f64;
-    let d = dx.hypot(dy) / terrain_size as f64;
+    let dx = col.abs_diff(capital.1) as f64;
+    let dy = row.abs_diff(capital.0) as f64;
+    let distance = dx.hypot(dy) / terrain_size as f64;
 
-    (1.0 - d / CAPITAL_SMALL_BIOME_RADIUS).clamp(0.0, 1.0)
+    (1.0 - distance / CAPITAL_SMALL_BIOME_RADIUS).clamp(0.0, 1.0)
 }
 
-fn choose_local_biome(
-    value: u8,
-    config: &GenerationConfig,
-    player_id: Id,
-    player_race: PlayerRace,
-) -> BiomeType {
+fn choose_local_biome(value: u8, config: &GenerationConfig) -> BiomeType {
     if value <= config.local_small_threshold {
-        SmallBiome(player_id, player_race)
+        BiomeType::SmallBiome
     } else if value <= config.local_middle_threshold {
-        MediumBiome(player_id, player_race)
+        BiomeType::MediumBiome
     } else {
-        LargeBiome(player_id, player_race)
+        BiomeType::LargeBiome
     }
 }

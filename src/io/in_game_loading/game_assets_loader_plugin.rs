@@ -125,6 +125,23 @@ fn load_assets(
                     base_color: parse_color(parse_string(&race_asset.large_resource)),
                     ..default()
                 }),
+                // todo
+                materials.add(StandardMaterial {
+                    base_color: Color::srgb(0.5, 0.4, 0.0),
+                    ..default()
+                }),
+                materials.add(StandardMaterial {
+                    base_color: Color::srgb(0.0, 0.4, 0.4),
+                    ..default()
+                }),
+                materials.add(StandardMaterial {
+                    base_color: Color::srgb(0.5, 0.0, 0.4),
+                    ..default()
+                }),
+                materials.add(StandardMaterial {
+                    base_color: Color::srgb(0.3, 0.35, 0.7),
+                    ..default()
+                }),
             ],
 
             buildings: [

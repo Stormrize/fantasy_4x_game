@@ -41,17 +41,13 @@ pub fn spawn_terrain_meshes(
 
     for row in min_x..max_x {
         for col in min_y..max_y {
-            let biome = terrain.get(row as usize, col as usize);
+            let biome = terrain.get_biome(row as usize, col as usize);
 
-            let race_inside = biome.race_inside();
-
-            let Some(race) = race_inside else {
-                continue;
-            };
+            let race = biome.owner_race();
 
             let handle = config.assets_registry.get(race).unwrap_or_else(|| {
                 panic!("assets for this race do not exist, if it is moded race, dont forget to configure assets");
-            }).get_biome(biome.index());
+            }).get_biome(biome.biome_type.index());
 
             let mesh_handle = meshes.add(Plane3d::default());
 

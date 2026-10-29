@@ -5,7 +5,7 @@ use bevy::world_serialization::WorldAsset;
 pub struct RaceAssets {
     pub biomes: [Handle<StandardMaterial>; 4],
 
-    pub resources: [Handle<StandardMaterial>; 3],
+    pub resources: [Handle<StandardMaterial>; 7],
 
     pub buildings: [Handle<WorldAsset>; 9],
 
@@ -22,6 +22,10 @@ impl RaceAssets {
             self.resources[0].clone().untyped(),
             self.resources[1].clone().untyped(),
             self.resources[2].clone().untyped(),
+            self.resources[3].clone().untyped(),
+            self.resources[4].clone().untyped(),
+            self.resources[5].clone().untyped(),
+            self.resources[6].clone().untyped(),
             self.buildings[0].clone().untyped(),
             self.buildings[1].clone().untyped(),
             self.buildings[2].clone().untyped(),

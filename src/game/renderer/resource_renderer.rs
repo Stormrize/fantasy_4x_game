@@ -43,7 +43,7 @@ pub fn spawn_resource_meshes(
                 continue;
             };
 
-            let player_race = resource.race_inside();
+            let player_race = resource.owner_race();
 
             let Some(race_assets) = config.assets_registry.get(player_race) else {
                 continue;

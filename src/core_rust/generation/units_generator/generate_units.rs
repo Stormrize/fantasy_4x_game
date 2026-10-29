@@ -50,7 +50,7 @@ impl UnitsMapNoBevy {
                 let x = (coord.0 as i32 + position.0) as usize;
                 let y = (coord.1 as i32 + position.1) as usize;
 
-                if !matches!(terrain.get(x, y), BiomeType::SmallBiome(_, _)) {
+                if !matches!(terrain.get_biome_type(x, y), BiomeType::SmallBiome) {
                     continue;
                 }
 

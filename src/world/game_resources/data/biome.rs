@@ -1,43 +1,43 @@
 use crate::world::components::{Id, PlayerRace};
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[derive(Deserialize, Debug, Default, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum BiomeType {
-    Water(Id, PlayerRace),
-    SmallBiome(Id, PlayerRace),
-    MediumBiome(Id, PlayerRace),
-    LargeBiome(Id, PlayerRace),
+    Water,
+    SmallBiome,
+    MediumBiome,
+    LargeBiome,
+    #[default]
     Ground,
+}
+
+#[derive(Deserialize, Debug, Default, Clone)]
+pub struct Biome {
+    pub biome_type: BiomeType,
+    pub id: Option<Id>,
+    pub owner_race: PlayerRace,
+}
+
+impl Biome {
+    pub fn id_inside(&self) -> Option<Id> {
+        self.id
+    }
+
+    pub fn owner_race(&self) -> &PlayerRace {
+        &self.owner_race
+    }
 }
 
 impl BiomeType {
     pub fn index(&self) -> usize {
         use BiomeType::*;
         match self {
-            Water(_, _) => 0,
-            SmallBiome(_, _) => 1,
-            MediumBiome(_, _) => 2,
-            LargeBiome(_, _) => 3,
+            Water => 0,
+            SmallBiome => 1,
+            MediumBiome => 2,
+            LargeBiome => 3,
             Ground => unreachable!(),
-        }
-    }
-
-    pub fn id_inside(&self) -> Option<Id> {
-        use BiomeType::*;
-        match self {
-            SmallBiome(id, _) | MediumBiome(id, _) | LargeBiome(id, _) | Water(id, _) => Some(*id),
-
-            Ground => None,
-        }
-    }
-
-    pub fn race_inside(&self) -> Option<&PlayerRace> {
-        use BiomeType::*;
-        match self {
-            SmallBiome(_, p) | MediumBiome(_, p) | LargeBiome(_, p) | Water(_, p) => Some(p),
-
-            Ground => None,
         }
     }
 }

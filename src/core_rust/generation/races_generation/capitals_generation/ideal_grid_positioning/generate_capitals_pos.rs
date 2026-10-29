@@ -87,8 +87,8 @@ impl CapitalsPos {
                     candidates.shuffle(&mut rng);
 
                     for (x, y) in candidates {
-                        match global_terrain.get(x, y) {
-                            BiomeType::Water(_, _) => continue,
+                        match global_terrain.get_biome_type(x, y) {
+                            BiomeType::Water => continue,
                             BiomeType::Ground => {
                                 found_pos = Some((x, y));
                                 break;
