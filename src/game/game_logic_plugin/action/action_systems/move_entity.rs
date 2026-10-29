@@ -1,5 +1,5 @@
 use crate::game::game_logic_plugin::action::rules::move_rules::{
-    check_move_validity, is_players_unit,
+    check_move_validity, is_players_turn, is_players_unit,
 };
 use crate::game::game_logic_plugin::events_resources_structs::action_messages::{Clear, Move};
 use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::RenderMoveEntity;
@@ -30,13 +30,10 @@ pub fn move_entity(
 
         let (id, mut movement_points) = movement_stats.get_mut(selected_entity).unwrap();
 
-        if game_logic_config.player != turn_manager.current_player {
+        if !is_players_turn(game_logic_config.player, turn_manager.current_player) {
             println!("Not your turn");
             clear.write(Clear);
             continue;
-        } else {
-            println!("player config: {}", game_logic_config.player.id.0);
-            println!("player turn manager: {}", turn_manager.current_player.id.0);
         }
 
         if !is_players_unit(*id, turn_manager.current_player) {

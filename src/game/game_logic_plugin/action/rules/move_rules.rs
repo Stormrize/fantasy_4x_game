@@ -2,10 +2,17 @@ use crate::world::components::Id;
 use crate::world::game_configs::Player;
 use bevy::math::IVec2;
 
+#[inline]
+pub fn is_players_turn(player: Player, current_player: Player) -> bool {
+    player == current_player
+}
+
+#[inline]
 pub fn is_players_unit(unit_id: Id, player: Player) -> bool {
     unit_id == player.id
 }
 
+#[inline]
 pub fn check_move_validity(
     movement_points: u16,
     current_position: IVec2,
