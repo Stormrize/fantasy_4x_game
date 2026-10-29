@@ -7,18 +7,24 @@ impl FogMap {
     pub fn new(config: &GenerationConfig, capital_coord: &CapitalsPos) -> Self {
         let terrain_size = config.terrain_size;
 
-        let all_bots: Box<[(Id, bool)]> = config
+        let all_bots: Vec<(Id, bool)> = config
             .players
             .iter()
             .skip(1)
             .map(|(id, _)| (*id, false))
-            .collect::<Vec<_>>()
-            .into_boxed_slice();
+            .collect::<Vec<_>>();
 
-        let mut data =
-            vec![Fog::new(true /* debug for now */, all_bots); terrain_size * terrain_size];
+        let mut data = vec![
+            Fog::new(
+                true, // debug for now
+                all_bots.clone(),
+                true, //debug for now
+                all_bots
+            );
+            terrain_size * terrain_size
+        ];
 
-        let radius = 2isize;
+        let radius = 3isize;
 
         // todo
         for ((id, _), coord) in capital_coord.data.iter() {
@@ -41,10 +47,11 @@ impl FogMap {
                         let index = (map_x as usize) * terrain_size + (map_y as usize);
 
                         if is_player {
-                            data[index].visible_for_player = true
+                            data[index].general_visible_player = true;
+                            data[index].full_visible_player = true;
                         } else {
-                            data[index].visible_for_bots[(id.0 - 1) as usize] = (*id, true);
-                            data[index].visible_for_player = true;
+                            data[index].general_visible_bots[(id.0 - 1) as usize] = (*id, true);
+                            data[index].full_visible_bots[(id.0 - 1) as usize] = (*id, true);
                         }
                     }
                 }

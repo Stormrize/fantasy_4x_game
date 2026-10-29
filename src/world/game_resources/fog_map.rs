@@ -4,15 +4,26 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct Fog {
-    pub visible_for_player: bool,
-    pub visible_for_bots: Box<[(Id, bool)]>,
+    // general visibility no units visible
+    pub general_visible_player: bool,
+    pub general_visible_bots: Vec<(Id, bool)>,
+    // full visibility units visible
+    pub full_visible_player: bool,
+    pub full_visible_bots: Vec<(Id, bool)>,
 }
 
 impl Fog {
-    pub fn new(player: bool, visible_for_bots: Box<[(Id, bool)]>) -> Self {
+    pub fn new(
+        general_visible_player: bool,
+        general_visible_bots: Vec<(Id, bool)>,
+        full_visible_player: bool,
+        full_visible_bots: Vec<(Id, bool)>,
+    ) -> Self {
         Self {
-            visible_for_player: player,
-            visible_for_bots,
+            general_visible_player,
+            general_visible_bots,
+            full_visible_player,
+            full_visible_bots,
         }
     }
 }
@@ -33,6 +44,6 @@ impl FogMap {
     }
 
     pub fn is_visible_player(&self, row: usize, col: usize) -> bool {
-        self.map[row * self.size + col].visible_for_player
+        self.map[row * self.size + col].general_visible_player
     }
 }
