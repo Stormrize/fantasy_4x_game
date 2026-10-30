@@ -4,16 +4,17 @@ UnitsData(
             unit_type: DamageDealer,
             level_economy: LevelCost([
                 Cost(new_level_cost: 50, maintenance: 5),
-                Cost(new_level_cost: 120, maintenance: 10),
-                Cost(new_level_cost: 150, maintenance: 25),
+                Cost(new_level_cost: 90, maintenance: 12),
+                Cost(new_level_cost: 160, maintenance: 26),
             ]),
+            current_hp: CurrentHp(120),
             basic_stats: CombatBasicStats(health: 120, defense: 25, attack: 30, range: 1),
             movement_points: MovementPoints(3),
             field_of_view: FieldOfView(2),
             unique_level_abilities: LevelAbilities([
                 UniqueLevelAbility(
                     name: "Fireball",
-                    range: 1, area: 0, damage: 75, mana_amount_needs: 20, cool_down_turns: 2,
+                    range: 2, area: 0, damage: 70, mana_amount_needs: 20, cool_down_turns: 2,
                     buffs: Buffs([]),
                     debuffs: Debuffs([
                         SustainedDamage(damage: 10, duration: 3, turns_offset: 0)
@@ -21,7 +22,7 @@ UnitsData(
                 ),
                 UniqueLevelAbility(
                     name: "Fiery land",
-                    range: 2, area: 0, damage: 130, mana_amount_needs: 30, cool_down_turns: 3,
+                    range: 2, area: 1, damage: 110, mana_amount_needs: 35, cool_down_turns: 3,
                     buffs: Buffs([]),
                     debuffs: Debuffs([
                         SustainedDamage(damage: 10, duration: 3, turns_offset: 0)
@@ -41,9 +42,11 @@ UnitsData(
             unit_type: Support,
             level_economy: LevelCost([
                 Cost(new_level_cost: 45, maintenance: 3),
-                Cost(new_level_cost: 65, maintenance: 7),
+                Cost(new_level_cost: 70, maintenance: 8),
+                Cost(new_level_cost: 140, maintenance: 20),
             ]),
-            basic_stats: CombatBasicStats(health: 160, defense: 60, attack: 20, range: 1, ),
+            current_hp: CurrentHp(160),
+            basic_stats: CombatBasicStats(health: 160, defense: 60, attack: 20, range: 1),
             movement_points: MovementPoints(3),
             field_of_view: FieldOfView(2),
             unique_level_abilities: LevelAbilities([
@@ -55,12 +58,11 @@ UnitsData(
                     ]),
                     debuffs: Debuffs([])
                 ),
-
                 UniqueLevelAbility(
                     name: "Fire Wall",
                     range: 1, area: 1, damage: 0, mana_amount_needs: 45, cool_down_turns: 3,
                     buffs: Buffs([
-                        DefenseBuff(defense: 25, duration: 2, turns_offset: 0, ),
+                        DefenseBuff(defense: 25, duration: 2, turns_offset: 0),
                         DamageReflection(damage: 30, duration: 2, turns_offset: 0)
                     ]),
                     debuffs: Debuffs([])
@@ -71,24 +73,25 @@ UnitsData(
             unit_type: Skill,
             level_economy: LevelCost([
                 Cost(new_level_cost: 50, maintenance: 5),
-                Cost(new_level_cost: 70, maintenance: 10),
+                Cost(new_level_cost: 80, maintenance: 12),
+                Cost(new_level_cost: 150, maintenance: 24),
             ]),
+            current_hp: CurrentHp(90),
             basic_stats: CombatBasicStats(health: 90, defense: 20, attack: 35, range: 2),
             movement_points: MovementPoints(3),
             field_of_view: FieldOfView(2),
             unique_level_abilities: LevelAbilities([
                 UniqueLevelAbility(
                     name: "Magma Pulse",
-                    range: 1, area: 1, damage: 30, mana_amount_needs: 25, cool_down_turns: 3,
+                    range: 2, area: 1, damage: 40, mana_amount_needs: 25, cool_down_turns: 3,
                     buffs: Buffs([]),
                     debuffs: Debuffs([
                         DamageDebuff(attack: 15, duration: 2, turns_offset: 0),
                     ])
                 ),
-
                 UniqueLevelAbility(
                     name: "Spark",
-                    range: 2, area: 1, damage: 50, mana_amount_needs: 15, cool_down_turns: 2,
+                    range: 2, area: 1, damage: 55, mana_amount_needs: 20, cool_down_turns: 2,
                     buffs: Buffs([]),
                     debuffs: Debuffs([
                         RangeDebuff(range: 1, duration: 2, turns_offset: 0),

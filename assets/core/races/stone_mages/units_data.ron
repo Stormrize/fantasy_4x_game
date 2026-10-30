@@ -4,8 +4,10 @@ UnitsData(
             unit_type: DamageDealer, // Каменный сокрушитель
             level_economy: LevelCost([
                 Cost(new_level_cost: 55, maintenance: 6),
-                Cost(new_level_cost: 75, maintenance: 12),
+                Cost(new_level_cost: 85, maintenance: 13),
+                Cost(new_level_cost: 155, maintenance: 25),
             ]),
+            current_hp: CurrentHp(140),
             basic_stats: CombatBasicStats(health: 140, defense: 40, attack: 25, range: 1),
             movement_points: MovementPoints(3),
             field_of_view: FieldOfView(2),
@@ -14,7 +16,7 @@ UnitsData(
                     name: "Rock Throw",
                     range: 2, area: 0, damage: 60, mana_amount_needs: 15, cool_down_turns: 1,
                     buffs: Buffs([]),
-                    debuffs: Debuffs([Stun(duration: 1, turns_offset: 0, )])
+                    debuffs: Debuffs([Stun(duration: 1, turns_offset: 0)])
                 ),
                 UniqueLevelAbility(
                     name: "Earthquake",
@@ -28,9 +30,10 @@ UnitsData(
             unit_type: Support, // Хранитель Земли (3 СПОСОБНОСТИ ПОД ЗАЩИТУ)
             level_economy: LevelCost([
                 Cost(new_level_cost: 50, maintenance: 4),
-                Cost(new_level_cost: 70, maintenance: 9),
-                Cost(new_level_cost: 130, maintenance: 22),
+                Cost(new_level_cost: 80, maintenance: 10),
+                Cost(new_level_cost: 150, maintenance: 24),
             ]),
+            current_hp: CurrentHp(180),
             basic_stats: CombatBasicStats(health: 180, defense: 75, attack: 15, range: 1),
             movement_points: MovementPoints(2),
             field_of_view: FieldOfView(2),
@@ -41,7 +44,6 @@ UnitsData(
                     buffs: Buffs([DefenseBuff(defense: 40, duration: 2, turns_offset: 0)]),
                     debuffs: Debuffs([])
                 ),
-                // todo
                 UniqueLevelAbility(
                     name: "Earthen Rampart",
                     range: 2, area: 1, damage: 20, mana_amount_needs: 35, cool_down_turns: 3,
@@ -54,7 +56,7 @@ UnitsData(
                     range: 1, area: 2, damage: 0, mana_amount_needs: 50, cool_down_turns: 4,
                     buffs: Buffs([
                         DefenseBuff(defense: 60, duration: 2, turns_offset: 0),
-                        VulnerabilityBuff(duration: 1, turns_offset: 0) // Полная неуязвимость к эффеткам на 1 ход для союзников в зоне
+                        VulnerabilityBuff(duration: 1, turns_offset: 0) // Полная неуязвимость к эффектам на 1 ход для союзников в зоне
                     ]),
                     debuffs: Debuffs([])
                 ),
@@ -64,8 +66,10 @@ UnitsData(
             unit_type: Skill, // Геомант-Скульптор
             level_economy: LevelCost([
                 Cost(new_level_cost: 50, maintenance: 5),
-                Cost(new_level_cost: 75, maintenance: 11),
+                Cost(new_level_cost: 80, maintenance: 12),
+                Cost(new_level_cost: 150, maintenance: 24),
             ]),
+            current_hp: CurrentHp(100),
             basic_stats: CombatBasicStats(health: 100, defense: 30, attack: 30, range: 2),
             movement_points: MovementPoints(3),
             field_of_view: FieldOfView(2),
@@ -79,7 +83,7 @@ UnitsData(
                     ])
                 ),
                 UniqueLevelAbility(
-                    name: "",
+                    name: "Petrify",
                     range: 3, area: 0, damage: 10, mana_amount_needs: 40, cool_down_turns: 3,
                     buffs: Buffs([]),
                     debuffs: Debuffs([
