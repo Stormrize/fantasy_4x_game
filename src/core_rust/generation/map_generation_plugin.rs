@@ -16,7 +16,7 @@ use crate::world::{
                 BARBARIAN_CITY, Building, BuildingLevel, BuildingType, CAPITAL, CAPTURED_CITY,
                 HOUSE, LARGE_BUILDING, MEDIUM_BUILDING, RESEARCH_CENTER, SPAWNING_BUILDING,
             },
-            unit::{HELPER, Helper, UnitType},
+            unit::{HELPER, Helper, MovementPointsMax, UnitType},
         },
         fog_map::FogMap,
         resource_map::ResourceMap,
@@ -168,13 +168,16 @@ fn spawn_units(units_map_no_bevy: UnitsMapNoBevy, commands: &mut Commands) -> Un
         match unit.unit_type {
             UnitType::Helper => {
                 let unit = commands
-                    .spawn(Helper {
-                        player_id: unit.id,
-                        player_race: unit.player_race,
-                        unit_data: HELPER,
-                        active_buffs: Buffs::default(),
-                        active_debuffs: Debuffs::default(),
-                    })
+                    .spawn((
+                        Helper {
+                            player_id: unit.id,
+                            player_race: unit.player_race,
+                            unit_data: HELPER,
+                            active_buffs: Buffs::default(),
+                            active_debuffs: Debuffs::default(),
+                        },
+                        MovementPointsMax(HELPER.movement_points.0),
+                    ))
                     .id();
                 units_map.push(Some(unit));
             }

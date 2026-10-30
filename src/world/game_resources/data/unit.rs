@@ -2,7 +2,7 @@ use bevy::prelude::{Bundle, Component};
 use serde::Deserialize;
 use smol_str::SmolStr;
 
-use crate::world::components::{Cost, Id, Mana, PlayerRace};
+use crate::world::components::{Cost, Gold, Id, Mana, PlayerRace};
 use crate::world::game_resources::data::buffs_and_debuffs::{Buffs, Debuffs};
 
 #[derive(Component, Debug, Clone, Copy, Default)]
@@ -16,7 +16,7 @@ pub enum UnitLevel {
 impl UnitLevel {
     pub fn next(&self) -> Option<UnitLevel> {
         match self {
-            Self::Beginner => Some(Self::Holy),
+            Self::Beginner => Some(Self::Master),
             Self::Master => Some(Self::Holy),
             Self::Holy => None,
         }
@@ -71,6 +71,11 @@ pub struct LevelAbilities(pub Vec<UniqueLevelAbility>);
 #[derive(Component, Deserialize, Debug, Clone)]
 pub struct MovementPoints(pub u16);
 
+/// Максимальные очки движения юнита. Восстанавливаются в начале хода игрока,
+/// которому принадлежит юнит.
+#[derive(Component, Debug, Clone, Copy)]
+pub struct MovementPointsMax(pub u16);
+
 #[derive(Component, Deserialize, Debug, Clone)]
 pub struct FieldOfView(pub u16);
 
@@ -106,12 +111,17 @@ pub struct HelperBasicStats {
     pub build_gather_points: u8,
 }
 
+/// Цена найма юнита (у строителя — в городе).
+#[derive(Component, Debug, Clone, Copy)]
+pub struct UnitCost(pub Gold);
+
 #[derive(Bundle, Debug, Clone)]
 pub struct HelperData {
     pub unit_type: UnitType,
     pub basic_stats: HelperBasicStats,
     pub movement_points: MovementPoints,
     pub field_of_view: FieldOfView,
+    pub unit_cost: UnitCost,
 }
 
 pub const HELPER: HelperData = HelperData {
@@ -123,6 +133,7 @@ pub const HELPER: HelperData = HelperData {
     },
     movement_points: MovementPoints(2),
     field_of_view: FieldOfView(2),
+    unit_cost: UnitCost(10),
 };
 
 #[derive(Bundle, Debug, Clone)]
