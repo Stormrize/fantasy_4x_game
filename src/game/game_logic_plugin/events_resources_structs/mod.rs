@@ -1,6 +1,6 @@
 use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
-    Attack, Build, Clear, Cycle, Delete, EndTurn, Gather, Info, Move, NewTile, SpawnUnitCommand,
-    TileClickedEvent, Upgrade, WorldView,
+    Attack, Build, Clear, Cycle, Delete, EndTurn, Gather, Info, Move, NewTile, RevealMap,
+    SpawnUnitCommand, TileClickedEvent, Upgrade, WorldView,
 };
 use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::{
     RenderAttackEntity, RenderBuildEntity, RenderGatherEntity, RenderMoveEntity,
@@ -38,6 +38,7 @@ impl AppMessageExt for App {
             .add_message::<Gather>()
             .add_message::<Build>()
             .add_message::<SpawnUnitCommand>()
+            .add_message::<RevealMap>()
             // general
             .add_message::<WorldView>()
             .add_message::<EndTurn>()

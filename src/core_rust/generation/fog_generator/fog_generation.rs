@@ -16,9 +16,9 @@ impl FogMap {
 
         let mut data = vec![
             Fog::new(
-                true, // debug for now
+                false, // debug for now
                 all_bots.clone(),
-                true, //debug for now
+                false, //debug for now
                 all_bots
             );
             terrain_size * terrain_size
@@ -61,6 +61,8 @@ impl FogMap {
         Self {
             map: data,
             size: terrain_size,
+            // debug for now: весь туман раскрыт локальному игроку
+            debug_full_visibility: false,
         }
     }
 }

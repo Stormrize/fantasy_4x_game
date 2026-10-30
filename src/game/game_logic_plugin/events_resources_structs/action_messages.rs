@@ -1,6 +1,8 @@
 use crate::game::game_logic_plugin::events_resources_structs::components::{
     JustSelectedTile, TileLayer,
 };
+use crate::world::game_resources::data::building::BuildingType;
+use crate::world::game_resources::data::unit::UnitType;
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::{IVec2, Message, MessageWriter};
 
@@ -62,10 +64,25 @@ pub struct Attack {
 pub struct Gather(pub IVec2);
 
 #[derive(Message)]
-pub struct Build(pub IVec2);
+pub struct Build {
+    pub entity_pos: IVec2,
+    /// `None` — здание по умолчанию для биома клетки.
+    pub building_type: Option<BuildingType>,
+}
 
+/// Наём юнита в городе на `city_pos`:
+/// `unit_type: None` — строитель, `Some(unit_type)` — боевой юнит.
 #[derive(Message)]
-pub struct SpawnUnitCommand;
+pub struct SpawnUnitCommand {
+    pub city_pos: IVec2,
+    pub unit_type: Option<UnitType>,
+}
+
+/// Применение свитка открытия местности (из инвентаря текущего игрока).
+#[derive(Message)]
+pub struct RevealMap {
+    pub center: IVec2,
+}
 
 #[derive(SystemParam)]
 pub struct ActionWriters<'w> {

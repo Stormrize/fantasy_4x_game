@@ -1,15 +1,20 @@
+use crate::game::game_logic_plugin::action::rules::move_rules::is_players_turn;
 use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
     ActionWriters, Attack, Build, Delete, EndTurn, Gather, Info, Upgrade, WorldView,
 };
 use crate::game::game_logic_plugin::events_resources_structs::components::{
     AlreadySelectedTile, TileLayer,
 };
+use crate::world::game_configs::GameLogicConfig;
+use crate::world::turn_manager::TurnManager;
 use bevy::prelude::KeyCode::{AltLeft, Digit1, Digit2, KeyB, KeyP, KeyQ, KeyR, KeyU, KeyX, Space};
 use bevy::prelude::{ButtonInput, KeyCode, Res};
 
 pub fn route_keyboard_actions(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     already_selected_tile: Res<AlreadySelectedTile>,
+    turn_manager: Res<TurnManager>,
+    game_logic_config: Res<GameLogicConfig>,
     mut action_command_writers: ActionWriters,
 ) {
     // skills
@@ -32,8 +37,11 @@ pub fn route_keyboard_actions(
     let tab_pressed = keyboard_input.just_pressed(KeyCode::Tab);
 
     if space_pressed {
-        action_command_writers.end_turn.write(EndTurn);
-        println!("send end turn");
+        // Завершать ход можно только в свой ход, иначе человек прервал бы ход бота.
+        if is_players_turn(game_logic_config.player, turn_manager.current_player) {
+            action_command_writers.end_turn.write(EndTurn);
+            println!("send end turn");
+        }
         return;
     } else if tab_pressed {
         action_command_writers.world_view.write(WorldView);
@@ -84,9 +92,10 @@ pub fn route_keyboard_actions(
                 });
                 println!("send info unit");
             } else if b_pressed {
-                action_command_writers
-                    .build_cmd
-                    .write(Build(already_selected_tile.pos.unwrap()));
+                action_command_writers.build_cmd.write(Build {
+                    entity_pos: already_selected_tile.pos.unwrap(),
+                    building_type: None,
+                });
                 println!("send build");
             } else if p_pressed {
                 action_command_writers

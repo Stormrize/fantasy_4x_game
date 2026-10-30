@@ -1,5 +1,5 @@
 use crate::game::game_logic_plugin::action::rules::move_rules::{
-    check_move_validity, is_players_turn, is_players_unit,
+    MovementCostGrid, check_move_validity, is_players_turn, is_players_unit,
 };
 use crate::game::game_logic_plugin::events_resources_structs::action_messages::{Clear, Move};
 use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::RenderMoveEntity;
@@ -10,10 +10,12 @@ use crate::world::game_resources::unit_map::UnitsMap;
 use crate::world::turn_manager::TurnManager;
 use bevy::prelude::{MessageReader, MessageWriter, Query, Res, ResMut};
 
+#[allow(clippy::too_many_arguments)]
 pub fn move_entity(
     mut move_command: MessageReader<Move>,
     turn_manager: Res<TurnManager>,
     game_logic_config: Res<GameLogicConfig>,
+    cost_grid: Res<MovementCostGrid>,
     mut units_map: ResMut<UnitsMap>,
     mut movement_stats: Query<(&Id, &mut MovementPoints)>,
     mut render_move: MessageWriter<RenderMoveEntity>,
@@ -30,23 +32,32 @@ pub fn move_entity(
 
         let (id, mut movement_points) = movement_stats.get_mut(selected_entity).unwrap();
 
-        if !is_players_turn(game_logic_config.player, turn_manager.current_player) {
-            println!("Not your turn");
-            clear.write(Clear);
-            continue;
-        }
-
         if !is_players_unit(*id, turn_manager.current_player) {
             println!("Not your race");
             clear.write(Clear);
             continue;
         }
 
-        if !check_move_validity(movement_points.0, current_pos, target_pos) {
-            println!("Not valid move");
+        // В онлайне нельзя ходить вне своего хода (сервер проверит ещё раз).
+        if matches!(turn_manager.game_mode, GameMode::Online)
+            && !is_players_turn(game_logic_config.player, turn_manager.current_player)
+        {
+            println!("Not your turn");
             clear.write(Clear);
             continue;
         }
+
+        let Some(cost) = check_move_validity(
+            &cost_grid,
+            &units_map,
+            movement_points.0,
+            current_pos,
+            target_pos,
+        ) else {
+            println!("Not valid move");
+            clear.write(Clear);
+            continue;
+        };
 
         if matches!(turn_manager.game_mode, GameMode::Online) {
             // send http request
@@ -64,8 +75,7 @@ pub fn move_entity(
             current_pos,
             new_pos: target_pos,
         });
-        // todo not zero rather difference
-        movement_points.0 = 0;
+        movement_points.0 -= cost;
         clear.write(Clear);
     }
 }
