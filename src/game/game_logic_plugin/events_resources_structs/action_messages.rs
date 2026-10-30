@@ -54,9 +54,13 @@ pub struct Move {
     pub target_pos: IVec2,
 }
 
+/// Боевая команда: юнит на `entity_pos` атакует `target_pos`.
+/// `skill_type: 0` — базовая атака (без маны), `1..` — способность из
+/// `unique_level_abilities`.
 #[derive(Message)]
 pub struct Attack {
     pub entity_pos: IVec2,
+    pub target_pos: IVec2,
     pub skill_type: u8,
 }
 
@@ -70,12 +74,12 @@ pub struct Build {
     pub building_type: Option<BuildingType>,
 }
 
-/// Наём юнита в городе на `city_pos`:
-/// `unit_type: None` — строитель, `Some(unit_type)` — боевой юнит.
+/// Наём юнита в городе на `city_pos`.
+/// `unit_type: Helper` — строитель, остальные типы — боевые юниты.
 #[derive(Message)]
 pub struct SpawnUnitCommand {
     pub city_pos: IVec2,
-    pub unit_type: Option<UnitType>,
+    pub unit_type: UnitType,
 }
 
 /// Применение свитка открытия местности (из инвентаря текущего игрока).

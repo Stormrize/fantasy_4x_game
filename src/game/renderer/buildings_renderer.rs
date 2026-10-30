@@ -4,15 +4,8 @@ use crate::world::game_resources::building_map::BuildingMap;
 use crate::world::game_resources::data::building::BuildingType;
 use bevy::math::Vec3;
 use bevy::prelude::{
-    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Query,
-    Sphere, Transform, WorldAsset, WorldAssetRoot,
+    Commands, Entity, Handle, IVec2, Query, Transform, WorldAsset, WorldAssetRoot,
 };
-
-#[derive(Component)]
-pub struct BuildingsMesh {
-    pub coord: IVec2,
-    pub building: BuildingType,
-}
 
 pub struct SpawnedBuildingsMeshes {
     pub entities: Vec<Entity>,
@@ -22,7 +15,6 @@ pub struct SpawnedBuildingsMeshes {
 pub fn spawn_buildings_meshes(
     commands: &mut Commands,
     config: &RenderConfig,
-    meshes: &mut Assets<Mesh>,
     coord: IVec2,
     buildings: &BuildingMap,
     visual_q: Query<(&PlayerRace, &BuildingType)>,

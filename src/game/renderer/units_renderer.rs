@@ -1,5 +1,4 @@
-use bevy::math::ops::atan2;
-use bevy::math::{Quat, Vec3};
+use bevy::math::Vec3;
 use bevy::prelude::{
     Commands, Component, Entity, Handle, IVec2, Query, Transform, WorldAsset, WorldAssetRoot,
 };
@@ -8,12 +7,6 @@ use crate::world::components::PlayerRace;
 use crate::world::game_configs::RenderConfig;
 use crate::world::game_resources::data::unit::UnitType;
 use crate::world::game_resources::unit_map::UnitsMap;
-
-#[derive(Component)]
-pub struct UnitMesh {
-    pub coord: IVec2,
-    pub resource: UnitType,
-}
 
 pub struct SpawnedUnitsMeshes {
     pub entities: Vec<Entity>,

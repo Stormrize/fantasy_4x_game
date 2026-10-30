@@ -48,7 +48,6 @@ impl TileContent {
 pub struct AlreadySelectedTile {
     pub pos: Option<IVec2>,
     pub layer: Option<TileLayer>,
-    pub tile_content: TileContent,
 }
 
 #[derive(Debug, Clone)]

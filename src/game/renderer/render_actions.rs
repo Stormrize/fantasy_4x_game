@@ -10,7 +10,9 @@ pub fn render_move(
     time: Res<Time>,
 ) {
     for action in move_entity_event.read() {
-        let entity = logical_units_q.get(action.entity).unwrap();
+        let Ok(entity) = logical_units_q.get(action.entity) else {
+            continue;
+        };
         let mut transform = visual_units_q.get_mut(entity.0).unwrap();
 
         transform.translation.x = action.new_pos.x as f32;

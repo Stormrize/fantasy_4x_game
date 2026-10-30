@@ -11,6 +11,7 @@ pub struct Fog {
     pub full_visible_player: bool,
     pub full_visible_bots: Vec<(Id, bool)>,
     // Местность, раскрытая свитком навсегда (не сбрасывается пересчётом тумана).
+    // буду использовать если нада будет именно full visibility пока unused
     #[serde(default)]
     pub revealed_player: bool,
     #[serde(default)]
@@ -52,6 +53,7 @@ impl Fog {
             .any(|(bot_id, visible)| *bot_id == id && *visible)
     }
 
+    #[allow(unused)]
     /// Раскрыто свитком навсегда.
     pub fn is_revealed_for(&self, id: Id) -> bool {
         self.revealed_bots
@@ -92,7 +94,6 @@ impl Fog {
     /// Сбрасывает текущую видимость клетки (вызывается при пересчёте тумана).
     /// Раскрытое свитком (`revealed`) не трогается.
     pub fn clear_visibility(&mut self) {
-        self.general_visible_player = false;
         self.full_visible_player = false;
         for (_, visible) in self.general_visible_bots.iter_mut() {
             *visible = false;
@@ -157,9 +158,9 @@ impl FogMap {
     pub fn is_full_visible_for(&self, row: usize, col: usize, id: Id, local_player_id: Id) -> bool {
         let fog = &self.map[row * self.size + col];
         if id == local_player_id {
-            fog.full_visible_player
+            fog.full_visible_player || fog.revealed_player
         } else {
-            fog.is_full_visible_for(id)
+            fog.is_full_visible_for(id) || fog.is_revealed_for(id)
         }
     }
 
@@ -182,6 +183,7 @@ impl FogMap {
         }
     }
 
+    #[allow(unused)]
     /// Раскрывает местность для игрока навсегда (свиток открытия местности).
     pub fn set_revealed(&mut self, row: usize, col: usize, id: Id, local_player_id: Id) {
         let fog = self.get_mut(row, col);

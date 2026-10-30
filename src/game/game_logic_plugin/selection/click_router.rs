@@ -9,6 +9,7 @@ use crate::game::game_logic_plugin::events_resources_structs::{
 use crate::world::game_configs::GameLogicConfig;
 use crate::world::game_resources::WorldMaps;
 
+#[allow(clippy::too_many_arguments)]
 pub fn route_selection(
     world_maps: WorldMaps,
     config: Res<GameLogicConfig>,

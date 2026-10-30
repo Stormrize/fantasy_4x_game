@@ -1,16 +1,9 @@
 use bevy::prelude::{
-    Assets, Commands, Component, Cuboid, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d,
-    Transform,
+    Assets, Commands, Cuboid, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Transform,
 };
 
 use crate::world::game_configs::RenderConfig;
-use crate::world::game_resources::{data::resource::ResourceType, resource_map::ResourceMap};
-
-#[derive(Component)]
-pub struct ResourceMesh {
-    pub coord: IVec2,
-    pub resource: ResourceType,
-}
+use crate::world::game_resources::resource_map::ResourceMap;
 
 pub struct SpawnedResourceMeshes {
     pub entities: Vec<Entity>,

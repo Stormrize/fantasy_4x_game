@@ -1,16 +1,10 @@
 use bevy::prelude::{
-    AssetServer, Assets, Commands, Component, Entity, Handle, IVec2, Image, Mesh, Mesh3d,
-    MeshMaterial3d, Meshable, Plane3d, StandardMaterial, Transform, default,
+    AssetServer, Assets, Commands, Entity, Handle, IVec2, Image, Mesh, Mesh3d, MeshMaterial3d,
+    Meshable, Plane3d, StandardMaterial, Transform, default,
 };
 
 use crate::world::game_configs::RenderConfig;
 use crate::world::game_resources::fog_map::FogMap;
-
-#[derive(Component)]
-pub struct FogMesh {
-    pub coord: IVec2,
-    pub fog: bool,
-}
 
 pub struct SpawnedFogMeshes {
     pub entities: Vec<Entity>,

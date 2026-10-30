@@ -54,7 +54,7 @@ pub struct CombatBasicStats {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-struct UniqueLevelAbility {
+pub struct UniqueLevelAbility {
     pub name: SmolStr,
     pub buffs: Buffs,
     pub debuffs: Debuffs,
@@ -82,10 +82,14 @@ pub struct FieldOfView(pub u16);
 #[derive(Component, Deserialize, Debug, Clone)]
 pub struct LevelCost(pub Vec<Cost>);
 
+#[derive(Component, Deserialize, Debug, Clone)]
+pub struct CurrentHp(pub u16);
+
 #[derive(Bundle, Deserialize, Debug, Clone)]
 pub struct CombatUnitData {
     pub unit_type: UnitType,
     pub level_economy: LevelCost,
+    pub current_hp: CurrentHp,
     pub basic_stats: CombatBasicStats,
     pub movement_points: MovementPoints,
     pub field_of_view: FieldOfView,

@@ -159,7 +159,6 @@ fn refresh_buildings_chunks(
     mut commands: Commands,
     mut rendered: ResMut<Rendered>,
     config: Res<RenderConfig>,
-    mut meshes: ResMut<Assets<Mesh>>,
     buildings_map: Res<BuildingMap>,
     visual_q: Query<(&PlayerRace, &BuildingType)>,
 ) {
@@ -171,14 +170,8 @@ fn refresh_buildings_chunks(
         if let Some(old) = rendered.buildings.remove(&coord) {
             despawn_buildings_meshes(&mut commands, old);
         }
-        let spawned = spawn_buildings_meshes(
-            &mut commands,
-            &config,
-            &mut meshes,
-            coord,
-            &buildings_map,
-            visual_q,
-        );
+        let spawned =
+            spawn_buildings_meshes(&mut commands, &config, coord, &buildings_map, visual_q);
         rendered.buildings.insert(coord, spawned);
     }
 }

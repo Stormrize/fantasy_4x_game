@@ -26,6 +26,7 @@ struct DropdownState {
     is_open: bool,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_dropdown<T>(
     commands: &mut Commands,
     parent: Entity,
@@ -108,7 +109,7 @@ pub fn spawn_dropdown<T>(
     observe_toggle(commands, button, options_panel);
 
     for (key, value) in options.iter() {
-        let key: &'static str = *key;
+        let key: &'static str = key;
         spawn_option(
             commands,
             options_panel,

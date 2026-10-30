@@ -21,16 +21,12 @@ use crate::game::{
     },
 };
 use crate::world::components::PlayerRace;
+use crate::world::game_configs::RenderConfig;
+use crate::world::game_resources::WorldMaps;
 use crate::world::game_resources::data::building::BuildingType;
 use crate::world::game_resources::data::unit::UnitType;
-use crate::world::{
-    game_configs::RenderConfig,
-    game_resources::{
-        building_map::BuildingMap, fog_map::FogMap, resource_map::ResourceMap,
-        terrain_map::TerrainMap, unit_map::UnitsMap,
-    },
-};
 
+#[allow(clippy::too_many_arguments)]
 pub fn stream_chunks(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -38,11 +34,7 @@ pub fn stream_chunks(
     asset_server: Res<AssetServer>,
     mut rendered: ResMut<Rendered>,
     config: Res<RenderConfig>,
-    terrain: Res<TerrainMap>,
-    resources: Res<ResourceMap>,
-    buildings: Res<BuildingMap>,
-    fog_map: Res<FogMap>,
-    units: Res<UnitsMap>,
+    world_params: WorldMaps,
     camera_q: Query<(&Transform, &Projection), With<MainCamera>>,
     window_q: Query<&Window, With<PrimaryWindow>>,
     visual_b_q: Query<(&PlayerRace, &BuildingType)>,
@@ -84,11 +76,7 @@ pub fn stream_chunks(
         &mut meshes,
         &mut rendered,
         missing_chunks,
-        &terrain,
-        &resources,
-        &buildings,
-        &fog_map,
-        &units,
+        world_params,
         &asset_server,
         &mut materials,
         visual_b_q,
@@ -193,17 +181,14 @@ fn get_sorted_missing_chunks(
     missing_chunks
 }
 
+#[allow(clippy::too_many_arguments)]
 fn load_missing_chunks(
     commands: &mut Commands,
     config: &RenderConfig,
     meshes: &mut ResMut<Assets<Mesh>>,
     rendered: &mut Rendered,
     missing_chunks: Vec<IVec2>,
-    terrain: &TerrainMap,
-    resources: &ResourceMap,
-    buildings: &BuildingMap,
-    fog: &FogMap,
-    units: &UnitsMap,
+    world_params: WorldMaps,
     asset_server: &AssetServer,
     materials: &mut Assets<StandardMaterial>,
     visual_b_q: Query<(&PlayerRace, &BuildingType)>,
@@ -220,12 +205,14 @@ fn load_missing_chunks(
             continue;
         }
 
-        let terrain_meshes = spawn_terrain_meshes(commands, config, meshes, coord, terrain);
+        let terrain_meshes =
+            spawn_terrain_meshes(commands, config, meshes, coord, &world_params.terrain);
 
-        let resource_meshes = spawn_resource_meshes(commands, config, meshes, coord, resources);
+        let resource_meshes =
+            spawn_resource_meshes(commands, config, meshes, coord, &world_params.resources);
 
         let building_meshes =
-            spawn_buildings_meshes(commands, config, meshes, coord, buildings, visual_b_q);
+            spawn_buildings_meshes(commands, config, coord, &world_params.buildings, visual_b_q);
 
         let fog_meshes = spawn_fog_meshes(
             commands,
@@ -234,10 +221,11 @@ fn load_missing_chunks(
             materials,
             coord,
             asset_server,
-            fog,
+            &world_params.fog,
         );
 
-        let units_meshes = spawn_units_meshes(commands, config, coord, units, visual_u_q);
+        let units_meshes =
+            spawn_units_meshes(commands, config, coord, &world_params.units, visual_u_q);
 
         rendered.terrain.insert(coord, terrain_meshes);
         rendered.resources.insert(coord, resource_meshes);

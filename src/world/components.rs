@@ -1,8 +1,6 @@
-use bevy::{ecs::error::Severity::Debug, prelude::Component};
+use bevy::prelude::Component;
 use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
-
-use crate::io::startup_loading::localization_loader_plugin::Language::De;
 
 pub type Gold = u16;
 pub type Food = u16;
@@ -70,12 +68,6 @@ pub enum MapSize {
     Large = 128,
 }
 
-impl MapSize {
-    pub fn len() -> usize {
-        5
-    }
-}
-
 #[derive(Deserialize, Serialize, Clone, Copy, Debug, Default)]
 #[allow(dead_code)]
 #[repr(u8)]
@@ -85,12 +77,6 @@ pub enum MapShape {
     Jagged,
 }
 
-impl MapShape {
-    pub fn len() -> usize {
-        2
-    }
-}
-
 #[derive(Serialize, Default, Debug, Clone, Copy, PartialEq)]
 pub enum AiDifficulty {
     Easy,
@@ -98,9 +84,4 @@ pub enum AiDifficulty {
     Normal,
     Hard,
     Crazy,
-}
-impl AiDifficulty {
-    pub fn len() -> usize {
-        4
-    }
 }

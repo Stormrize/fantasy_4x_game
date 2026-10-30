@@ -1,16 +1,9 @@
 use bevy::prelude::{
-    Assets, Commands, Component, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Plane3d,
-    Transform,
+    Assets, Commands, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Plane3d, Transform,
 };
 
 use crate::world::game_configs::RenderConfig;
-use crate::world::game_resources::{data::biome::BiomeType, terrain_map::TerrainMap};
-
-#[derive(Component)]
-pub struct TerrainMesh {
-    pub coord: IVec2,
-    pub biome: BiomeType,
-}
+use crate::world::game_resources::terrain_map::TerrainMap;
 
 pub struct SpawnedTerrainMeshes {
     pub entities: Vec<Entity>,
