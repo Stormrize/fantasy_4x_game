@@ -1,15 +1,16 @@
 use crate::game::game_logic_plugin::ai::{ActiveBotTurn, ActiveBotTurnState, AiPhase};
+use crate::game::game_logic_plugin::combat::integration::{CombatCycle, CombatPhase};
 use crate::game::game_logic_plugin::events_resources_structs::action_messages::EndTurn;
-use crate::world::components::{Id, PlayerType};
-use crate::world::game_configs::{GameLogicConfig, Player};
+use crate::world::game_configs::GameLogicConfig;
 use crate::world::turn_manager::{TurnManager, TurnTransition};
-use bevy::prelude::{MessageReader, Res, ResMut};
+use bevy::prelude::{Commands, MessageReader, Res, ResMut};
 
 pub fn end_turn(
     mut turn_manager: ResMut<TurnManager>,
     game_logic_config: Res<GameLogicConfig>,
     mut turn_ended: MessageReader<EndTurn>,
     mut active_bot_turn: ResMut<ActiveBotTurnState>,
+    mut commands: Commands,
 ) {
     for _ in turn_ended.read() {
         let transition = turn_manager.next_turn(&game_logic_config);
@@ -34,11 +35,12 @@ pub fn end_turn(
                 // await for a http request
             }
             TurnTransition::SimulationTime => {
-                // Боевая фаза: здесь будет планирование боевого ИИ.
-                // После неё ход возвращается стартовому игроку (человеку).
-                turn_manager.current_player =
-                    Player::new(Id(turn_manager.starting_index), PlayerType::Human);
+                // Боевая фаза: запускаем фоновое планирование боевого ИИ.
+                // Ход человеку вернётся после завершения симуляции (poll_combat).
                 active_bot_turn.0 = None;
+                commands.insert_resource(CombatCycle {
+                    phase: CombatPhase::Planning,
+                });
                 println!("Simulation time");
             }
         }

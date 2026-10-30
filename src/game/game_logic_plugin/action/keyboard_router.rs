@@ -49,27 +49,32 @@ pub fn route_keyboard_actions(
 
     match already_selected_tile.layer {
         Some(TileLayer::Unit) => {
+            // todo: цель выбирается в боевом UI; пока target = entity.
             if q_pressed {
                 action_command_writers.attack_cmd.write(Attack {
                     entity_pos: already_selected_tile.pos.unwrap(),
+                    target_pos: already_selected_tile.pos.unwrap(),
                     skill_type: 0,
                 });
                 println!("send attack q");
             } else if one_pressed {
                 action_command_writers.attack_cmd.write(Attack {
                     entity_pos: already_selected_tile.pos.unwrap(),
+                    target_pos: already_selected_tile.pos.unwrap(),
                     skill_type: 1,
                 });
                 println!("send end turn 1");
             } else if two_pressed {
                 action_command_writers.attack_cmd.write(Attack {
                     entity_pos: already_selected_tile.pos.unwrap(),
+                    target_pos: already_selected_tile.pos.unwrap(),
                     skill_type: 2,
                 });
                 println!("send attack 2");
             } else if r_pressed {
                 action_command_writers.attack_cmd.write(Attack {
                     entity_pos: already_selected_tile.pos.unwrap(),
+                    target_pos: already_selected_tile.pos.unwrap(),
                     skill_type: 3,
                 });
                 println!("send attack 3");
