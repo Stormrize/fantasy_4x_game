@@ -3,7 +3,6 @@ use crate::world::game_resources::data::unit::{MovementPoints, MovementPointsMax
 use crate::world::turn_manager::TurnManager;
 use bevy::prelude::{DetectChanges, Query, Res};
 
-/// В начале хода игрока восстанавливает очки движения его юнитов.
 pub fn reset_movement_points(
     turn_manager: Res<TurnManager>,
     mut units_query: Query<(&Id, &MovementPointsMax, &mut MovementPoints)>,

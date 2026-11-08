@@ -1,5 +1,5 @@
 use crate::core_rust::generation::races_generation::capitals_generation::CapitalsPos;
-use crate::world::components::Id;
+use crate::world::components::{BUILDING_SEE_RADIUS, Id};
 use crate::world::game_resources::fog_map::Fog;
 use crate::world::{game_configs::GenerationConfig, game_resources::fog_map::FogMap};
 
@@ -24,7 +24,7 @@ impl FogMap {
             terrain_size * terrain_size
         ];
 
-        let radius = 3isize;
+        let radius = BUILDING_SEE_RADIUS as isize;
 
         // todo
         for ((id, _), coord) in capital_coord.data.iter() {

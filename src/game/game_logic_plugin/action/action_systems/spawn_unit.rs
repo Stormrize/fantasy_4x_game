@@ -110,8 +110,6 @@ pub fn spawn_unit(ctx: &mut ActionCtx, pos: IVec2, unit_type: UnitType) {
                 ))
                 .id();
             ctx.units_map.set(nx, ny, Some(entity));
-            // ASSUMPTION: field name `field_of_view` (see questions).
-
             fog_update(
                 ctx,
                 IVec2::new(nx as i32, ny as i32),
