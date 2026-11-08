@@ -1,20 +1,15 @@
 pub mod memory;
 pub mod perception;
-pub mod plan;
 pub mod planning;
 pub mod profile;
 
+use crate::game::game_logic_plugin::action::action_systems::action_router;
 use crate::game::game_logic_plugin::action::action_systems::end_turn::end_turn;
-use crate::game::game_logic_plugin::action::action_systems::move_entity::move_entity;
-use crate::game::game_logic_plugin::ai::memory::BotMemories;
+use crate::game::game_logic_plugin::ai::memory::{BotMemories, BotMemory};
 use crate::game::game_logic_plugin::ai::perception::build_snapshot;
-use crate::game::game_logic_plugin::ai::plan::{AiAction, BotTurnPlan};
 use crate::game::game_logic_plugin::ai::planning::plan_bot_turn;
 use crate::game::game_logic_plugin::ai::profile::AiProfile;
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
-    ActionWriters, Build, EndTurn, Gather, Move, RevealMap, SpawnUnitCommand, Upgrade,
-};
-use crate::game::game_logic_plugin::events_resources_structs::components::TileLayer;
+use crate::game::game_logic_plugin::events_resources_structs::action_messages::{Action, EndTurn};
 use crate::ui::menus::AppState;
 use crate::world::components::{AiDifficulty, Id};
 use crate::world::game_configs::{GameLogicConfig, Player, Players};
@@ -28,21 +23,27 @@ use bevy::prelude::{IntoScheduleConfigs, MessageWriter, Query, Res, ResMut, Reso
 use bevy::tasks::futures_lite::future;
 use bevy::tasks::{AsyncComputeTaskPool, Task};
 
-/// Активный ход бота. Вставляется в `end_turn` при переходе `TriggerBotAI`
-/// и убирается, когда план выполнен.
+/// Active bot turn. Inserted by `end_turn` when entering `TriggerBotAI`
+/// and removed once the plan has been executed.
 pub struct ActiveBotTurn {
     pub player: Player,
     pub phase: AiPhase,
 }
 
+/// Result of bot turn planning.
+#[derive(Debug, Default)]
+pub struct BotTurnPlan {
+    pub actions: Vec<Action>,
+}
+
 pub enum AiPhase {
-    /// Мир ещё не осмотрен, план не начат.
+    /// The world is not inspected yet; the plan has not started.
     Planning,
-    /// План считается в фоновой задаче, система его опрашивает.
+    /// The plan is being computed in a background task and polled by the system.
     Executing(Task<BotTurnPlan>),
 }
 
-/// Ресурс-обёртка для `Option<ActiveBotTurn>` (Option сам по себе не Resource).
+/// Resource wrapper for `Option<ActiveBotTurn>` (`Option` itself is not a Resource).
 #[derive(Resource, Default)]
 pub struct ActiveBotTurnState(pub Option<ActiveBotTurn>);
 
@@ -56,9 +57,9 @@ impl Plugin for AiPlugin {
                 Update,
                 (
                     start_bot_turn,
-                    // Исполнитель пишет сообщения до обработчиков ходов,
-                    // чтобы действия бота применялись в этом же кадре.
-                    execute_bot_turn.before(move_entity).before(end_turn),
+                    // The executor writes messages before the action handlers so
+                    // bot actions are applied in the same frame.
+                    execute_bot_turn.before(action_router).before(end_turn),
                 )
                     .chain()
                     .run_if(in_state(AppState::InGameRenderer)),
@@ -66,8 +67,9 @@ impl Plugin for AiPlugin {
     }
 }
 
-/// Осматривает мир глазами бота и запускает планирование в фоне.
-/// Планировщик видит только то, что бот реально видел (туман войны + память).
+/// Inspects the world through the bot's eyes and starts planning in the
+/// background. The planner sees only what the bot has really seen (fog of war
+/// plus memory).
 #[allow(clippy::too_many_arguments)]
 fn start_bot_turn(
     mut active_bot_turn: ResMut<ActiveBotTurnState>,
@@ -93,7 +95,16 @@ fn start_bot_turn(
             .ai_difficulty
             .unwrap_or(AiDifficulty::Normal),
     );
-    let memory = memories.0.entry(bot_id).or_default();
+
+    let memory = memories.0.entry(bot_id).or_insert_with(|| {
+        BotMemory::default_with_id(
+            bot_id,
+            game_logic_config.player.id,
+            &world_maps,
+            &buildings_query,
+            &units_query,
+        )
+    });
 
     let snapshot = build_snapshot(
         bot_id,
@@ -113,13 +124,12 @@ fn start_bot_turn(
     state.phase = AiPhase::Executing(task);
 }
 
-/// Когда план готов, превращает его в обычные игровые сообщения — бот играет
-/// через тот же интерфейс, что и человек, и те же проверки правил.
+/// Once the plan is ready, turns it into regular game messages — the bot acts
+/// through the same interface as a human player and goes through the same rules.
 fn execute_bot_turn(
     mut active_bot_turn: ResMut<ActiveBotTurnState>,
-    mut action_writers: ActionWriters,
-    mut move_writer: MessageWriter<Move>,
-    mut reveal_writer: MessageWriter<RevealMap>,
+    mut actions: MessageWriter<Action>,
+    mut end_turn: MessageWriter<EndTurn>,
 ) {
     let Some(state) = active_bot_turn.0.as_mut() else {
         return;
@@ -134,42 +144,54 @@ fn execute_bot_turn(
 
     for action in plan.actions.drain(..) {
         match action {
-            AiAction::Move { from, to } => {
-                move_writer.write(Move {
-                    entity_pos: from,
-                    target_pos: to,
+            Action::Move {
+                unit_pos,
+                target_pos,
+            } => {
+                actions.write(Action::Move {
+                    unit_pos,
+                    target_pos,
                 });
             }
-            AiAction::Gather { pos } => {
-                action_writers.gather_cmd.write(Gather(pos));
+            Action::Gather { resource_pos } => {
+                actions.write(Action::Gather { resource_pos });
             }
-            AiAction::Build { pos, building_type } => {
-                action_writers.build_cmd.write(Build {
-                    entity_pos: pos,
-                    building_type: Some(building_type),
+            Action::Build {
+                entity_pos,
+                building_type,
+            } => {
+                actions.write(Action::Build {
+                    entity_pos,
+                    building_type,
                 });
             }
-            AiAction::SpawnUnit {
+            Action::SpawnUnit {
                 city_pos,
                 unit_type,
             } => {
-                action_writers.spawn_cmd.write(SpawnUnitCommand {
+                actions.write(Action::SpawnUnit {
                     city_pos,
                     unit_type,
                 });
             }
-            AiAction::UpgradeBuilding { pos } => {
-                action_writers.upgrade.write(Upgrade {
-                    entity_pos: pos,
-                    layer: TileLayer::Building,
+            Action::Upgrade { entity_pos, layer } => {
+                actions.write(Action::Upgrade { entity_pos, layer });
+            }
+            Action::RevealMap {
+                center,
+                full,
+                reveal_source,
+            } => {
+                actions.write(Action::RevealMap {
+                    center,
+                    full,
+                    reveal_source,
                 });
             }
-            AiAction::RevealMap { center } => {
-                reveal_writer.write(RevealMap { center });
-            }
+            _ => {}
         }
     }
 
-    action_writers.end_turn.write(EndTurn);
+    end_turn.write(EndTurn);
     active_bot_turn.0 = None;
 }

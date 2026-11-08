@@ -1,11 +1,15 @@
 use crate::game::game_logic_plugin::action::rules::movement::{
     UNREACHABLE, movement_field, neighbors, nominal_field,
 };
+use crate::game::game_logic_plugin::ai::BotTurnPlan;
 use crate::game::game_logic_plugin::ai::perception::{
     OwnBuilding, OwnCombatUnit, OwnHelper, WorldSnapshot,
 };
-use crate::game::game_logic_plugin::ai::plan::{AiAction, BotTurnPlan};
 use crate::game::game_logic_plugin::ai::profile::AiProfile;
+use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
+    Action, RevealSource,
+};
+use crate::game::game_logic_plugin::events_resources_structs::components::TileLayer;
 use crate::world::components::Gold;
 use crate::world::game_resources::data::biome::BiomeType;
 use crate::world::game_resources::data::building::{BuildingData, BuildingLevel, BuildingType};
@@ -16,16 +20,16 @@ use bevy::tasks::ComputeTaskPool;
 use std::cmp::Ordering;
 use std::collections::HashSet;
 
-/// Радиус обзора строителя для оценки пользы разведки.
+/// Builder's view radius used to score exploration.
 const EXPLORATION_FOV: isize = 2;
 
-/// Ожидаемая доля успеха шага в неизвестное (там может быть вода).
+/// Expected success chance of a step into the unknown (there may be water).
 const EXPLORATION_RISK: f32 = 0.6;
 
-/// Минимум неизведанных клеток, чтобы тратить свиток открытия местности.
+/// Minimum number of unexplored tiles to spend a map reveal scroll.
 const UNEXPLORED_SCROLL_THRESHOLD: usize = 64;
 
-/// Оценка потребностей экономики: > 1 — ресурс нужен, < 1 — избыток.
+/// Economy needs: > 1 means the resource is needed, < 1 means a surplus.
 #[derive(Clone, Copy)]
 struct Needs {
     gold: f32,
@@ -64,7 +68,7 @@ fn rare_value(kind: RareKind) -> f32 {
     }
 }
 
-/// Кандидат на строительство: клетка + тип здания + привлекательность.
+/// Build candidate: tile + building type + attractiveness.
 #[derive(Clone, Copy)]
 struct BuildSite {
     pos: IVec2,
@@ -72,7 +76,7 @@ struct BuildSite {
     score: f32,
 }
 
-/// Цель-ресурс: клетка + ценность + виден ли ресурс в текущий ход.
+/// Resource target: tile + value + whether it is currently visible.
 #[derive(Clone, Copy)]
 struct ResourceTarget {
     pos: IVec2,
@@ -85,11 +89,11 @@ fn flat_of(pos: IVec2, size: usize) -> usize {
     pos.x as usize * size + pos.y as usize
 }
 
-/// Главная точка входа планировщика небоевого хода бота.
+/// Entry point of the bot's non-combat turn planner.
 ///
-/// Выполняется в фоновой задаче (`AsyncComputeTaskPool`), внутри неё выбор
-/// действий строителей распараллелен по потокам `ComputeTaskPool`.
-/// Планировщик видит только `WorldSnapshot` — то, что бот реально видел.
+/// Runs in a background task (`AsyncComputeTaskPool`); builder decisions inside
+/// it are parallelized across the `ComputeTaskPool` threads. The planner sees
+/// only `WorldSnapshot` — what the bot has really observed.
 pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan {
     let size = snapshot.size;
     let needs = Needs::from(&snapshot, &profile);
@@ -97,7 +101,7 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
     let mut plan = BotTurnPlan::default();
     let mut gold = snapshot.gold as i32;
 
-    // Города для найма строителей.
+    // Cities where builders can be hired.
     let cities: Vec<IVec2> = snapshot
         .own_buildings
         .iter()
@@ -110,11 +114,11 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
         .map(|b| b.pos)
         .collect();
     let Some(&capital) = cities.first() else {
-        // Нет городов — нечего делать.
+        // No cities — nothing to do.
         return plan;
     };
 
-    // 1. Найм строителей, пока позволяет золото и лимит сложности.
+    // 1. Hire builders while gold and the difficulty limit allow it.
     let mut hires_left = profile.max_hires_per_turn;
     while hires_left > 0 {
         if snapshot.own_helpers.len() + (profile.max_hires_per_turn - hires_left)
@@ -125,7 +129,7 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
         if gold < HELPER.unit_cost.0 as i32 + profile.gold_reserve as i32 {
             break;
         }
-        plan.actions.push(AiAction::SpawnUnit {
+        plan.actions.push(Action::SpawnUnit {
             city_pos: capital,
             unit_type: UnitType::Helper,
         });
@@ -133,7 +137,7 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
         hires_left -= 1;
     }
 
-    // 1.5 Найм боевых юнитов, если построено здание спавна.
+    // 1.5 Hire combat units if a spawning building is available.
     let spawning_building = snapshot
         .own_buildings
         .iter()
@@ -149,7 +153,7 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
             if cost == 0 || gold < cost + profile.gold_reserve as i32 {
                 break;
             }
-            plan.actions.push(AiAction::SpawnUnit {
+            plan.actions.push(Action::SpawnUnit {
                 city_pos: spawn_pos,
                 unit_type,
             });
@@ -157,7 +161,7 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
         }
     }
 
-    // 2. Улучшения зданий с лучшим соотношением прироста дохода к цене.
+    // 2. Upgrade buildings with the best income gain per cost.
     let mut upgrades_left = profile.max_upgrades_per_turn;
     let mut upgrade_candidates: Vec<(OwnBuilding, f32)> = snapshot
         .own_buildings
@@ -178,14 +182,17 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
         if gold < cost as i32 + profile.gold_reserve as i32 {
             continue;
         }
-        plan.actions
-            .push(AiAction::UpgradeBuilding { pos: building.pos });
+        plan.actions.push(Action::Upgrade {
+            entity_pos: building.pos,
+            layer: TileLayer::Building,
+        });
         gold -= cost as i32;
         upgrades_left -= 1;
     }
 
-    // 3. Сетка движения: известно проходимое + блоки чужих юнитов и своих
-    //    строителей. Отдельная сетка с «кольцом» неизвестного — для разведки.
+    // 3. Movement grid: known passable tiles plus blocks for enemy units and
+    //    own builders. A separate grid with an "unknown ring" is used for
+    //    exploration.
     let mut grid = snapshot.cost.clone();
     for (index, unit) in snapshot.known_enemy_units.iter().enumerate() {
         if unit.is_some() {
@@ -197,15 +204,15 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
     }
     let ring_grid = exploration_grid(&snapshot);
 
-    // 4. Кандидаты для действий.
+    // 4. Action candidates.
     let sites = compute_build_sites(&snapshot, &needs);
     let targets = resource_targets(&snapshot, &needs);
     let explore_targets = exploration_targets(&snapshot, &ring_grid);
 
-    // 5. Параллельный выбор действия для каждого строителя.
-    //    `async` без `move`: фьючеры заимствуют общие данные из scope.
-    //    `get_or_init` — чтобы планирование работало и в юнит-тестах без App.
-    let decisions: Vec<Option<(f32, Vec<AiAction>)>> =
+    // 5. Pick an action for each builder in parallel.
+    //    `async` without `move`: futures borrow the shared data from the scope.
+    //    `get_or_init` keeps planning usable in unit tests without an App.
+    let decisions: Vec<Option<(f32, Vec<Action>)>> =
         ComputeTaskPool::get_or_init(bevy::tasks::TaskPool::new).scope(|scope| {
             for helper in &snapshot.own_helpers {
                 scope.spawn(async {
@@ -225,8 +232,9 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
             }
         });
 
-    // 6. Слияние решений: лучшие по score, без конфликтов за одни и те же клетки.
-    let mut ranked: Vec<(usize, f32, Vec<AiAction>)> = decisions
+    // 6. Merge decisions: highest score first, without conflicts over the same
+    //    tiles.
+    let mut ranked: Vec<(usize, f32, Vec<Action>)> = decisions
         .into_iter()
         .enumerate()
         .filter_map(|(index, decision)| decision.map(|(score, actions)| (index, score, actions)))
@@ -237,13 +245,13 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
             .then(a.0.cmp(&b.0))
     });
 
-    // Стройки тратят золото — учитываем общий бюджет, чтобы не запланировать
-    // больше строек, чем бот может оплатить.
+    // Construction costs gold — keep a shared budget so the bot never plans
+    // more buildings than it can afford.
     let mut gold_budget = gold;
     let mut claimed: HashSet<(i32, i32)> = HashSet::new();
     for (_, _, actions) in ranked {
         let build_cost = actions.iter().find_map(|action| match action {
-            AiAction::Build { building_type, .. } => BuildingData::from_type(*building_type)
+            Action::Build { building_type, .. } => BuildingData::from_type(building_type.unwrap())
                 .map(|data| data.stats(BuildingLevel::Standard).upgrade_cost()),
             _ => None,
         });
@@ -254,9 +262,9 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
         }
 
         let claim = match actions.first() {
-            Some(AiAction::Move { to, .. }) => (to.x, to.y),
-            Some(AiAction::Gather { pos }) => (pos.x, pos.y),
-            Some(AiAction::Build { pos, .. }) => (pos.x, pos.y),
+            Some(Action::Move { unit_pos, .. }) => (unit_pos.x, unit_pos.y),
+            Some(Action::Gather { resource_pos, .. }) => (resource_pos.x, resource_pos.y),
+            Some(Action::Build { entity_pos, .. }) => (entity_pos.x, entity_pos.y),
             _ => continue,
         };
         if claimed.contains(&claim) {
@@ -269,7 +277,7 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
         plan.actions.extend(actions);
     }
 
-    // 7. Свиток открытия местности — если ещё есть что открывать.
+    // 7. Map reveal scroll — only if there is still something to reveal.
     let unexplored_count = snapshot
         .explored
         .iter()
@@ -279,15 +287,19 @@ pub fn plan_bot_turn(snapshot: WorldSnapshot, profile: AiProfile) -> BotTurnPlan
         && unexplored_count >= UNEXPLORED_SCROLL_THRESHOLD
         && let Some(center) = pick_reveal_center(&snapshot, &explore_targets)
     {
-        plan.actions.push(AiAction::RevealMap { center });
+        plan.actions.push(Action::RevealMap {
+            center,
+            full: false,
+            reveal_source: RevealSource::RevealScroll,
+        });
     }
 
     plan
 }
 
-/// Сетка движения с «кольцом»: неизвестные клетки рядом с известной
-/// проходимой местностью считаются проходимыми (бот может шагнуть в туман,
-/// как и игрок; если там вода — ход честно не сработает).
+/// Movement grid with an "unknown ring": unknown tiles next to known passable
+/// terrain are treated as passable (the bot may step into the fog, just like a
+/// human player; if there is water, the move simply fails).
 fn exploration_grid(snapshot: &WorldSnapshot) -> Vec<u8> {
     let size = snapshot.size;
     let mut grid = snapshot.cost.clone();
@@ -309,7 +321,7 @@ fn exploration_grid(snapshot: &WorldSnapshot) -> Vec<u8> {
     grid
 }
 
-/// Клетки тумана, в которые бот может шагнуть в этом ходу (цели разведки).
+/// Fog tiles the bot may step into this turn (exploration targets).
 fn exploration_targets(snapshot: &WorldSnapshot, ring_grid: &[u8]) -> Vec<(usize, usize)> {
     let size = snapshot.size;
     let mut targets = Vec::new();
@@ -392,7 +404,7 @@ fn compute_build_sites(snapshot: &WorldSnapshot, needs: &Needs) -> Vec<BuildSite
                 score,
             });
 
-            // Военное здание спавна — строим одно, на любом проходимом биоме.
+            // Spawning building — build exactly one, on any passable biome.
             if !has_spawning {
                 sites.push(BuildSite {
                     pos: IVec2::new(row as i32, col as i32),
@@ -436,7 +448,7 @@ fn resource_targets(snapshot: &WorldSnapshot, needs: &Needs) -> Vec<ResourceTarg
     targets
 }
 
-/// Выбирает лучшее действие одного строителя. Возвращает (score, действия).
+/// Chooses the best action for a single builder. Returns (score, actions).
 #[allow(clippy::too_many_arguments)]
 fn choose_helper_actions(
     helper: &OwnHelper,
@@ -449,16 +461,22 @@ fn choose_helper_actions(
     explored: &[bool],
     profile: &AiProfile,
     gold: Gold,
-) -> Option<(f32, Vec<AiAction>)> {
+) -> Option<(f32, Vec<Action>)> {
     let start = (helper.pos.x as usize, helper.pos.y as usize);
     let start_flat = start.0 * size + start.1;
 
-    // Без очков движения можно только собрать ресурс или построиться под собой.
+    // Without movement points the builder can only gather a resource or build
+    // on its current tile.
     if helper.movement_points == 0 {
-        let mut best: Option<(f32, Vec<AiAction>)> = None;
+        let mut best: Option<(f32, Vec<Action>)> = None;
         if let Some(target) = targets.iter().find(|t| flat_of(t.pos, size) == start_flat) {
             let score = target.value * if target.visible { 1.15 } else { 1.0 };
-            best = Some((score, vec![AiAction::Gather { pos: target.pos }]));
+            best = Some((
+                score,
+                vec![Action::Gather {
+                    resource_pos: target.pos,
+                }],
+            ));
         }
         if helper.charges > 0 {
             for site in sites {
@@ -477,9 +495,9 @@ fn choose_helper_actions(
                 {
                     best = Some((
                         site.score,
-                        vec![AiAction::Build {
-                            pos: site.pos,
-                            building_type: site.building_type,
+                        vec![Action::Build {
+                            entity_pos: site.pos,
+                            building_type: Some(site.building_type),
                         }],
                     ));
                 }
@@ -490,8 +508,8 @@ fn choose_helper_actions(
 
     let bounded = movement_field(grid, size, start, helper.movement_points);
 
-    let mut best: Option<(f32, Vec<AiAction>)> = None;
-    let mut consider = |score: f32, actions: Vec<AiAction>| {
+    let mut best: Option<(f32, Vec<Action>)> = None;
+    let mut consider = |score: f32, actions: Vec<Action>| {
         if best
             .as_ref()
             .is_none_or(|(best_score, _)| score > *best_score)
@@ -500,7 +518,7 @@ fn choose_helper_actions(
         }
     };
 
-    // 1. Сбор ресурсов в зоне досягаемости.
+    // 1. Gathering resources within reach.
     for target in targets {
         let distance = bounded[flat_of(target.pos, size)];
         if distance == UNREACHABLE {
@@ -509,23 +527,27 @@ fn choose_helper_actions(
         let score =
             target.value / (distance as f32 + 1.0) * if target.visible { 1.15 } else { 1.0 };
         let actions = if distance == 0 {
-            vec![AiAction::Gather { pos: target.pos }]
+            vec![Action::Gather {
+                resource_pos: target.pos,
+            }]
         } else {
             vec![
-                AiAction::Move {
-                    from: helper.pos,
-                    to: target.pos,
+                Action::Move {
+                    unit_pos: helper.pos,
+                    target_pos: target.pos,
                 },
-                AiAction::Gather { pos: target.pos },
+                Action::Gather {
+                    resource_pos: target.pos,
+                },
             ]
         };
         consider(score, actions);
     }
 
-    // 2. Строительство, если остались заряды и хватает золота на стройку.
+    // 2. Construction if charges are left and gold covers the cost.
     if helper.charges > 0 {
         for site in sites {
-            // Не планируем то, что не можем оплатить.
+            // Do not plan anything the bot cannot pay for.
             let Some(data) = BuildingData::from_type(site.building_type) else {
                 continue;
             };
@@ -538,19 +560,19 @@ fn choose_helper_actions(
             }
             let score = site.score / (distance as f32 + 1.0);
             let actions = if distance == 0 {
-                vec![AiAction::Build {
-                    pos: site.pos,
-                    building_type: site.building_type,
+                vec![Action::Build {
+                    entity_pos: site.pos,
+                    building_type: Some(site.building_type),
                 }]
             } else {
                 vec![
-                    AiAction::Move {
-                        from: helper.pos,
-                        to: site.pos,
+                    Action::Move {
+                        unit_pos: helper.pos,
+                        target_pos: site.pos,
                     },
-                    AiAction::Build {
-                        pos: site.pos,
-                        building_type: site.building_type,
+                    Action::Build {
+                        entity_pos: site.pos,
+                        building_type: Some(site.building_type),
                     },
                 ]
             };
@@ -558,7 +580,7 @@ fn choose_helper_actions(
         }
     }
 
-    // 3. Разведка: шаг в туман на границе известного.
+    // 3. Exploration: step into the fog at the edge of the known area.
     if profile.exploration_weight > 0.0 && !explore_targets.is_empty() {
         let ring_bounded = movement_field(ring_grid, size, start, helper.movement_points);
         let mut best_explore: Option<(f32, IVec2)> = None;
@@ -577,15 +599,15 @@ fn choose_helper_actions(
         if let Some((score, to)) = best_explore {
             consider(
                 score,
-                vec![AiAction::Move {
-                    from: helper.pos,
-                    to,
+                vec![Action::Move {
+                    unit_pos: helper.pos,
+                    target_pos: to,
                 }],
             );
         }
     }
 
-    // 4. Подход к самой ценной дальней цели, если ничего лучше нет.
+    // 4. Approach the most valuable distant target if nothing better exists.
     if best.is_none() {
         let (nominal, parents) = nominal_field(grid, size, start);
         let mut best_target: Option<(f32, usize)> = None;
@@ -623,9 +645,9 @@ fn choose_helper_actions(
                     let to = IVec2::new((destination / size) as i32, (destination % size) as i32);
                     best = Some((
                         score * 0.7,
-                        vec![AiAction::Move {
-                            from: helper.pos,
-                            to,
+                        vec![Action::Move {
+                            unit_pos: helper.pos,
+                            target_pos: to,
                         }],
                     ));
                 }
@@ -636,7 +658,7 @@ fn choose_helper_actions(
     best
 }
 
-/// Сколько неизвестных клеток откроется вокруг точки (в радиусе `radius`).
+/// How many unknown tiles around a point (within `radius`) would be revealed.
 fn estimate_reveal(
     explored: &[bool],
     size: usize,
@@ -659,8 +681,8 @@ fn estimate_reveal(
     count
 }
 
-/// Лучшая точка для свитка открытия местности: граница, вокруг которой
-/// больше всего неизвестного.
+/// Best spot for a map reveal scroll: the frontier tile with the most unknown
+/// tiles around it.
 fn pick_reveal_center(
     snapshot: &WorldSnapshot,
     explore_targets: &[(usize, usize)],
@@ -690,7 +712,7 @@ fn upgrade_cost(building: &OwnBuilding) -> Option<Gold> {
     Some(data.stats(building.level).upgrade_cost())
 }
 
-/// (стоимость улучшения, ценность прироста доходов по текущим потребностям)
+/// (upgrade cost, income gain value under the current needs)
 fn upgrade_value(building: &OwnBuilding, needs: &Needs) -> Option<(Gold, f32)> {
     let data = BuildingData::from_type(building.building_type)?;
     let current = data.stats(building.level);
@@ -704,7 +726,7 @@ fn upgrade_value(building: &OwnBuilding, needs: &Needs) -> Option<(Gold, f32)> {
     Some((current.upgrade_cost(), delta.max(0.0)))
 }
 
-/// Какой боевой юнит нанять следующим, чтобы держать армию сбалансированной.
+/// Which combat unit to hire next to keep the army balanced.
 fn choose_combat_unit_type(units: &[OwnCombatUnit]) -> UnitType {
     let damage = units
         .iter()
@@ -740,7 +762,7 @@ mod tests {
     use crate::game::game_logic_plugin::ai::memory::SeenBuilding;
     use crate::world::components::{AiDifficulty, Id};
 
-    /// Мини-карта: всё известно, биом small, капитолий на (0,0).
+    /// Minimal map: everything is known, small biome, capital at (0,0).
     fn snapshot(size: usize, helpers: Vec<OwnHelper>, gold: u16) -> WorldSnapshot {
         let mut known_buildings = vec![None; size * size];
         known_buildings[0] = Some(SeenBuilding {
@@ -755,7 +777,6 @@ mod tests {
             biome: vec![BiomeType::SmallBiome; size * size],
             explored: vec![true; size * size],
             visible_now: vec![true; size * size],
-            full_visible_now: vec![false; size * size],
             known_resources: vec![None; size * size],
             known_rare: vec![None; size * size],
             known_buildings,
@@ -784,7 +805,7 @@ mod tests {
         let snap = snapshot(5, vec![], 30);
         let plan = plan_bot_turn(snap, normal_profile());
         assert!(plan.actions.iter().any(
-            |action| matches!(action, AiAction::SpawnUnit { city_pos, unit_type: UnitType::Helper } if *city_pos == IVec2::new(0, 0))
+            |action| matches!(action, Action::SpawnUnit { city_pos, unit_type: UnitType::Helper } if *city_pos == IVec2::new(0, 0))
         ));
     }
 
@@ -796,7 +817,7 @@ mod tests {
             !plan
                 .actions
                 .iter()
-                .any(|action| matches!(action, AiAction::SpawnUnit { .. }))
+                .any(|action| matches!(action, Action::SpawnUnit { .. }))
         );
     }
 
@@ -814,11 +835,9 @@ mod tests {
         snap.known_resources[1] = Some(CommonKind::Gold);
 
         let plan = plan_bot_turn(snap, normal_profile());
-        assert!(
-            plan.actions.iter().any(
-                |action| matches!(action, AiAction::Gather { pos } if *pos == IVec2::new(0, 1))
-            )
-        );
+        assert!(plan.actions.iter().any(
+            |action| matches!(action, Action::Gather { resource_pos } if *resource_pos == IVec2::new(0, 1))
+        ));
     }
 
     #[test]
@@ -839,13 +858,14 @@ mod tests {
             !plan
                 .actions
                 .iter()
-                .any(|action| matches!(action, AiAction::Build { .. }))
+                .any(|action| matches!(action, Action::Build { .. }))
         );
     }
 
     #[test]
     fn does_not_plan_unaffordable_building() {
-        // Золота хватает только на найм? Нет — золота нет ни на что.
+        // Gold is only enough for hiring? No — there is not enough gold for
+        // anything.
         let mut snap = snapshot(
             5,
             vec![OwnHelper {
@@ -862,14 +882,14 @@ mod tests {
             !plan
                 .actions
                 .iter()
-                .any(|action| matches!(action, AiAction::Build { .. }))
+                .any(|action| matches!(action, Action::Build { .. }))
         );
     }
 
     #[test]
     fn uses_reveal_scroll_on_unexplored_map() {
         let mut snap = snapshot(12, vec![], 5);
-        // Известен только угол 6x6, остальное — туман.
+        // Only a 6x6 corner is known, the rest is fog.
         for row in 0..12 {
             for col in 0..12 {
                 let index = row * 12 + col;
@@ -887,13 +907,13 @@ mod tests {
         assert!(
             plan.actions
                 .iter()
-                .any(|action| matches!(action, AiAction::RevealMap { .. }))
+                .any(|action| matches!(action, Action::RevealMap { .. }))
         );
     }
 
     #[test]
     fn keeps_reveal_scroll_on_explored_map() {
-        // Карта маленькая и полностью известна — свиток не тратим.
+        // Map is small and fully explored — do not waste the scroll.
         let snap = snapshot(5, vec![], 5);
         let mut snap = snap;
         snap.reveal_scrolls = 1;
@@ -903,7 +923,7 @@ mod tests {
             !plan
                 .actions
                 .iter()
-                .any(|action| matches!(action, AiAction::RevealMap { .. }))
+                .any(|action| matches!(action, Action::RevealMap { .. }))
         );
     }
 
@@ -918,7 +938,7 @@ mod tests {
             }],
             5,
         );
-        // Известен только угол 4x4, ресурсов нет.
+        // Only a 4x4 corner is known, there are no resources.
         for row in 0..8 {
             for col in 0..8 {
                 let index = row * 8 + col;
@@ -935,7 +955,7 @@ mod tests {
         assert!(
             plan.actions
                 .iter()
-                .any(|action| matches!(action, AiAction::Move { .. }))
+                .any(|action| matches!(action, Action::Move { .. }))
         );
     }
 }

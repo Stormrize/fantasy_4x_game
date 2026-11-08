@@ -14,7 +14,7 @@ use crate::world::game_resources::data::unit::{
 use bevy::math::IVec2;
 use bevy::prelude::Query;
 
-/// Строитель бота.
+/// Bot's builder unit.
 #[derive(Debug, Clone)]
 pub struct OwnHelper {
     pub pos: IVec2,
@@ -22,19 +22,19 @@ pub struct OwnHelper {
     pub charges: u8,
 }
 
-/// Боевой юнит бота.
+/// Bot's combat unit.
 #[derive(Debug, Clone, Copy)]
 pub struct OwnCombatUnit {
     pub pos: IVec2,
     pub unit_type: UnitType,
-    /// Уровень и очки движения понадобятся боевому ИИ.
+    /// Level and movement points will be used by the combat AI.
     #[allow(dead_code)]
     pub level: UnitLevel,
     #[allow(dead_code)]
     pub movement_points: u16,
 }
 
-/// Здание бота.
+/// Bot's building.
 #[derive(Debug, Clone, Copy)]
 pub struct OwnBuilding {
     pub pos: IVec2,
@@ -42,48 +42,46 @@ pub struct OwnBuilding {
     pub level: BuildingLevel,
 }
 
-/// Снимок мира с точки зрения бота: только то, что он видит сейчас
-/// (туман войны) или помнит. Планировщик работает исключительно с ним,
-/// поэтому бот не знает о том, чего не видел.
+/// World as seen by a bot: only what it sees right now (fog of war) or
+/// remembers. The planner works exclusively with this snapshot, so the bot
+/// never knows anything it has not observed.
 #[derive(Debug)]
 pub struct WorldSnapshot {
     pub id: Id,
     pub size: usize,
-    /// Стоимость передвижения по известной местности (0 — вода/неизвестно).
+    /// Movement cost over known terrain (0 means water/unknown).
     pub cost: Vec<u8>,
-    /// Тип биома известных клеток (для выбора зданий).
+    /// Biome of known tiles (used for building placement).
     pub biome: Vec<BiomeType>,
-    /// Клетка когда-либо была видна (сейчас или в прошлом).
+    /// Tile has been explored at some point (now or in the past).
     pub explored: Vec<bool>,
-    /// Общая видимость в текущий ход.
+    /// Tile is currently fully visible (units and buildings are visible).
     pub visible_now: Vec<bool>,
-    /// Полная видимость (видны юниты) в текущий ход.
-    /// Понадобится боевому ИИ (атаковать можно только то, что реально видно).
-    #[allow(dead_code)]
-    pub full_visible_now: Vec<bool>,
+    /// Will be used by the combat AI (only currently visible targets can be
+    /// attacked).
     pub known_resources: Vec<Option<CommonKind>>,
     pub known_rare: Vec<Option<RareKind>>,
-    /// Известные здания (включая свои и нейтральные).
+    /// Known buildings (including own and neutral ones).
     pub known_buildings: Vec<Option<SeenBuilding>>,
-    /// Чужие юниты: видимые сейчас или свежие воспоминания.
+    /// Enemy units: currently visible or recently remembered.
     pub known_enemy_units: Vec<Option<(Id, UnitType)>>,
     pub own_helpers: Vec<OwnHelper>,
     pub own_buildings: Vec<OwnBuilding>,
-    /// Свои боевые юниты.
+    /// Own combat units.
     pub own_combat_units: Vec<OwnCombatUnit>,
-    /// Стоимость найма боевых юнитов своей расы по индексу `UnitType::index()`.
+    /// Cost of hiring own race's combat units by `UnitType::index()`.
     pub combat_unit_costs: [Gold; 3],
-    /// Свитки открытия местности в инвентаре.
+    /// Map reveal scrolls in the inventory.
     pub reveal_scrolls: u32,
     pub gold: Gold,
     pub food: Food,
     pub science: Science,
 }
 
-/// Обновляет память бота увиденным и собирает снимок мира.
+/// Updates the bot's memory with what it sees and builds the world snapshot.
 ///
-/// `bot_id` — id бота, чьими глазами смотрим. Видимость берётся из тумана
-/// войны (только своя), всё остальное — из памяти.
+/// `bot_id` is the bot whose eyes we are looking through. Visibility comes
+/// from the fog of war (that bot only), everything else comes from memory.
 #[allow(clippy::too_many_arguments)]
 pub fn build_snapshot<'w, 's>(
     bot_id: Id,
@@ -102,85 +100,21 @@ pub fn build_snapshot<'w, 's>(
     let n = size * size;
     memory.turn += 1;
 
-    // 1. Обновляем память тем, что бот видит в этот ход.
-    for row in 0..size {
-        for col in 0..size {
-            let index = row * size + col;
-            let general_visible =
-                world_maps
-                    .fog
-                    .is_general_visible_for(row, col, bot_id, local_player_id);
-            let full_visible =
-                world_maps
-                    .fog
-                    .is_full_visible_for(row, col, bot_id, local_player_id);
+    // 1. Refresh the memory with the current observation.
+    memory.observe(
+        bot_id,
+        local_player_id,
+        world_maps,
+        buildings_query,
+        units_query,
+    );
 
-            if general_visible {
-                memory.explored.insert(index);
-                memory
-                    .biome
-                    .insert(index, world_maps.terrain.get_biome_type(row, col));
-
-                match world_maps.resources.get(row, col) {
-                    Some(ResourceType::Common(common)) => {
-                        memory.resources.insert(index, common.kind);
-                        memory.rare_resources.remove(&index);
-                    }
-                    Some(ResourceType::Rare(rare)) => {
-                        memory.rare_resources.insert(index, rare.kind);
-                        memory.resources.remove(&index);
-                    }
-                    None => {
-                        memory.resources.remove(&index);
-                        memory.rare_resources.remove(&index);
-                    }
-                }
-
-                match world_maps
-                    .buildings
-                    .get(row, col)
-                    .and_then(|entity| buildings_query.get(entity).ok())
-                {
-                    Some((owner, building_type, _)) => {
-                        memory.buildings.insert(
-                            index,
-                            SeenBuilding {
-                                owner: *owner,
-                                building_type: *building_type,
-                            },
-                        );
-                    }
-                    None => {
-                        memory.buildings.remove(&index);
-                    }
-                }
-            }
-
-            if full_visible {
-                match world_maps
-                    .units
-                    .get(row, col)
-                    .and_then(|entity| units_query.get(entity).ok())
-                {
-                    Some((owner, unit_type)) if *owner != bot_id => {
-                        memory
-                            .unit_sightings
-                            .insert(index, (*owner, *unit_type, memory.turn));
-                    }
-                    _ => {
-                        memory.unit_sightings.remove(&index);
-                    }
-                }
-            }
-        }
-    }
-
-    // 2. Собираем массивы снимка: сейчас видимое — из карт, иначе — из памяти.
+    // 2. Build snapshot arrays: currently visible data comes from the live
+    //    maps, everything else from memory.
     let mut cost = vec![0u8; n];
     let mut biome = vec![BiomeType::Water; n];
     let mut explored = vec![false; n];
     let mut visible_now = vec![false; n];
-    let mut full_visible_now = vec![false; n];
     let mut known_resources = vec![None; n];
     let mut known_rare = vec![None; n];
     let mut known_buildings = vec![None; n];
@@ -198,11 +132,10 @@ pub fn build_snapshot<'w, 's>(
                     .fog
                     .is_full_visible_for(row, col, bot_id, local_player_id);
 
-            visible_now[index] = general_visible;
-            full_visible_now[index] = full_visible;
+            visible_now[index] = full_visible;
             explored[index] = general_visible || memory.explored.contains(&index);
 
-            if general_visible {
+            if full_visible {
                 let terrain_biome = world_maps.terrain.get_biome_type(row, col);
                 biome[index] = terrain_biome;
                 cost[index] = biome_cost(terrain_biome);
@@ -226,26 +159,26 @@ pub fn build_snapshot<'w, 's>(
                         building_type: *building_type,
                     });
 
-                if full_visible {
-                    known_enemy_units[index] = world_maps
-                        .units
-                        .get(row, col)
-                        .and_then(|entity| units_query.get(entity).ok())
-                        .filter(|(owner, _)| **owner != bot_id)
-                        .map(|(owner, unit_type)| (*owner, *unit_type));
-                }
+                known_enemy_units[index] = world_maps
+                    .units
+                    .get(row, col)
+                    .and_then(|entity| units_query.get(entity).ok())
+                    .filter(|(owner, _)| **owner != bot_id)
+                    .map(|(owner, unit_type)| (*owner, *unit_type));
             } else if let Some(remembered_biome) = memory.biome.get(&index) {
-                // Клетку видели раньше — помним местность и статику.
+                // The tile was explored before: remember terrain and static
+                // contents. Terrain, resources and buildings do not expire.
                 biome[index] = *remembered_biome;
                 cost[index] = biome_cost(*remembered_biome);
+
                 known_resources[index] = memory.resources.get(&index).copied();
                 known_rare[index] = memory.rare_resources.get(&index).copied();
                 known_buildings[index] = memory.buildings.get(&index).copied();
 
-                // Юниты — только если воспоминание ещё свежее.
+                // Enemy units are remembered only while the sighting is fresh.
                 if let Some((owner, unit_type, seen_turn)) =
                     memory.unit_sightings.get(&index).copied()
-                    && memory.turn.saturating_sub(seen_turn) <= profile.unit_memory_turns
+                    && memory.turn.saturating_sub(seen_turn) <= profile.forget_memory_turns
                 {
                     known_enemy_units[index] = Some((owner, unit_type));
                 }
@@ -253,7 +186,7 @@ pub fn build_snapshot<'w, 's>(
         }
     }
 
-    // 3. Свои строители и здания.
+    // 3. Own builders and buildings.
     let mut own_helpers = Vec::new();
     for (index, slot) in world_maps.units.map.iter().enumerate() {
         let Some(entity) = *slot else { continue };
@@ -264,7 +197,6 @@ pub fn build_snapshot<'w, 's>(
             continue;
         }
         let Ok((movement, stats)) = helpers_query.get(entity) else {
-            // Боевые юниты — ими займётся боевой ИИ.
             continue;
         };
         own_helpers.push(OwnHelper {
@@ -275,7 +207,7 @@ pub fn build_snapshot<'w, 's>(
     }
     own_helpers.sort_by_key(|helper| (helper.pos.x, helper.pos.y));
 
-    // Свои боевые юниты.
+    // Own combat units.
     let mut own_combat_units = Vec::new();
     for (index, slot) in world_maps.units.map.iter().enumerate() {
         let Some(entity) = *slot else { continue };
@@ -311,7 +243,7 @@ pub fn build_snapshot<'w, 's>(
     }
     own_buildings.sort_by_key(|building| (building.pos.x, building.pos.y));
 
-    // 4. Своя экономика и инвентарь.
+    // 4. Own economy and inventory.
     let player = players.0.iter().find(|p| p.id == bot_id);
     let (gold, food, science) = player
         .map(|p| (p.gold, p.food, p.science))
@@ -325,7 +257,7 @@ pub fn build_snapshot<'w, 's>(
         })
         .unwrap_or(0);
 
-    // Стоимость найма боевых юнитов своей расы (по индексам UnitType::index()).
+    // Cost of hiring own race's combat units (by `UnitType::index()`).
     let combat_unit_costs = player
         .and_then(|p| game_logic_config.units_data.get(&p.player_race))
         .map(|units_data| {
@@ -346,7 +278,6 @@ pub fn build_snapshot<'w, 's>(
         biome,
         explored,
         visible_now,
-        full_visible_now,
         known_resources,
         known_rare,
         known_buildings,
