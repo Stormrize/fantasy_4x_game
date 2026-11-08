@@ -1,81 +1,63 @@
+use crate::game::game_logic_plugin::action::action_systems::fog_update::fog_update;
+use crate::game::game_logic_plugin::action::action_systems::{ActionCtx, tile};
 use crate::game::game_logic_plugin::action::rules::move_rules::{
-    MovementCostGrid, check_move_validity, is_players_turn, is_players_unit,
+    check_move_validity, is_players_turn, is_players_unit,
 };
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{Clear, Move};
+use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
+    Clear, RevealSource,
+};
 use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::RenderMoveEntity;
-use crate::world::components::{GameMode, Id};
-use crate::world::game_configs::GameLogicConfig;
-use crate::world::game_resources::data::unit::MovementPoints;
-use crate::world::game_resources::unit_map::UnitsMap;
-use crate::world::turn_manager::TurnManager;
-use bevy::prelude::{MessageReader, MessageWriter, Query, Res, ResMut};
+use crate::world::components::GameMode;
+use bevy::math::IVec2;
 
-#[allow(clippy::too_many_arguments)]
-pub fn move_entity(
-    mut move_command: MessageReader<Move>,
-    turn_manager: Res<TurnManager>,
-    game_logic_config: Res<GameLogicConfig>,
-    cost_grid: Res<MovementCostGrid>,
-    mut units_map: ResMut<UnitsMap>,
-    mut movement_stats: Query<(&Id, &mut MovementPoints)>,
-    mut render_move: MessageWriter<RenderMoveEntity>,
-    mut clear: MessageWriter<Clear>,
-) {
-    for command in move_command.read() {
-        let current_pos = command.entity_pos;
-        let target_pos = command.target_pos;
-        let Some(selected_entity) = units_map.get(current_pos.x as usize, current_pos.y as usize)
-        else {
-            clear.write(Clear);
-            continue;
-        };
+/// Moves a unit from `from` to `to`, spending movement points.
+pub fn move_entity(ctx: &mut ActionCtx, from: IVec2, to: IVec2) {
+    let size = ctx.terrain.size;
+    let (Some((fx, fy)), Some((tx, ty))) = (tile(from, size), tile(to, size)) else {
+        return;
+    };
 
-        let (id, mut movement_points) = movement_stats.get_mut(selected_entity).unwrap();
+    let Some(unit) = ctx.units_map.get(fx, fy) else {
+        ctx.clear.write(Clear);
+        return;
+    };
+    let Ok((id, mut points)) = ctx.movers.get_mut(unit) else {
+        ctx.clear.write(Clear);
+        return;
+    };
 
-        if !is_players_unit(*id, turn_manager.current_player) {
-            println!("Not your race");
-            clear.write(Clear);
-            continue;
-        }
-
-        // В онлайне нельзя ходить вне своего хода (сервер проверит ещё раз).
-        if matches!(turn_manager.game_mode, GameMode::Online)
-            && !is_players_turn(game_logic_config.player, turn_manager.current_player)
-        {
-            println!("Not your turn");
-            clear.write(Clear);
-            continue;
-        }
-
-        let Some(cost) = check_move_validity(
-            &cost_grid,
-            &units_map,
-            movement_points.0,
-            current_pos,
-            target_pos,
-        ) else {
-            println!("Not valid move");
-            clear.write(Clear);
-            continue;
-        };
-
-        if matches!(turn_manager.game_mode, GameMode::Online) {
-            // send http request
-        }
-
-        units_map.set(current_pos.x as usize, current_pos.y as usize, None);
-        units_map.set(
-            target_pos.x as usize,
-            target_pos.y as usize,
-            Some(selected_entity),
-        );
-
-        render_move.write(RenderMoveEntity {
-            entity: selected_entity,
-            current_pos,
-            new_pos: target_pos,
-        });
-        movement_points.0 -= cost;
-        clear.write(Clear);
+    if !is_players_unit(*id, ctx.turn_manager.current_player) {
+        println!("Not your race");
+        ctx.clear.write(Clear);
+        return;
     }
+
+    if !is_players_turn(ctx.config.player, ctx.turn_manager.current_player) {
+        println!("Not your turn");
+        ctx.clear.write(Clear);
+        return;
+    }
+
+    let Some(cost) = check_move_validity(&ctx.cost_grid, &ctx.units_map, points.0, from, to) else {
+        println!("Not valid move");
+        ctx.clear.write(Clear);
+        return;
+    };
+
+    if matches!(ctx.turn_manager.game_mode, GameMode::Online) {
+        // TODO: send http request
+    }
+
+    ctx.units_map.set(fx, fy, None);
+    ctx.units_map.set(tx, ty, Some(unit));
+    ctx.render_move.write(RenderMoveEntity {
+        entity: unit,
+        current_pos: from,
+        new_pos: to,
+    });
+    points.0 -= cost;
+    ctx.clear.write(Clear);
+
+    // Reveal around the NEW tile (the old one is empty now).
+    fog_update(ctx, to, RevealSource::Unit, true);
 }

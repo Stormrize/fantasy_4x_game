@@ -1,125 +1,123 @@
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::SpawnUnitCommand;
-use crate::world::components::{Id, PlayerRace};
-use crate::world::game_configs::{GameLogicConfig, Players};
+use bevy::math::IVec2;
+
+use crate::game::game_logic_plugin::action::action_systems::fog_update::fog_update;
+use crate::game::game_logic_plugin::action::action_systems::{ActionCtx, tile};
+use crate::game::game_logic_plugin::events_resources_structs::action_messages::RevealSource;
 use crate::world::game_resources::building_map::BuildingMap;
 use crate::world::game_resources::data::biome::BiomeType;
 use crate::world::game_resources::data::buffs_and_debuffs::{Buffs, Debuffs};
-use crate::world::game_resources::data::building::{BuildingLevel, BuildingType, Levels};
+use crate::world::game_resources::data::building::BuildingType;
 use crate::world::game_resources::data::unit::{
     CombatUnit, HELPER, Helper, MovementPointsMax, UnitLevel, UnitType,
 };
 use crate::world::game_resources::terrain_map::TerrainMap;
 use crate::world::game_resources::unit_map::UnitsMap;
-use crate::world::turn_manager::TurnManager;
-use bevy::prelude::{Commands, MessageReader, Query, Res, ResMut};
 
-/// Наём юнита в городе текущего игрока. Строитель (`unit_type: None`)
-/// нанимается в любом городе, боевой юнит — в здании спавна
-/// (`SpawningBuilding`) с положительной `spawn_capacity`.
-#[allow(clippy::too_many_arguments)]
-pub fn spawn_unit(
-    mut spawn_command: MessageReader<SpawnUnitCommand>,
-    turn_manager: Res<TurnManager>,
-    game_logic_config: Res<GameLogicConfig>,
-    terrain: Res<TerrainMap>,
-    mut units_map: ResMut<UnitsMap>,
-    buildings_map: Res<BuildingMap>,
-    buildings_query: Query<(&Id, &PlayerRace, &BuildingType, &BuildingLevel, &Levels)>,
-    mut players: ResMut<Players>,
-    mut commands: Commands,
-) {
-    let size = terrain.size;
+/// Hires a unit in the city at `pos`; it appears on a free adjacent tile.
+pub fn spawn_unit(ctx: &mut ActionCtx, pos: IVec2, unit_type: UnitType) {
+    let Some((x, y)) = tile(pos, ctx.terrain.size) else {
+        return;
+    };
+    let Some(city) = ctx.buildings_map.get(x, y) else {
+        return;
+    };
+    let Ok((city_id, city_race, building_type, building_level, levels)) = ctx.buildings.get(city)
+    else {
+        return;
+    };
+    if *city_id != ctx.turn_manager.current_player.id {
+        return;
+    }
+    let Some((nx, ny)) = find_free_adjacent(&ctx.terrain, &ctx.units_map, &ctx.buildings_map, x, y)
+    else {
+        return;
+    };
+    let Some(player) = ctx.players.0.iter_mut().find(|p| p.id == *city_id) else {
+        return;
+    };
 
-    for command in spawn_command.read() {
-        let pos = command.city_pos;
-        if pos.x < 0 || pos.y < 0 || pos.x as usize >= size || pos.y as usize >= size {
-            continue;
-        }
-        let (x, y) = (pos.x as usize, pos.y as usize);
-
-        let Some(city_entity) = buildings_map.get(x, y) else {
-            continue;
-        };
-        let Ok((city_id, city_race, building_type, building_level, levels)) =
-            buildings_query.get(city_entity)
-        else {
-            continue;
-        };
-        if *city_id != turn_manager.current_player.id {
-            continue;
-        }
-
-        let Some(player) = players.0.iter_mut().find(|p| p.id == *city_id) else {
-            continue;
-        };
-        let Some((new_x, new_y)) = find_free_adjacent(&terrain, &units_map, &buildings_map, x, y)
-        else {
-            continue;
-        };
-
-        match command.unit_type {
-            // Строитель — нанимается в любом городе.
-            UnitType::Helper => {
-                if !matches!(
-                    *building_type,
-                    BuildingType::Capital
-                        | BuildingType::CapturedCity
-                        | BuildingType::SpawningBuilding
-                ) {
-                    continue;
-                }
-                if player.gold < HELPER.unit_cost.0 {
-                    continue;
-                }
-                player.gold -= HELPER.unit_cost.0;
-
-                let entity = commands
-                    .spawn((
-                        Helper {
-                            player_id: *city_id,
-                            player_race: city_race.clone(),
-                            unit_data: HELPER,
-                            active_buffs: Buffs::default(),
-                            active_debuffs: Debuffs::default(),
-                        },
-                        MovementPointsMax(HELPER.movement_points.0),
-                    ))
-                    .id();
-                units_map.set(new_x, new_y, Some(entity));
+    match unit_type {
+        // Helper: only in a capital, a captured city or a spawning building.
+        UnitType::Helper => {
+            if !matches!(
+                *building_type,
+                BuildingType::Capital | BuildingType::CapturedCity | BuildingType::SpawningBuilding
+            ) {
+                return;
             }
-            // Боевой юнит — только в здании спавна.
-            unit_type => {
-                if *building_type != BuildingType::SpawningBuilding {
-                    continue;
-                }
-                if levels.stats(*building_level).spawn_capacity() == 0 {
-                    continue;
-                }
-                let Some(units_data) = game_logic_config.units_data.get(city_race) else {
-                    continue;
-                };
-                let data = &units_data.0[unit_type.index()];
-                let cost = data.level_economy.0[0].new_level_cost;
-                if player.gold < cost {
-                    continue;
-                }
-                player.gold -= cost;
-
-                let entity = commands
-                    .spawn((
-                        CombatUnit {
-                            player_id: *city_id,
-                            player_race: city_race.clone(),
-                            level: UnitLevel::Beginner,
-                            unit_data: data.clone(),
-                            active_buffs: Buffs::default(),
-                            active_debuffs: Debuffs::default(),
-                        },
-                        MovementPointsMax(data.movement_points.0),
-                    ))
-                    .id();
-                units_map.set(new_x, new_y, Some(entity));
+            if player.gold < HELPER.unit_cost.0 {
+                return;
             }
+            player.gold -= HELPER.unit_cost.0;
+
+            let entity = ctx
+                .commands
+                .spawn((
+                    Helper {
+                        player_id: *city_id,
+                        player_race: city_race.clone(),
+                        unit_data: HELPER,
+                        active_buffs: Buffs::default(),
+                        active_debuffs: Debuffs::default(),
+                    },
+                    MovementPointsMax(HELPER.movement_points.0),
+                ))
+                .id();
+            ctx.units_map.set(nx, ny, Some(entity));
+            // ASSUMPTION: field name `field_of_view` (see questions).
+
+            fog_update(
+                ctx,
+                IVec2::new(nx as i32, ny as i32),
+                RevealSource::Unit,
+                true,
+            );
+        }
+        // Combat unit: only in a spawning building.
+        unit_type => {
+            if *building_type != BuildingType::SpawningBuilding {
+                return;
+            }
+            if levels.stats(*building_level).spawn_capacity() == 0 {
+                return;
+            }
+            let Some(units_data) = ctx.config.units_data.get(city_race) else {
+                return;
+            };
+            let data = &units_data.0[unit_type.index()];
+            let cost = data
+                .level_economy
+                .level_cost(UnitLevel::Beginner)
+                .unwrap()
+                .new_level_cost;
+            if player.gold < cost {
+                return;
+            }
+            player.gold -= cost;
+
+            let entity = ctx
+                .commands
+                .spawn((
+                    CombatUnit {
+                        player_id: *city_id,
+                        player_race: city_race.clone(),
+                        level: UnitLevel::Beginner,
+                        unit_data: data.clone(),
+                        active_buffs: Buffs::default(),
+                        active_debuffs: Debuffs::default(),
+                    },
+                    MovementPointsMax(data.movement_points.0),
+                ))
+                .id();
+            ctx.units_map.set(nx, ny, Some(entity));
+            // ASSUMPTION: field name `field_of_view` (see questions).
+
+            fog_update(
+                ctx,
+                IVec2::new(nx as i32, ny as i32),
+                RevealSource::Unit,
+                true,
+            );
         }
     }
 }

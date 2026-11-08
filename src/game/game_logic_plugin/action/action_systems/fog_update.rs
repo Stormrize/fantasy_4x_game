@@ -1,96 +1,78 @@
-use crate::world::components::{CAPITAL_CONTROL_RADIUS, Id};
-use crate::world::game_configs::GameLogicConfig;
-use crate::world::game_resources::building_map::BuildingMap;
-use crate::world::game_resources::data::unit::FieldOfView;
-use crate::world::game_resources::fog_map::FogMap;
-use crate::world::game_resources::unit_map::UnitsMap;
-use bevy::prelude::{DetectChanges, Query, Res, ResMut};
+use bevy::math::IVec2;
 
-/// Пересчитывает туман войны по текущему положению юнитов и зданий:
-/// юниты дают полную видимость (с юнитами) в радиусе своего обзора,
-/// здания — общую видимость (без юнитов) в радиусе контроля.
-/// Запускается после любых изменений карт юнитов/зданий.
-pub fn update_fog(
-    units_map: Res<UnitsMap>,
-    buildings_map: Res<BuildingMap>,
-    mut fog_map: ResMut<FogMap>,
-    game_logic_config: Res<GameLogicConfig>,
-    units_query: Query<(&Id, &FieldOfView)>,
-    buildings_query: Query<&Id>,
-) {
-    if !units_map.is_changed() && !buildings_map.is_changed() {
+use crate::game::game_logic_plugin::action::action_systems::{ActionCtx, tile};
+use crate::game::game_logic_plugin::events_resources_structs::action_messages::RevealSource;
+use crate::world::components::BUILDING_SEE_RADIUS;
+use crate::world::game_resources::data::resource::RareKind;
+
+/// Updates fog around `center`.
+/// Plain function: called from the router (`Action::RevealMap`) and from `move_entity`.
+/// The source entity must already exist (be queryable).
+pub fn fog_update(ctx: &mut ActionCtx, center: IVec2, source: RevealSource, full: bool) {
+    let Some((x, y)) = tile(center, ctx.fog_map.size) else {
         return;
-    }
+    };
+    let local_id = ctx.config.player.id;
 
-    let local_player_id = game_logic_config.player.id;
-    let size = fog_map.size;
-    for fog in fog_map.map.iter_mut() {
-        fog.clear_visibility();
-    }
-
-    for (index, slot) in units_map.map.iter().enumerate() {
-        let Some(entity) = *slot else { continue };
-        let Ok((id, field_of_view)) = units_query.get(entity) else {
-            continue;
-        };
-        let (row, col) = (index / size, index % size);
-        reveal_area(
-            &mut fog_map,
-            *id,
-            local_player_id,
-            row,
-            col,
-            field_of_view.0 as usize,
-            true,
-        );
-    }
-
-    for (index, slot) in buildings_map.map.iter().enumerate() {
-        let Some(entity) = *slot else { continue };
-        let Ok(id) = buildings_query.get(entity) else {
-            continue;
-        };
-        let (row, col) = (index / size, index % size);
-        reveal_area(
-            &mut fog_map,
-            *id,
-            local_player_id,
-            row,
-            col,
-            CAPITAL_CONTROL_RADIUS,
-            true,
-        );
-    }
-
-    // debug: весь туман раскрыт локальному игроку
-    if fog_map.debug_full_visibility {
-        for row in 0..size {
-            for col in 0..size {
-                fog_map.set_visibility(row, col, local_player_id, local_player_id, true, true);
-            }
+    match source {
+        RevealSource::Unit => {
+            let Some((owner, radius)) = ctx
+                .units_map
+                .get(x, y)
+                .and_then(|e| ctx.sight.get(e).ok())
+                .map(|(id, fov)| (*id, fov.0 as usize))
+            else {
+                return;
+            };
+            ctx.fog_map.clear_visibility();
+            ctx.fog_map
+                .reveal_area(x, y, radius, owner, local_id, true, full);
+        }
+        RevealSource::Building => {
+            let Some(owner) = ctx
+                .buildings_map
+                .get(x, y)
+                .and_then(|e| ctx.buildings.get(e).ok())
+                .map(|(id, ..)| *id)
+            else {
+                return;
+            };
+            ctx.fog_map.clear_visibility();
+            ctx.fog_map
+                .reveal_area(x, y, BUILDING_SEE_RADIUS, owner, local_id, true, full);
+        }
+        RevealSource::RevealScroll => {
+            // Uses up one scroll of the current player (replaces the old `reveal_map` system).
+            // Does not clear existing visibility: a scroll only adds to it.
+            let player_id = ctx.turn_manager.current_player.id;
+            let Some(player) = ctx.players.0.iter_mut().find(|p| p.id == player_id) else {
+                return;
+            };
+            let Some(index) = player
+                .inventory
+                .iter()
+                .position(|rare| rare.kind == RareKind::RevealScroll)
+            else {
+                return;
+            };
+            let radius = player.inventory.remove(index).power as usize;
+            ctx.fog_map
+                .reveal_area(x, y, radius, player_id, local_id, true, full);
         }
     }
 }
 
-fn reveal_area(
-    fog_map: &mut FogMap,
-    id: Id,
-    local_player_id: Id,
-    row: usize,
-    col: usize,
-    radius: usize,
-    full: bool,
-) {
-    let size = fog_map.size;
-    let radius = radius as isize;
-    for dr in -radius..=radius {
-        for dc in -radius..=radius {
-            let r = row as isize + dr;
-            let c = col as isize + dc;
-            if r < 0 || c < 0 || r as usize >= size || c as usize >= size {
-                continue;
-            }
-            fog_map.set_visibility(r as usize, c as usize, id, local_player_id, true, full);
+/// Debug: whole map is visible to the local player.
+pub fn apply_debug_visibility(ctx: &mut ActionCtx) {
+    if !ctx.fog_map.debug_full_visibility {
+        return;
+    }
+    let size = ctx.fog_map.size;
+    let local_id = ctx.config.player.id;
+    for row in 0..size {
+        for col in 0..size {
+            ctx.fog_map
+                .set_visibility(row, col, local_id, local_id, true, true);
         }
     }
 }

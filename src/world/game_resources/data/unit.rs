@@ -82,6 +82,12 @@ pub struct FieldOfView(pub u16);
 #[derive(Component, Deserialize, Debug, Clone)]
 pub struct LevelCost(pub Vec<Cost>);
 
+impl LevelCost {
+    pub fn level_cost(&self, level: UnitLevel) -> Option<Cost> {
+        self.0.get(level as usize).cloned()
+    }
+}
+
 #[derive(Component, Deserialize, Debug, Clone)]
 pub struct CurrentHp(pub u16);
 

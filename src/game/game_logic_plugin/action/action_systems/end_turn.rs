@@ -5,6 +5,7 @@ use crate::world::game_configs::GameLogicConfig;
 use crate::world::turn_manager::{TurnManager, TurnTransition};
 use bevy::prelude::{Commands, MessageReader, Res, ResMut};
 
+/// end turn action, gives a turn to next player
 pub fn end_turn(
     mut turn_manager: ResMut<TurnManager>,
     game_logic_config: Res<GameLogicConfig>,

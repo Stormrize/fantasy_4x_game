@@ -1,7 +1,7 @@
 use bevy::prelude::{MessageReader, MessageWriter, Res};
 
 use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
-    Clear, Cycle, Move, NewTile,
+    Action, Clear, Cycle, NewTile,
 };
 use crate::game::game_logic_plugin::events_resources_structs::{
     action_messages::TileClickedEvent, components::*,
@@ -15,7 +15,7 @@ pub fn route_selection(
     config: Res<GameLogicConfig>,
     already_selected_tile: Res<AlreadySelectedTile>,
     mut tile_clicked: MessageReader<TileClickedEvent>,
-    mut move_cmd: MessageWriter<Move>,
+    mut actions: MessageWriter<Action>,
     mut cycle: MessageWriter<Cycle>,
     mut new_tile: MessageWriter<NewTile>,
     mut clear: MessageWriter<Clear>,
@@ -45,7 +45,7 @@ pub fn route_selection(
                 .is_some(clicked_pos.x as usize, clicked_pos.y as usize),
             !world_maps
                 .fog
-                .is_visible_player(clicked_pos.x as usize, clicked_pos.y as usize),
+                .is_general_visible_player(clicked_pos.x as usize, clicked_pos.y as usize),
         );
 
         let just_selected_tile = JustSelectedTile {
@@ -63,8 +63,8 @@ pub fn route_selection(
             }
 
             Some(selected_pos) => {
-                move_cmd.write(Move {
-                    entity_pos: selected_pos,
+                actions.write(Action::Move {
+                    unit_pos: selected_pos,
                     target_pos: clicked_pos,
                 });
             }

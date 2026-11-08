@@ -8,6 +8,7 @@ pub type Science = u16;
 pub type Mana = u16;
 
 pub const CAPITAL_CONTROL_RADIUS: usize = 2;
+pub const BUILDING_SEE_RADIUS: usize = 3;
 
 #[derive(Component, Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PlayerRace(pub SmolStr);

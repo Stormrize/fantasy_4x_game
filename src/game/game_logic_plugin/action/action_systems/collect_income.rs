@@ -7,11 +7,10 @@ use crate::world::game_resources::data::building::{BuildingLevel, Levels};
 use crate::world::turn_manager::TurnManager;
 use bevy::prelude::{MessageReader, Query, Res, ResMut};
 
-/// Регенерация глобальной маны за ход.
+/// mana regen per turn
 const MANA_REGENERATION: u16 = 10;
 
-/// Когда игрок заканчивает ход, собирает пассивный доход с его зданий
-/// и вычитает золото на их содержание.
+/// collect income after player's turn
 pub fn collect_income(
     mut turn_ended: MessageReader<EndTurn>,
     turn_manager: Res<TurnManager>,

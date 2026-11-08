@@ -4,10 +4,13 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct Fog {
-    // general visibility no units visible
+    // General visibility is persistent memory: the tile has been explored at
+    // some point. It is never reset by the fog recalculation.
     pub general_visible_player: bool,
     pub general_visible_bots: Vec<(Id, bool)>,
-    // full visibility units visible
+    // Full visibility is the current turn's line of sight: units, buildings,
+    // resources and enemy units inside a unit's or building's view radius.
+    // It is reset and recomputed on every fog update.
     pub full_visible_player: bool,
     pub full_visible_bots: Vec<(Id, bool)>,
     // Местность, раскрытая свитком навсегда (не сбрасывается пересчётом тумана).
@@ -39,14 +42,14 @@ impl Fog {
         }
     }
 
-    /// Общая видимость для игрока/бота: местность видна, но юниты — нет.
+    /// Persistent memory: the tile has been explored for this player/bot.
     pub fn is_general_visible_for(&self, id: Id) -> bool {
         self.general_visible_bots
             .iter()
             .any(|(bot_id, visible)| *bot_id == id && *visible)
     }
 
-    /// Полная видимость: видны и юниты.
+    /// Current line of sight: units, buildings and enemy units are visible.
     pub fn is_full_visible_for(&self, id: Id) -> bool {
         self.full_visible_bots
             .iter()
@@ -91,13 +94,11 @@ impl Fog {
         }
     }
 
-    /// Сбрасывает текущую видимость клетки (вызывается при пересчёте тумана).
-    /// Раскрытое свитком (`revealed`) не трогается.
+    /// Resets only the current line of sight before a fog recalculation.
+    /// General visibility is persistent explored memory and is intentionally
+    /// left untouched, so `full_visible` can never "un-explore" a tile.
     pub fn clear_visibility(&mut self) {
         self.full_visible_player = false;
-        for (_, visible) in self.general_visible_bots.iter_mut() {
-            *visible = false;
-        }
         for (_, visible) in self.full_visible_bots.iter_mut() {
             *visible = false;
         }
@@ -132,14 +133,20 @@ impl FogMap {
         &mut self.map[row * self.size + col]
     }
 
-    /// Видно ли клетку локальному игроку (общая видимость + раскрытое свитком).
-    pub fn is_visible_player(&self, row: usize, col: usize) -> bool {
+    /// Whether the local player has ever explored the tile
+    /// (persistent memory + permanently revealed tiles).
+    pub fn is_general_visible_player(&self, row: usize, col: usize) -> bool {
         let fog = &self.map[row * self.size + col];
         fog.general_visible_player || fog.revealed_player
     }
 
-    /// Общая видимость для `id` (включает раскрытое свитком).
-    /// `local_player_id` — id локального игрока (не всегда `Id(0)`).
+    pub fn is_full_visible_player(&self, row: usize, col: usize) -> bool {
+        let fog = &self.map[row * self.size + col];
+        fog.full_visible_player
+    }
+
+    /// Whether `id` has ever explored the tile (includes permanently revealed tiles).
+    /// `local_player_id` is the local player's id (not necessarily `Id(0)`).
     pub fn is_general_visible_for(
         &self,
         row: usize,
@@ -155,12 +162,15 @@ impl FogMap {
         }
     }
 
+    /// Whether `id` currently sees the tile with full visibility.
+    /// Permanently revealed tiles are explored memory only, so they do not
+    /// grant full visibility on later turns.
     pub fn is_full_visible_for(&self, row: usize, col: usize, id: Id, local_player_id: Id) -> bool {
         let fog = &self.map[row * self.size + col];
         if id == local_player_id {
-            fog.full_visible_player || fog.revealed_player
+            fog.full_visible_player
         } else {
-            fog.is_full_visible_for(id) || fog.is_revealed_for(id)
+            fog.is_full_visible_for(id)
         }
     }
 
@@ -183,6 +193,36 @@ impl FogMap {
         }
     }
 
+    pub fn reveal_area(
+        &mut self,
+        row: usize,
+        col: usize,
+        radius: usize,
+        local_player_id: Id,
+        id: Id,
+        general: bool,
+        full: bool,
+    ) {
+        let size = self.size;
+        let radius = radius as isize;
+        for dr in -radius..=radius {
+            for dc in -radius..=radius {
+                let r = row as isize + dr;
+                let c = col as isize + dc;
+                if r < 0 || c < 0 || r as usize >= size || c as usize >= size {
+                    continue;
+                }
+                self.set_visibility(r as usize, c as usize, id, local_player_id, general, full);
+            }
+        }
+    }
+
+    pub fn clear_visibility(&mut self) {
+        for fog in self.map.iter_mut() {
+            fog.clear_visibility();
+        }
+    }
+
     #[allow(unused)]
     /// Раскрывает местность для игрока навсегда (свиток открытия местности).
     pub fn set_revealed(&mut self, row: usize, col: usize, id: Id, local_player_id: Id) {
@@ -192,5 +232,41 @@ impl FogMap {
         } else {
             fog.set_revealed_for(id);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn clearing_line_of_sight_keeps_explored_memory() {
+        let mut fog = Fog::new(true, vec![(Id(1), true)], true, vec![(Id(1), true)]);
+
+        fog.clear_visibility();
+
+        assert!(fog.general_visible_player);
+        assert!(fog.is_general_visible_for(Id(1)));
+        assert!(!fog.full_visible_player);
+        assert!(!fog.is_full_visible_for(Id(1)));
+    }
+
+    #[test]
+    fn revealed_tiles_are_explored_but_not_full_visible() {
+        let mut map = FogMap {
+            map: vec![Fog::new(
+                false,
+                vec![(Id(1), false)],
+                false,
+                vec![(Id(1), false)],
+            )],
+            size: 1,
+            debug_full_visibility: false,
+        };
+
+        map.set_revealed(0, 0, Id(1), Id(0));
+
+        assert!(map.is_general_visible_for(0, 0, Id(1), Id(0)));
+        assert!(!map.is_full_visible_for(0, 0, Id(1), Id(0)));
     }
 }
