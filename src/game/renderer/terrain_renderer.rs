@@ -2,20 +2,25 @@ use bevy::prelude::{
     Assets, Commands, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Plane3d, Transform,
 };
 
+use crate::game::renderer::fog_memory::FogMemory;
 use crate::world::game_configs::RenderConfig;
-use crate::world::game_resources::terrain_map::TerrainMap;
 
 pub struct SpawnedTerrainMeshes {
     pub entities: Vec<Entity>,
     pub mesh_handles: Vec<Handle<Mesh>>,
 }
 
+/// Spawns terrain for every explored tile of a chunk.
+///
+/// Full visibility always shows the current biome. Tiles that are only explored
+/// use the last state the local player saw (`FogMemory`), so they never leak
+/// live information through the fog.
 pub fn spawn_terrain_meshes(
     commands: &mut Commands,
     config: &RenderConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    terrain: &TerrainMap,
+    memory: &FogMemory,
 ) -> SpawnedTerrainMeshes {
     // todo можно поменять тайлы на гексагоны изза боевки
 
@@ -34,13 +39,20 @@ pub fn spawn_terrain_meshes(
 
     for row in min_x..max_x {
         for col in min_y..max_y {
-            let biome = terrain.get_biome(row as usize, col as usize);
+            let Some(tile) = memory.get(row as usize, col as usize) else {
+                continue;
+            };
+            let Some(terrain) = &tile.terrain else {
+                continue;
+            };
 
-            let race = biome.owner_race();
-
-            let handle = config.assets_registry.get(race).unwrap_or_else(|| {
-                panic!("assets for this race do not exist, if it is moded race, dont forget to configure assets");
-            }).get_biome(biome.biome_type.index());
+            let handle = config
+                .assets_registry
+                .get(&terrain.race)
+                .unwrap_or_else(|| {
+                    panic!("assets for this race do not exist, if it is moded race, dont forget to configure assets");
+                })
+                .get_biome(terrain.index);
 
             let mesh_handle = meshes.add(Plane3d::default());
 

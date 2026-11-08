@@ -14,19 +14,16 @@ use crate::game::{
         camera_math::{
             camera_chunk_bounds, camera_ground_point, chunk_coord_from_world_xz, outside_bounds,
         },
+        fog_memory::{ChunkSnapshot, FogMemory},
         fog_renderer::{despawn_fog_meshes, spawn_fog_meshes},
         resource_renderer::{despawn_resource_meshes, spawn_resource_meshes},
         terrain_renderer::{despawn_terrain_meshes, spawn_terrain_meshes},
-        units_renderer::{despawn_units_meshes, spawn_units_meshes},
+        units_renderer::{SpawnedUnitsMeshes, despawn_units_meshes},
     },
 };
-use crate::world::components::PlayerRace;
 use crate::world::game_configs::RenderConfig;
 use crate::world::game_resources::WorldMaps;
-use crate::world::game_resources::data::building::BuildingType;
-use crate::world::game_resources::data::unit::UnitType;
 
-#[allow(clippy::too_many_arguments)]
 pub fn stream_chunks(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -35,10 +32,9 @@ pub fn stream_chunks(
     mut rendered: ResMut<Rendered>,
     config: Res<RenderConfig>,
     world_params: WorldMaps,
+    memory: Res<FogMemory>,
     camera_q: Query<(&Transform, &Projection), With<MainCamera>>,
     window_q: Query<&Window, With<PrimaryWindow>>,
-    visual_b_q: Query<(&PlayerRace, &BuildingType)>,
-    visual_u_q: Query<(&PlayerRace, &UnitType)>,
 ) {
     let Ok((camera_transform, projection)) = camera_q.single() else {
         return;
@@ -76,11 +72,10 @@ pub fn stream_chunks(
         &mut meshes,
         &mut rendered,
         missing_chunks,
-        world_params,
+        &world_params,
         &asset_server,
         &mut materials,
-        visual_b_q,
-        visual_u_q,
+        &memory,
     );
 }
 
@@ -151,6 +146,7 @@ fn unload_distant_chunks(
         if let Some(units_meshes) = rendered.units.remove(&coord) {
             despawn_units_meshes(commands, units_meshes);
         }
+        rendered.snapshots.remove(&coord);
     }
 }
 
@@ -188,11 +184,10 @@ fn load_missing_chunks(
     meshes: &mut ResMut<Assets<Mesh>>,
     rendered: &mut Rendered,
     missing_chunks: Vec<IVec2>,
-    world_params: WorldMaps,
+    world_params: &WorldMaps,
     asset_server: &AssetServer,
     materials: &mut Assets<StandardMaterial>,
-    visual_b_q: Query<(&PlayerRace, &BuildingType)>,
-    visual_u_q: Query<(&PlayerRace, &UnitType)>,
+    memory: &FogMemory,
 ) {
     let start_time = Instant::now();
 
@@ -205,14 +200,11 @@ fn load_missing_chunks(
             continue;
         }
 
-        let terrain_meshes =
-            spawn_terrain_meshes(commands, config, meshes, coord, &world_params.terrain);
+        let terrain_meshes = spawn_terrain_meshes(commands, config, meshes, coord, memory);
 
-        let resource_meshes =
-            spawn_resource_meshes(commands, config, meshes, coord, &world_params.resources);
+        let resource_meshes = spawn_resource_meshes(commands, config, meshes, coord, memory);
 
-        let building_meshes =
-            spawn_buildings_meshes(commands, config, coord, &world_params.buildings, visual_b_q);
+        let building_meshes = spawn_buildings_meshes(commands, config, coord, memory);
 
         let fog_meshes = spawn_fog_meshes(
             commands,
@@ -224,13 +216,17 @@ fn load_missing_chunks(
             &world_params.fog,
         );
 
-        let units_meshes =
-            spawn_units_meshes(commands, config, coord, &world_params.units, visual_u_q);
+        // Unit visuals are owned by `sync_unit_visuals`; the chunk only keeps
+        // the registry entry so unloading can despawn whatever lives there.
+        let units_meshes = SpawnedUnitsMeshes::default();
+
+        let snapshot = ChunkSnapshot::capture(config, memory, &world_params.fog, coord);
 
         rendered.terrain.insert(coord, terrain_meshes);
         rendered.resources.insert(coord, resource_meshes);
         rendered.buildings.insert(coord, building_meshes);
         rendered.fog.insert(coord, fog_meshes);
         rendered.units.insert(coord, units_meshes);
+        rendered.snapshots.insert(coord, snapshot);
     }
 }

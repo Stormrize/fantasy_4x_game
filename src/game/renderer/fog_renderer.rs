@@ -35,9 +35,7 @@ pub fn spawn_fog_meshes(
 
     for row in min_x..max_x {
         for col in min_y..max_y {
-            let visible = fog_map.is_visible_player(row as usize, col as usize);
-
-            if visible {
+            if fog_map.is_general_visible_player(row as usize, col as usize) {
                 continue;
             }
 
@@ -47,15 +45,12 @@ pub fn spawn_fog_meshes(
 
             let entity = commands
                 .spawn((
-                    // 1. Создаем плоский квадрат (размером 1.0 на 1.0 метр или под ваш tile_size)
                     Mesh3d(mesh_handle.clone()),
-                    // 2. Делаем материал с вашей текстурой тумана и поддержкой прозрачности
                     MeshMaterial3d(materials.add(StandardMaterial {
                         base_color_texture: Some(handle.clone()),
-                        unlit: true, // Туман будет светиться сам, игнорируя 3D-источники света
+                        unlit: true,
                         ..default()
                     })),
-                    // 3. Теперь 3D координаты (X, Y, Z) отработают идеально
                     Transform::from_xyz(
                         (row + 1) as f32 * tile_size,
                         1.0,

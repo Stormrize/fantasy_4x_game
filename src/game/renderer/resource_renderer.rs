@@ -2,20 +2,22 @@ use bevy::prelude::{
     Assets, Commands, Cuboid, Entity, Handle, IVec2, Mesh, Mesh3d, MeshMaterial3d, Transform,
 };
 
+use crate::game::renderer::fog_memory::FogMemory;
 use crate::world::game_configs::RenderConfig;
-use crate::world::game_resources::resource_map::ResourceMap;
 
 pub struct SpawnedResourceMeshes {
     pub entities: Vec<Entity>,
     pub mesh_handles: Vec<Handle<Mesh>>,
 }
 
+/// Spawns resources for every explored tile of a chunk, using remembered data
+/// for explored-only tiles.
 pub fn spawn_resource_meshes(
     commands: &mut Commands,
     config: &RenderConfig,
     meshes: &mut Assets<Mesh>,
     coord: IVec2,
-    resources: &ResourceMap,
+    memory: &FogMemory,
 ) -> SpawnedResourceMeshes {
     let chunk_size = config.chunk_size;
     let tile_size = config.tile_size;
@@ -32,17 +34,18 @@ pub fn spawn_resource_meshes(
 
     for row in min_x..max_x {
         for col in min_y..max_y {
-            let Some(resource) = resources.get(row as usize, col as usize) else {
+            let Some(tile) = memory.get(row as usize, col as usize) else {
+                continue;
+            };
+            let Some(resource) = &tile.resource else {
                 continue;
             };
 
-            let player_race = resource.owner_race();
-
-            let Some(race_assets) = config.assets_registry.get(player_race) else {
+            let Some(race_assets) = config.assets_registry.get(&resource.race) else {
                 continue;
             };
 
-            let handle = race_assets.get_resource(resource.index());
+            let handle = race_assets.get_resource(resource.index);
 
             let mesh_handle = meshes.add(Cuboid::new(0.3, 0.3, 0.3));
 

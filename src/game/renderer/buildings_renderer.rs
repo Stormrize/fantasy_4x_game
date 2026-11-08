@@ -1,23 +1,21 @@
-use crate::world::components::PlayerRace;
-use crate::world::game_configs::RenderConfig;
-use crate::world::game_resources::building_map::BuildingMap;
-use crate::world::game_resources::data::building::BuildingType;
 use bevy::math::Vec3;
-use bevy::prelude::{
-    Commands, Entity, Handle, IVec2, Query, Transform, WorldAsset, WorldAssetRoot,
-};
+use bevy::prelude::{Commands, Entity, Handle, IVec2, Transform, WorldAsset, WorldAssetRoot};
+
+use crate::game::renderer::fog_memory::FogMemory;
+use crate::world::game_configs::RenderConfig;
 
 pub struct SpawnedBuildingsMeshes {
     pub entities: Vec<Entity>,
     pub mesh_handles: Vec<Handle<WorldAsset>>,
 }
 
+/// Spawns buildings for every explored tile of a chunk, using remembered data
+/// for explored-only tiles.
 pub fn spawn_buildings_meshes(
     commands: &mut Commands,
     config: &RenderConfig,
     coord: IVec2,
-    buildings: &BuildingMap,
-    visual_q: Query<(&PlayerRace, &BuildingType)>,
+    memory: &FogMemory,
 ) -> SpawnedBuildingsMeshes {
     let chunk_size = config.chunk_size;
     let tile_size = config.tile_size;
@@ -33,18 +31,18 @@ pub fn spawn_buildings_meshes(
 
     for row in min_x..max_x {
         for col in min_y..max_y {
-            let building = buildings.get(row as usize, col as usize);
-            let Some(building) = building else {
+            let Some(tile) = memory.get(row as usize, col as usize) else {
+                continue;
+            };
+            let Some(building) = &tile.building else {
                 continue;
             };
 
-            let (player_race, building_type) = visual_q.get(building).unwrap();
-
-            let Some(race_assets) = config.assets_registry.get(player_race) else {
+            let Some(race_assets) = config.assets_registry.get(&building.race) else {
                 continue;
             };
 
-            let handle = race_assets.get_building(building_type.index());
+            let handle = race_assets.get_building(building.index);
 
             let entity = commands
                 .spawn((
