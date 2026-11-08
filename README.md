@@ -2,6 +2,9 @@
 
 A large-scale turn-based fantasy 4X strategy game built with **Rust** and **Bevy Engine**, inspired by games like _The Battle of Polytopia_ and _Civilization V_.
 
+<img width="960" height="540" alt="screenshot" src="https://github.com/user-attachments/assets/55a9be95-a816-438e-9700-25575e82b843" />
+
+
 ## About
 
 The game combines classic 4X strategy mechanics with a separate, simultaneous-planning combat phase.
