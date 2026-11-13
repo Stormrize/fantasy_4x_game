@@ -1,9 +1,10 @@
 //! Всплывающее окно с информацией о расе + кнопки "Начать игру" / "Закрыть".
 
+use bevy::picking::events::{PointerClick, PointerOut, PointerOver};
 use bevy::prelude::{
-    AlignItems, Button, ChildOf, Click, Commands, Component, Entity, FontSize, FontSource,
-    GlobalZIndex, ImageNode, JustifyContent, NextState, Node, On, Out, Over, Pointer, PositionType,
-    Query, Res, ResMut, Text, TextColor, TextFont, UiRect, With,
+    AlignItems, ChildOf, Commands, Component, Entity, FontSize, FontSource, GlobalZIndex,
+    ImageNode, JustifyContent, NextState, Node, On, PositionType, Query, Res, ResMut, Text,
+    TextColor, TextFont, UiRect, With,
 };
 use bevy::ui::{BackgroundColor, BorderColor, FlexDirection, Val};
 use bevy::utils::default;
@@ -122,7 +123,6 @@ fn spawn_start_button(
 ) {
     let button = commands
         .spawn((
-            Button,
             Node {
                 width: Val::Percent(70.0),
                 height: Val::Px(40.0),
@@ -151,7 +151,7 @@ fn spawn_start_button(
     commands
         .entity(button)
         .observe(
-            move |_event: On<Pointer<Click>>,
+            move |_click: On<PointerClick>,
                   mut commands: Commands,
                   pending: Res<PendingGameSetup>,
                   popups: Query<Entity, With<RacePopupRoot>>,
@@ -170,14 +170,14 @@ fn spawn_start_button(
             },
         )
         .observe(
-            |trigger: On<Pointer<Over>>, mut colors: Query<&mut BackgroundColor>| {
+            |trigger: On<PointerOver>, mut colors: Query<&mut BackgroundColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     color.0 = COLOR_BUTTON_START_HOVER;
                 }
             },
         )
         .observe(
-            |trigger: On<Pointer<Out>>, mut colors: Query<&mut BackgroundColor>| {
+            |trigger: On<PointerOut>, mut colors: Query<&mut BackgroundColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     color.0 = COLOR_BUTTON_START_BG;
                 }
@@ -194,7 +194,6 @@ fn spawn_close_button(
 ) {
     let button = commands
         .spawn((
-            Button,
             Node {
                 width: Val::Percent(70.0),
                 height: Val::Px(32.0),
@@ -223,24 +222,24 @@ fn spawn_close_button(
     commands
         .entity(button)
         .observe(
-            |mut event: On<Pointer<Click>>,
+            |mut click: On<PointerClick>,
              mut commands: Commands,
              popups: Query<Entity, With<RacePopupRoot>>| {
-                event.propagate(false);
+                click.propagate(false);
                 for popup in &popups {
                     commands.entity(popup).despawn();
                 }
             },
         )
         .observe(
-            |trigger: On<Pointer<Over>>, mut colors: Query<&mut BackgroundColor>| {
+            |trigger: On<PointerOver>, mut colors: Query<&mut BackgroundColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     color.0 = COLOR_DROPDOWN_HOVER;
                 }
             },
         )
         .observe(
-            |trigger: On<Pointer<Out>>, mut colors: Query<&mut BackgroundColor>| {
+            |trigger: On<PointerOut>, mut colors: Query<&mut BackgroundColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     color.0 = COLOR_DROPDOWN_BG;
                 }

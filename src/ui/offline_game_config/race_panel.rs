@@ -1,11 +1,9 @@
 //! Левая панель: иконка на каждую расу. Клик по иконке открывает попап
 //! с описанием расы и кнопкой "Начать игру" (см. `popup.rs`).
 
+use bevy::picking::events::{PointerClick, PointerOut, PointerOver};
 use bevy::platform::collections::HashMap;
-use bevy::prelude::{
-    Button, ChildOf, Click, Commands, Entity, ImageNode, Node, On, Out, Over, Pointer, Query, Res,
-    UiRect, With,
-};
+use bevy::prelude::{ChildOf, Commands, Entity, ImageNode, Node, On, Query, Res, UiRect, With};
 use bevy::ui::{BorderColor, Val};
 use bevy::utils::default;
 use bevy_persistent::Persistent;
@@ -39,7 +37,6 @@ fn spawn_race_icon(
 ) {
     let icon = commands
         .spawn((
-            Button,
             Node {
                 width: Val::Percent(15.0),
                 height: Val::Percent(15.0),
@@ -61,7 +58,7 @@ fn spawn_race_icon(
     commands
         .entity(icon)
         .observe(
-            move |_trigger: On<Pointer<Click>>,
+            move |_trigger: On<PointerClick>,
                   mut commands: Commands,
                   localization: Res<Localization>,
                   fonts: Res<Fonts>,
@@ -84,14 +81,14 @@ fn spawn_race_icon(
             },
         )
         .observe(
-            |trigger: On<Pointer<Over>>, mut colors: Query<&mut BorderColor>| {
+            |trigger: On<PointerOver>, mut colors: Query<&mut BorderColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     *color = BorderColor::all(COLOR_ICON_BORDER_HOVER);
                 }
             },
         )
         .observe(
-            |trigger: On<Pointer<Out>>, mut colors: Query<&mut BorderColor>| {
+            |trigger: On<PointerOut>, mut colors: Query<&mut BorderColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     *color = BorderColor::all(COLOR_ACCENT_GOLD);
                 }
