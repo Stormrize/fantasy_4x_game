@@ -82,9 +82,9 @@ pub enum BuildingsDataLoadingState {
     Ready,
 }
 
-pub struct BuildingsDataLoadingPlugin;
+pub struct BuildingsDataLoader;
 
-impl Plugin for BuildingsDataLoadingPlugin {
+impl Plugin for BuildingsDataLoader {
     fn build(&self, app: &mut App) {
         app.init_state::<BuildingsDataLoadingState>()
             .init_resource::<RawRacesBuildingsData>()

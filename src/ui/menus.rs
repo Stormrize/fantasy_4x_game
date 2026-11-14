@@ -10,5 +10,5 @@ pub enum AppState {
     InGameAssetLoading,
     InGameRenderer,
     SettingsMenu,
-    AboutUsMenu,
+    AboutMe,
 }

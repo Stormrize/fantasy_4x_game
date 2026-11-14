@@ -270,9 +270,9 @@ pub enum MapGenerationLoadingState {
     Ready,
 }
 
-pub struct GameMapGenerationPlugin;
+pub struct GameMapGeneration;
 
-impl Plugin for GameMapGenerationPlugin {
+impl Plugin for GameMapGeneration {
     fn build(&self, app: &mut App) {
         app.init_state::<MapGenerationLoadingState>()
             .add_systems(

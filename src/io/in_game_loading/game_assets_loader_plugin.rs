@@ -265,9 +265,9 @@ pub enum GameAssetsLoadingState {
     Ready,
 }
 
-pub struct GameAssetsLoadingPlugin;
+pub struct GameAssetsLoader;
 
-impl Plugin for GameAssetsLoadingPlugin {
+impl Plugin for GameAssetsLoader {
     fn build(&self, app: &mut App) {
         app.init_state::<GameAssetsLoadingState>()
             .init_resource::<RawRacesAssetsData>()

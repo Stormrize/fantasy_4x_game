@@ -83,9 +83,9 @@ pub enum UnitsDataLoadingState {
     Ready,
 }
 
-pub struct UnitsDataLoadingPlugin;
+pub struct UnitsDataLoader;
 
-impl Plugin for UnitsDataLoadingPlugin {
+impl Plugin for UnitsDataLoader {
     fn build(&self, app: &mut App) {
         app.init_state::<UnitsDataLoadingState>()
             .init_resource::<RawRacesUnitsData>()

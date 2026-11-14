@@ -65,9 +65,9 @@ pub enum FontsLoadingState {
 }
 
 // plugin
-pub struct FontsLoaderPlugin;
+pub struct FontsLoader;
 
-impl Plugin for FontsLoaderPlugin {
+impl Plugin for FontsLoader {
     fn build(&self, app: &mut App) {
         app.init_state::<FontsLoadingState>()
             .add_systems(OnEnter(FontsLoadingState::Loading), start_loading_fonts)

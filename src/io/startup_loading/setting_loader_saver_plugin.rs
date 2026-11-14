@@ -128,9 +128,9 @@ impl Default for SettingsConfig {
 const CONFIG_FILE_NAME: &str = "settings_menu.ron";
 
 // plugin
-pub struct PlayerSettingsPlugin;
+pub struct PlayerSettings;
 
-impl Plugin for PlayerSettingsPlugin {
+impl Plugin for PlayerSettings {
     fn build(&self, app: &mut App) {
         let settings_config = Persistent::<SettingsConfig>::builder()
             .name("settings_menu")

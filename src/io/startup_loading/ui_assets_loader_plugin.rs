@@ -122,9 +122,9 @@ pub enum RaceLoadingState {
 }
 
 // plugin
-pub struct RaceLoadingPlugin;
+pub struct RaceManifestsLoader;
 
-impl Plugin for RaceLoadingPlugin {
+impl Plugin for RaceManifestsLoader {
     fn build(&self, app: &mut App) {
         app.init_state::<RaceLoadingState>()
             .init_resource::<RacesUiRegistry>()

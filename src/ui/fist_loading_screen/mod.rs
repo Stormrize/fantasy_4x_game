@@ -1,24 +1,24 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, State, in_state};
 
-use crate::io::startup_loading::fonts_loader_plugin::{FontsLoaderPlugin, FontsLoadingState};
+use crate::io::startup_loading::fonts_loader_plugin::{FontsLoader, FontsLoadingState};
 use crate::io::startup_loading::localization_loader_plugin::{
-    LocalizationPlugin, LocalizationState,
+    LocalizationLoader, LocalizationState,
 };
-use crate::io::startup_loading::setting_loader_saver_plugin::PlayerSettingsPlugin;
-use crate::io::startup_loading::ui_assets_loader_plugin::{RaceLoadingPlugin, RaceLoadingState};
+use crate::io::startup_loading::setting_loader_saver_plugin::PlayerSettings;
+use crate::io::startup_loading::ui_assets_loader_plugin::{RaceLoadingState, RaceManifestsLoader};
 use crate::ui::fist_loading_screen::spawn_loading_screen::spawn_loading_screen;
 use crate::ui::menus::AppState;
 
 mod spawn_loading_screen;
-pub(super) struct InitialLoadingPlugin;
+pub(super) struct InitialLoader;
 
-impl Plugin for InitialLoadingPlugin {
+impl Plugin for InitialLoader {
     fn build(&self, app: &mut App) {
-        app.add_plugins(PlayerSettingsPlugin)
-            .add_plugins(LocalizationPlugin)
-            .add_plugins(RaceLoadingPlugin)
-            .add_plugins(FontsLoaderPlugin)
+        app.add_plugins(PlayerSettings)
+            .add_plugins(LocalizationLoader)
+            .add_plugins(RaceManifestsLoader)
+            .add_plugins(FontsLoader)
             .add_systems(
                 OnEnter(AppState::InitialAssetLoading),
                 (spawn_loading_screen, start_loading),

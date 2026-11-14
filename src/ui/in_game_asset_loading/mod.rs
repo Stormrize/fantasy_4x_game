@@ -5,16 +5,16 @@ use bevy::prelude::{
 use bevy_persistent::Persistent;
 
 use crate::core_rust::generation::map_generation_plugin::{
-    GameMapGenerationPlugin, MapGenerationLoadingState,
+    GameMapGeneration, MapGenerationLoadingState,
 };
 use crate::io::in_game_loading::buildings_data_loader_plugin::{
-    BuildingsDataLoadingPlugin, BuildingsDataLoadingState, RacesBuildingsData,
+    BuildingsDataLoader, BuildingsDataLoadingState, RacesBuildingsData,
 };
 use crate::io::in_game_loading::game_assets_loader_plugin::{
-    GameAssetsLoadingPlugin, GameAssetsLoadingState, RacesAssetsRegistry,
+    GameAssetsLoader, GameAssetsLoadingState, RacesAssetsRegistry,
 };
 use crate::io::in_game_loading::units_data_loader_plugin::{
-    RacesUnitsData, UnitsDataLoadingPlugin, UnitsDataLoadingState,
+    RacesUnitsData, UnitsDataLoader, UnitsDataLoadingState,
 };
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::ui::menus::AppState;
@@ -23,17 +23,17 @@ use crate::world::game_configs::{
     RenderConfig,
 };
 
-pub(super) struct InGameAssetLoadingPlugin;
+pub(super) struct InGameAssetLoader;
 
 #[derive(Event)]
 pub struct BuildConfigs;
 
-impl Plugin for InGameAssetLoadingPlugin {
+impl Plugin for InGameAssetLoader {
     fn build(&self, app: &mut App) {
-        app.add_plugins(GameAssetsLoadingPlugin)
-            .add_plugins(UnitsDataLoadingPlugin)
-            .add_plugins(BuildingsDataLoadingPlugin)
-            .add_plugins(GameMapGenerationPlugin)
+        app.add_plugins(GameAssetsLoader)
+            .add_plugins(UnitsDataLoader)
+            .add_plugins(BuildingsDataLoader)
+            .add_plugins(GameMapGeneration)
             .add_systems(OnEnter(AppState::InGameAssetLoading), load_generate)
             .add_systems(
                 Update,

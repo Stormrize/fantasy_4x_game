@@ -5,9 +5,9 @@ use crate::ui::{main_menu::spawn_start_menu::spawn_main_menu, menus::AppState};
 
 mod spawn_start_menu;
 
-pub(super) struct MainMenuPlugin;
+pub(super) struct MainMenu;
 
-impl Plugin for MainMenuPlugin {
+impl Plugin for MainMenu {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::MainMenu), spawn_main_menu);
     }

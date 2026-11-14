@@ -7,9 +7,9 @@ use bevy::prelude::{IntoScheduleConfigs, OnEnter, in_state};
 use crate::ui::in_game_ui::spawn_in_game_ui::{spawn_in_game_ui, update_resources_ui};
 use crate::ui::menus::AppState;
 
-pub(super) struct InGameMenuPlugin;
+pub(super) struct InGameMenu;
 
-impl Plugin for InGameMenuPlugin {
+impl Plugin for InGameMenu {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGameRenderer), spawn_in_game_ui)
             .add_systems(
