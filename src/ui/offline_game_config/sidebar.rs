@@ -1,8 +1,5 @@
 //! Сайдбар справа: заголовок + три дропдауна с дефолтными значениями
 //! (размер карты, форма карты, сложность ИИ).
-
-use std::ops::Range;
-
 use bevy::prelude::{
     ChildOf, Commands, Entity, FontSize, FontSource, Node, Text, TextColor, TextFont, UiRect,
 };
@@ -16,6 +13,7 @@ use crate::io::startup_loading::localization_loader_plugin::{Language, Localizat
 use crate::ui::TranslationKey;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
 use crate::ui::offline_game_config::dropdown::spawn_dropdown;
+use crate::ui::offline_game_config::scrollable::spawn_number_picker;
 use crate::world::components::{AiDifficulty, MapShape, MapSize};
 const TITLE_KEY: &str = "setup_sidebar_title";
 
@@ -51,8 +49,8 @@ const AI_DIFFICULTY_DEFAULT_INDEX: usize = 1; // Normal
 
 const BOTS_AMOUNT_LABEL_KEY: &str = "Amount of bots";
 
-const BOTS_AMOUNT_RANGE: Range<i32> = 1..6;
-const BOTS_AMOUNT_DEFAULT_INDEX: usize = 1;
+const BOTS_AMOUNT_RANGE: (u8, u8) = (1, 8);
+const BOTS_AMOUNT_DEFAULT_INDEX: u8 = 2;
 
 pub fn spawn_sidebar(
     commands: &mut Commands,
@@ -122,6 +120,25 @@ pub fn spawn_sidebar(
         AI_DIFFICULTY_DEFAULT_INDEX,
         apply_ai_difficulty,
     );
+
+    spawn_label(
+        commands,
+        sidebar,
+        BOTS_AMOUNT_LABEL_KEY,
+        localization,
+        fonts,
+        language,
+    );
+
+    spawn_number_picker(
+        commands,
+        sidebar,
+        fonts,
+        language,
+        BOTS_AMOUNT_RANGE,
+        BOTS_AMOUNT_DEFAULT_INDEX,
+        apply_bot_size,
+    );
 }
 
 fn spawn_title(
@@ -134,7 +151,7 @@ fn spawn_title(
     commands.spawn((
         Text::new(localization.get(TITLE_KEY, language)),
         TextFont {
-            font_size: FontSize::Px(24.0),
+            font_size: FontSize::Px(32.0),
             font: FontSource::Handle(fonts.get(language).clone()),
             weight: FontWeight::SEMIBOLD,
             ..default()
@@ -161,7 +178,7 @@ fn spawn_label(
         Text::new(localization.get(label, language)),
         TextFont {
             font: FontSource::Handle(fonts.get(language).clone()),
-            font_size: FontSize::Px(18.0),
+            font_size: FontSize::Px(24.0),
             weight: FontWeight::MEDIUM,
             ..default()
         },
@@ -185,4 +202,8 @@ fn apply_map_shape(cfg: &mut PendingGameSetup, value: MapShape) {
 
 fn apply_ai_difficulty(cfg: &mut PendingGameSetup, value: AiDifficulty) {
     cfg.ai_difficulty = value;
+}
+
+fn apply_bot_size(cfg: &mut PendingGameSetup, value: usize) {
+    cfg.bots_amount = value
 }

@@ -58,7 +58,7 @@ pub fn spawn_dropdown<T>(
             DropdownState { is_open: false },
             Node {
                 width: Val::Percent(100.0),
-                height: Val::Px(36.0),
+                height: Val::Px(40.0),
                 padding: UiRect::horizontal(Val::Px(10.0)),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::FlexStart,
@@ -76,7 +76,7 @@ pub fn spawn_dropdown<T>(
         .spawn((
             Text::new(localization.get(selected_key, language)),
             TextFont {
-                font_size: FontSize::Px(14.0),
+                font_size: FontSize::Px(18.0),
                 font: FontSource::Handle(fonts.get(language).clone()),
                 ..default()
             },
@@ -192,7 +192,7 @@ fn spawn_option<T>(
     commands.spawn((
         Text::new(localization.get(key, language)),
         TextFont {
-            font_size: FontSize::Px(13.0),
+            font_size: FontSize::Px(16.0),
             font: FontSource::Handle(fonts.get(language).clone()),
             ..default()
         },
