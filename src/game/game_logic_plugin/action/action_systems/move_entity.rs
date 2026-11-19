@@ -3,10 +3,10 @@ use crate::game::game_logic_plugin::action::action_systems::{ActionCtx, tile};
 use crate::game::game_logic_plugin::action::rules::move_rules::{
     check_move_validity, is_players_turn, is_players_unit,
 };
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
+use crate::game::events::action_messages::{
     Clear, RevealSource,
 };
-use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::RenderMoveEntity;
+use crate::game::events::render_action_messages::RenderMoveEntity;
 use crate::world::components::GameMode;
 use bevy::math::IVec2;
 

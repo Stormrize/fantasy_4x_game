@@ -1,7 +1,7 @@
 use bevy::math::IVec2;
 
 use crate::game::game_logic_plugin::action::action_systems::{ActionCtx, tile};
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::RevealSource;
+use crate::game::events::action_messages::RevealSource;
 use crate::world::components::BUILDING_SEE_RADIUS;
 use crate::world::game_resources::data::resource::RareKind;
 

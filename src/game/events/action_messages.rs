@@ -1,6 +1,7 @@
-use crate::game::game_logic_plugin::events_resources_structs::components::{
+use crate::game::game_logic_plugin::components::{
     JustSelectedTile, TileLayer,
 };
+use crate::world::game_configs::Player;
 use crate::world::game_resources::data::building::BuildingType;
 use crate::world::game_resources::data::unit::UnitType;
 use bevy::prelude::{IVec2, Message};
@@ -23,7 +24,7 @@ pub struct Clear;
 
 // general
 #[derive(Message)]
-pub struct EndTurn;
+pub struct EndTurn(pub Player);
 
 #[derive(Message)]
 pub struct WorldView;

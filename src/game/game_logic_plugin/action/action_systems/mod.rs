@@ -18,8 +18,8 @@ use crate::game::game_logic_plugin::action::action_systems::move_entity::move_en
 use crate::game::game_logic_plugin::action::action_systems::spawn_unit::spawn_unit;
 use crate::game::game_logic_plugin::action::action_systems::upgrade_entity::upgrade_entity;
 use crate::game::game_logic_plugin::action::rules::move_rules::MovementCostGrid;
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{Action, Clear};
-use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::{
+use crate::game::events::action_messages::{Action, Clear};
+use crate::game::events::render_action_messages::{
     RenderBuildEntity, RenderGatherEntity, RenderMoveEntity,
 };
 use crate::world::components::{Id, PlayerRace};

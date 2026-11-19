@@ -6,10 +6,10 @@ use crate::game::game_logic_plugin::ai::perception::{
     OwnBuilding, OwnCombatUnit, OwnHelper, WorldSnapshot,
 };
 use crate::game::game_logic_plugin::ai::profile::AiProfile;
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
+use crate::game::events::action_messages::{
     Action, RevealSource,
 };
-use crate::game::game_logic_plugin::events_resources_structs::components::TileLayer;
+use crate::game::game_logic_plugin::components::TileLayer;
 use crate::world::components::Gold;
 use crate::world::game_resources::data::biome::BiomeType;
 use crate::world::game_resources::data::building::{BuildingData, BuildingLevel, BuildingType};

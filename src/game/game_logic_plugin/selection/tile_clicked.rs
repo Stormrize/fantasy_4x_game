@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::prelude::{MouseButton, Res};
 
 use crate::game::camera_plugin::camera::MainCamera;
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::TileClickedEvent;
+use crate::game::events::action_messages::TileClickedEvent;
 
 pub fn click_to_world(
     mouse_input: Res<ButtonInput<MouseButton>>,

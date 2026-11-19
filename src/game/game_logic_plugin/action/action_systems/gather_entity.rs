@@ -2,8 +2,8 @@ use bevy::math::IVec2;
 
 use crate::game::game_logic_plugin::action::action_systems::{ActionCtx, tile};
 use crate::game::game_logic_plugin::ai::profile::AiProfile;
-use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::RenderGatherEntity;
-use crate::world::components::{Food, Gold, Science};
+use crate::game::events::render_action_messages::RenderGatherEntity;
+use crate::world::components::{Food, GameMode, Gold, Science};
 use crate::world::game_resources::data::resource::{CommonKind, ResourceType};
 
 /// A helper standing on a resource tile picks it up.
@@ -38,14 +38,36 @@ pub fn gather_entity(ctx: &mut ActionCtx, pos: IVec2) {
             }
             let amount = ((common.amount as f32) * multiplier).round() as u32;
             match common.kind {
-                CommonKind::Gold => player.gold = player.gold.saturating_add(amount as Gold),
-                CommonKind::Food => player.food = player.food.saturating_add(amount as Food),
+                CommonKind::Gold => {
+                    if matches!(ctx.turn_manager.game_mode, GameMode::Online) {
+                        // TODO: send http request
+                    }
+
+                    player.gold = player.gold.saturating_add(amount as Gold)
+                }
+                CommonKind::Food => {
+                    if matches!(ctx.turn_manager.game_mode, GameMode::Online) {
+                        // TODO: send http request
+                    }
+
+                    player.food = player.food.saturating_add(amount as Food)
+                }
                 CommonKind::Science => {
+                    if matches!(ctx.turn_manager.game_mode, GameMode::Online) {
+                        // TODO: send http request
+                    }
+
                     player.science = player.science.saturating_add(amount as Science)
                 }
             }
         }
-        ResourceType::Rare(rare) => player.inventory.push(rare.clone()),
+        ResourceType::Rare(rare) => {
+            if matches!(ctx.turn_manager.game_mode, GameMode::Online) {
+                // TODO: send http request
+            }
+
+            player.inventory.push(rare.clone())
+        }
     }
 
     ctx.resource_map.set(x, y, None);

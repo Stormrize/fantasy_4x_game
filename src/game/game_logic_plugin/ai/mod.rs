@@ -9,7 +9,7 @@ use crate::game::game_logic_plugin::ai::memory::{BotMemories, BotMemory};
 use crate::game::game_logic_plugin::ai::perception::build_snapshot;
 use crate::game::game_logic_plugin::ai::planning::plan_bot_turn;
 use crate::game::game_logic_plugin::ai::profile::AiProfile;
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{Action, EndTurn};
+use crate::game::events::action_messages::{Action, EndTurn};
 use crate::ui::menus::AppState;
 use crate::world::components::{AiDifficulty, Id};
 use crate::world::game_configs::{GameLogicConfig, Player, Players};
@@ -192,6 +192,6 @@ fn execute_bot_turn(
         }
     }
 
-    end_turn.write(EndTurn);
+    end_turn.write(EndTurn(state.player));
     active_bot_turn.0 = None;
 }

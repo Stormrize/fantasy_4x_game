@@ -1,5 +1,5 @@
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::Cycle;
-use crate::game::game_logic_plugin::events_resources_structs::components::{
+use crate::game::events::action_messages::Cycle;
+use crate::game::game_logic_plugin::components::{
     AlreadySelectedTile, TileLayer,
 };
 use bevy::prelude::{MessageReader, ResMut};

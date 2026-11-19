@@ -1,6 +1,7 @@
+use crate::game::game_logic_plugin::action::rules::move_rules::is_players_turn;
 use crate::game::game_logic_plugin::ai::{ActiveBotTurn, ActiveBotTurnState, AiPhase};
 use crate::game::game_logic_plugin::combat::integration::{CombatCycle, CombatPhase};
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::EndTurn;
+use crate::game::events::action_messages::EndTurn;
 use crate::world::game_configs::GameLogicConfig;
 use crate::world::turn_manager::{TurnManager, TurnTransition};
 use bevy::prelude::{Commands, MessageReader, Res, ResMut};
@@ -13,7 +14,10 @@ pub fn end_turn(
     mut active_bot_turn: ResMut<ActiveBotTurnState>,
     mut commands: Commands,
 ) {
-    for _ in turn_ended.read() {
+    for action in turn_ended.read() {
+        if !is_players_turn(action.0, turn_manager.current_player) {
+            return;
+        }
         let transition = turn_manager.next_turn(&game_logic_config);
 
         match transition {

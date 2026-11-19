@@ -1,4 +1,4 @@
-use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::RenderMoveEntity;
+use crate::game::events::render_action_messages::RenderMoveEntity;
 use crate::game::renderer::units_renderer::UnitVisual;
 use bevy::ecs::component::Component;
 use bevy::ecs::entity::Entity;

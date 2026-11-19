@@ -1,12 +1,10 @@
 use bevy::prelude::Res;
 
-use crate::game::game_logic_plugin::events_resources_structs::render_selection_messages::RenderMessages;
-use crate::game::game_logic_plugin::events_resources_structs::{
-    components::{AlreadySelectedTile, TileLayer},
-    render_selection_messages::{
-        RenderBuilding, RenderFog, RenderResource, RenderTerrain, RenderUnit,
-    },
+use crate::game::events::render_selection_messages::RenderMessages;
+use crate::game::events::render_selection_messages::{
+    RenderBuilding, RenderFog, RenderResource, RenderTerrain, RenderUnit,
 };
+use crate::game::game_logic_plugin::components::{AlreadySelectedTile, TileLayer};
 
 pub fn manage_selected_entity(
     selected_entity: Res<AlreadySelectedTile>,

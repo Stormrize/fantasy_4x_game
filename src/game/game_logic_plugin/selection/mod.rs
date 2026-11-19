@@ -1,4 +1,4 @@
-use crate::game::game_logic_plugin::events_resources_structs::components::AlreadySelectedTile;
+use crate::game::game_logic_plugin::components::AlreadySelectedTile;
 use crate::game::game_logic_plugin::selection::manage_selected_entity::manage_selected_entity;
 use crate::game::game_logic_plugin::selection::{
     click_router::route_selection, tile_clicked::click_to_world,

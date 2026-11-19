@@ -1,16 +1,15 @@
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
+use crate::game::events::action_messages::{
     Action, Clear, Cycle, EndTurn, NewTile, TileClickedEvent, WorldView,
 };
-use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::{
+use crate::game::events::render_action_messages::{
     RenderAttackEntity, RenderBuildEntity, RenderGatherEntity, RenderMoveEntity,
 };
-use crate::game::game_logic_plugin::events_resources_structs::render_selection_messages::{
+use crate::game::events::render_selection_messages::{
     RenderBuilding, RenderFog, RenderResource, RenderTerrain, RenderUnit,
 };
 use bevy::app::App;
 
 pub mod action_messages;
-pub mod components;
 pub mod render_action_messages;
 pub mod render_selection_messages;
 

@@ -1,6 +1,6 @@
 use crate::game::game_logic_plugin::ai::profile::AiProfile;
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::EndTurn;
-use crate::world::components::{Food, Gold, Id, Science};
+use crate::game::events::action_messages::EndTurn;
+use crate::world::components::{Food, GameMode, Gold, Id, Science};
 use crate::world::game_configs::{GameLogicConfig, Players};
 use crate::world::game_resources::building_map::BuildingMap;
 use crate::world::game_resources::data::building::{BuildingLevel, Levels};
@@ -50,15 +50,21 @@ pub fn collect_income(
     food = ((food as f32) * multiplier).round() as u32;
     science = ((science as f32) * multiplier).round() as u32;
 
-    if let Some(player) = players.0.iter_mut().find(|p| p.id == player.id) {
-        player.gold = player
-            .gold
-            .saturating_add(gold.saturating_sub(maintenance) as Gold);
-        player.food = player.food.saturating_add(food as Food);
-        player.science = player.science.saturating_add(science as Science);
-        player.current_mana = player
-            .current_mana
-            .saturating_add(MANA_REGENERATION)
-            .min(player.maximum_mana);
+    let Some(player) = players.0.iter_mut().find(|p| p.id == player.id) else {
+        return;
+    };
+
+    if matches!(turn_manager.game_mode, GameMode::Online) {
+        // TODO: send http request
     }
+
+    player.gold = player
+        .gold
+        .saturating_add(gold.saturating_sub(maintenance) as Gold);
+    player.food = player.food.saturating_add(food as Food);
+    player.science = player.science.saturating_add(science as Science);
+    player.current_mana = player
+        .current_mana
+        .saturating_add(MANA_REGENERATION)
+        .min(player.maximum_mana);
 }

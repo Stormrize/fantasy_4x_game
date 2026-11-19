@@ -1,11 +1,8 @@
 use bevy::prelude::{MessageReader, MessageWriter, Res};
 
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
-    Action, Clear, Cycle, NewTile,
-};
-use crate::game::game_logic_plugin::events_resources_structs::{
-    action_messages::TileClickedEvent, components::*,
-};
+use crate::game::events::action_messages::TileClickedEvent;
+use crate::game::events::action_messages::{Action, Clear, Cycle, NewTile};
+use crate::game::game_logic_plugin::components::*;
 use crate::world::game_configs::GameLogicConfig;
 use crate::world::game_resources::WorldMaps;
 

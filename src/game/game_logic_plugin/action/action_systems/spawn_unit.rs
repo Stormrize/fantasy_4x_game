@@ -2,7 +2,8 @@ use bevy::math::IVec2;
 
 use crate::game::game_logic_plugin::action::action_systems::fog_update::fog_update;
 use crate::game::game_logic_plugin::action::action_systems::{ActionCtx, tile};
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::RevealSource;
+use crate::game::events::action_messages::RevealSource;
+use crate::world::components::GameMode;
 use crate::world::game_resources::building_map::BuildingMap;
 use crate::world::game_resources::data::biome::BiomeType;
 use crate::world::game_resources::data::buffs_and_debuffs::{Buffs, Debuffs};
@@ -48,6 +49,11 @@ pub fn spawn_unit(ctx: &mut ActionCtx, pos: IVec2, unit_type: UnitType) {
             if player.gold < HELPER.unit_cost.0 {
                 return;
             }
+
+            if matches!(ctx.turn_manager.game_mode, GameMode::Online) {
+                // TODO: send http request
+            }
+
             player.gold -= HELPER.unit_cost.0;
 
             let entity = ctx
@@ -93,6 +99,11 @@ pub fn spawn_unit(ctx: &mut ActionCtx, pos: IVec2, unit_type: UnitType) {
             if player.gold < cost {
                 return;
             }
+
+            if matches!(ctx.turn_manager.game_mode, GameMode::Online) {
+                // TODO: send http request
+            }
+
             player.gold -= cost;
 
             let entity = ctx

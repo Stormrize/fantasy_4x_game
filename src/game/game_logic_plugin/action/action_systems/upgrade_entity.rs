@@ -1,8 +1,9 @@
 use bevy::math::IVec2;
 
 use crate::game::game_logic_plugin::action::action_systems::{ActionCtx, tile};
-use crate::game::game_logic_plugin::events_resources_structs::components::TileLayer;
-use crate::game::game_logic_plugin::events_resources_structs::render_action_messages::RenderBuildEntity;
+use crate::game::game_logic_plugin::components::TileLayer;
+use crate::game::events::render_action_messages::RenderBuildEntity;
+use crate::world::components::GameMode;
 
 /// Upgrades a building or a unit of the current player, paying gold.
 pub fn upgrade_entity(ctx: &mut ActionCtx, pos: IVec2, layer: TileLayer) {
@@ -37,6 +38,11 @@ fn upgrade_building(ctx: &mut ActionCtx, x: usize, y: usize) {
     if player.gold < cost {
         return;
     }
+
+    if matches!(ctx.turn_manager.game_mode, GameMode::Online) {
+        // TODO: send http request
+    }
+
     player.gold -= cost;
 
     *level = next;
@@ -58,7 +64,6 @@ fn upgrade_unit(ctx: &mut ActionCtx, x: usize, y: usize) {
         return;
     };
 
-    // Number of levels is defined by the length of `LevelCost`.
     let Some(level_cost) = level_cost.level_cost(*level) else {
         return;
     };
@@ -71,6 +76,11 @@ fn upgrade_unit(ctx: &mut ActionCtx, x: usize, y: usize) {
     if player.gold < cost {
         return;
     }
+
+    if matches!(ctx.turn_manager.game_mode, GameMode::Online) {
+        // TODO: send http request
+    }
+
     player.gold -= cost;
 
     *level = next;

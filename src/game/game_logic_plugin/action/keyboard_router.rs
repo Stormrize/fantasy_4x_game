@@ -1,12 +1,6 @@
-use crate::game::game_logic_plugin::action::rules::move_rules::is_players_turn;
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
-    Action, EndTurn, WorldView,
-};
-use crate::game::game_logic_plugin::events_resources_structs::components::{
-    AlreadySelectedTile, TileLayer,
-};
+use crate::game::events::action_messages::{Action, EndTurn, WorldView};
+use crate::game::game_logic_plugin::components::{AlreadySelectedTile, TileLayer};
 use crate::world::game_configs::GameLogicConfig;
-use crate::world::turn_manager::TurnManager;
 use bevy::ecs::message::MessageWriter;
 use bevy::prelude::KeyCode::{AltLeft, Digit1, Digit2, KeyB, KeyP, KeyQ, KeyR, KeyU, KeyX, Space};
 use bevy::prelude::{ButtonInput, KeyCode, Res};
@@ -14,7 +8,6 @@ use bevy::prelude::{ButtonInput, KeyCode, Res};
 pub fn route_keyboard_actions(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     already_selected_tile: Res<AlreadySelectedTile>,
-    turn_manager: Res<TurnManager>,
     game_logic_config: Res<GameLogicConfig>,
     mut actions: MessageWriter<Action>,
     mut end_turn: MessageWriter<EndTurn>,
@@ -40,12 +33,8 @@ pub fn route_keyboard_actions(
     let tab_pressed = keyboard_input.just_pressed(KeyCode::Tab);
 
     if space_pressed {
-        // Завершать ход можно только в свой ход, иначе человек прервал бы ход бота.
-        if is_players_turn(game_logic_config.player, turn_manager.current_player) {
-            end_turn.write(EndTurn);
-            println!("send end turn");
-        }
-        return;
+        end_turn.write(EndTurn(game_logic_config.player));
+        println!("send end turn");
     } else if tab_pressed {
         world_view.write(WorldView);
     }

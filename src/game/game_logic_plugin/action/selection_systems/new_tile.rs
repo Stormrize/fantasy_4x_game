@@ -1,5 +1,5 @@
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::NewTile;
-use crate::game::game_logic_plugin::events_resources_structs::components::AlreadySelectedTile;
+use crate::game::events::action_messages::NewTile;
+use crate::game::game_logic_plugin::components::AlreadySelectedTile;
 use bevy::prelude::{MessageReader, ResMut};
 
 pub fn new_tile_selection_system(
