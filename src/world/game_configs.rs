@@ -21,6 +21,8 @@ impl Player {
     }
 }
 
+use crate::world::game_resources::data::resource::RareResource;
+
 #[derive(Debug, Clone)]
 pub struct PlayerData {
     pub id: Id,
@@ -30,6 +32,8 @@ pub struct PlayerData {
     pub current_mana: Mana,
     pub maximum_mana: Mana,
     pub player_race: PlayerRace,
+    /// Редкие ресурсы (свитки), собранные на карте.
+    pub inventory: Vec<RareResource>,
 }
 
 impl PlayerData {
@@ -42,6 +46,7 @@ impl PlayerData {
             current_mana: 20,
             maximum_mana: 40,
             player_race,
+            inventory: Vec::new(),
         }
     }
 }
@@ -170,6 +175,8 @@ pub struct GameLogicConfig {
     pub terrain_size: usize,
     pub ai_difficulty: Option<AiDifficulty>,
     pub map_shape: MapShape,
+    /// Локальный игрок. В локальной игре — это `races[0]`, в онлайн
+    /// приходит от сервера и может быть любым id (не всегда `Id(0)`).
     pub player: Player,
 }
 
@@ -182,14 +189,19 @@ impl GameLogicConfig {
     ) -> Self {
         let ai_difficulty = Some(local_config.ai_difficulty);
 
+        // Первый игрок в списке рас — локальный человек, остальные — боты.
+        let human_id = local_config
+            .races
+            .first()
+            .map(|(id, _)| *id)
+            .unwrap_or(Id(0));
+
         let players: Vec<Player> = local_config
             .races
             .iter()
             .skip(1)
             .map(|(id, _)| Player::new(*id, PlayerType::Bot))
             .collect();
-
-        let id = players[0].id;
 
         Self {
             units_data,
@@ -198,7 +210,7 @@ impl GameLogicConfig {
             terrain_size: config.map_size as usize,
             ai_difficulty,
             map_shape: config.map_shape,
-            player: Player::new(id, PlayerType::Human),
+            player: Player::new(human_id, PlayerType::Human),
         }
     }
 }

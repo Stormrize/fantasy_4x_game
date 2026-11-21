@@ -20,4 +20,10 @@ impl ResourceMap {
     pub fn is_some(&self, row: usize, col: usize) -> bool {
         self.map[row * self.size + col].is_some()
     }
+
+    pub fn set(&mut self, row: usize, col: usize, resource: Option<ResourceType>) {
+        debug_assert!(row < self.size);
+        debug_assert!(col < self.size);
+        self.map[row * self.size + col] = resource;
+    }
 }

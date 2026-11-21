@@ -97,9 +97,9 @@ pub enum LocalizationState {
 }
 
 // plugin
-pub struct LocalizationPlugin;
+pub struct LocalizationLoader;
 
-impl Plugin for LocalizationPlugin {
+impl Plugin for LocalizationLoader {
     fn build(&self, app: &mut App) {
         app.add_plugins(RonAssetPlugin::<RawLocalization>::new(&["ron"]))
             .init_state::<LocalizationState>()

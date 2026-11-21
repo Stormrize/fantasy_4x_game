@@ -15,9 +15,9 @@ pub use change_tracking::PendingSettingsChanges;
 
 use crate::ui::menus::AppState;
 
-pub(super) struct SettingsMenuPlugin;
+pub(super) struct Settings;
 
-impl Plugin for SettingsMenuPlugin {
+impl Plugin for Settings {
     fn build(&self, app: &mut App) {
         app.init_resource::<PendingSettingsChanges>();
         app.add_observer(change_tracking::on_settings_applied);

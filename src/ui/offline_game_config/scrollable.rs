@@ -1,100 +1,233 @@
-// use std::ops::Range;
-// use crate::ui::initial_loading::fonts_loader_plugin::fonts::Fonts;
-// use crate::ui::initial_loading::localization_loader_plugin::public_api::{Language, Localization};
-// use bevy::prelude::{default, AlignItems, BackgroundColor, BorderColor, BorderRadius, ChildOf, Color, Commands, Entity, FlexDirection, FontSize, FontSource, Node, PositionType, Text, TextColor, TextFont, UiRect, Val};
-// use bevy::ui_widgets::{Slider, SliderOrientation, SliderRange, SliderStep, SliderThumb, TrackClick};
-// use crate::ui::colors::{COLOR_ACCENT_CRIMSON, COLOR_ACCENT_GOLD, COLOR_TEXT_MUTED};
-// use crate::ui::offline_game_config::colors::COLOR_TRACK_BG;
-//
-// fn percent_of(value: f32, min: f32, max: f32) -> f32 {
-//     if max > min {
-//         ((value - min) / (max - min) * 100.0).clamp(0.0, 100.0)
-//     } else {
-//         0.0
-//     }
-// }
-//
-// pub fn spawn_slider(
-//     commands: &mut Commands,
-//     parent: Entity,
-//     localization: &Localization,
-//     fonts: &Fonts,
-//     language: Language,
-//     bots_amount_range: (u8, u8),
-//     bots_default_index: usize,
-// ) {
-//     let track = commands
-//         .spawn((
-//             Node {
-//                 width: Val::Percent(60.0),
-//                 align_items: AlignItems::Center,
-//                 margin: UiRect::all(Val::Px(16.0)),
-//                 border_radius: BorderRadius::all(Val::Px(7.0)),
-//                 ..default()
-//             },
-//             Slider {
-//                 track_click: TrackClick::Snap,
-//                 orientation: SliderOrientation::Horizontal,
-//             },
-//             SliderRange::new(bots_amount_range.0 as f32, bots_amount_range.1 as f32),
-//             SliderStep(1.0),
-//             BackgroundColor(COLOR_TRACK_BG),
-//             BorderColor::all(COLOR_ACCENT_GOLD),
-//             ChildOf(parent),
-//         ))
-//         .id();
-//
-//     let percent0 = percent_of(bots_default_index as f32, bots_amount_range.0 as f32 , bots_amount_range.1 as f32);
-//
-//     let fill = commands
-//         .spawn((
-//             Node {
-//                 position_type: PositionType::Absolute,
-//                 left: Val::Percent(0.0),
-//                 top: Val::Px(0.0),
-//                 bottom: Val::Px(0.0),
-//                 width: Val::Percent(percent0),
-//                 border_radius: BorderRadius::all(Val::Px(7.0)),
-//                 ..default()
-//             },
-//             BackgroundColor(COLOR_ACCENT_CRIMSON),
-//             ChildOf(track),
-//         ))
-//         .id();
-//
-//     let thumb = commands
-//         .spawn((
-//             SliderThumb,
-//             Node {
-//                 position_type: PositionType::Absolute,
-//                 left: Val::Percent(percent0),
-//                 top: Val::Px(-3.0),
-//                 width: Val::Auto,
-//                 height: Val::Percent(100.0),
-//                 aspect_ratio: Some(1.0),
-//                 border_radius: BorderRadius::MAX,
-//                 ..default()
-//             },
-//             BackgroundColor(COLOR_ACCENT_GOLD),
-//             ChildOf(track),
-//         ))
-//         .id();
-//
-//
-//     let value_text = commands
-//         .spawn((
-//             Text::new(format_value(initial, decimals, suffix)),
-//             TextFont {
-//                 font: FontSource::Handle(fonts.get(language).clone()),
-//                 font_size: FontSize::Px(14.0),
-//                 ..default()
-//             },
-//             TextColor(COLOR_TEXT_MUTED),
-//             Node {
-//                 width: Val::Px(56.0),
-//                 ..default()
-//             },
-//             ChildOf(control),
-//         ))
-//         .id();
-// }
+use bevy::input::mouse::MouseScrollUnit;
+use bevy::prelude::*;
+use bevy::ui_widgets::ScrollArea;
+
+use crate::io::startup_loading::fonts_loader_plugin::Fonts;
+use crate::io::startup_loading::localization_loader_plugin::Language;
+use crate::ui::colors::COLOR_ACCENT_GOLD;
+use crate::ui::offline_game_config::PendingGameSetup;
+use crate::ui::offline_game_config::colors::COLOR_TRACK_BG;
+
+const COLS: usize = 5;
+const CENTER: i32 = (COLS / 2) as i32;
+const STEP: f32 = 100.0 / COLS as f32;
+
+#[derive(Component)]
+pub struct NumberPicker {
+    min: u8,
+    max: u8,
+    value: u8,
+    accum: f32,
+    apply: fn(&mut PendingGameSetup, usize),
+}
+
+/// style.
+fn col_visuals(picker_value: u8, min: u8, max: u8, col: usize) -> (String, Color) {
+    let offset = col as i32 - CENTER;
+    let v = picker_value as i32 + offset;
+    let text = if v >= min as i32 && v <= max as i32 {
+        v.to_string()
+    } else {
+        String::new()
+    };
+    let alpha = if offset == 0 { 1.0 } else { 0.65 };
+    (text, Color::srgba(1.0, 1.0, 1.0, alpha))
+}
+
+/// Ширина одного шага в ЛОГИЧЕСКИХ пикселях.
+fn step_px(node: &ComputedNode) -> f32 {
+    node.size().x * node.inverse_scale_factor() * STEP / 100.0
+}
+
+pub fn spawn_number_picker(
+    commands: &mut Commands,
+    parent: Entity,
+    fonts: &Fonts,
+    language: Language,
+    range: (u8, u8),
+    default_value: u8,
+    apply: fn(&mut PendingGameSetup, usize),
+) {
+    let value = default_value.clamp(range.0, range.1);
+    let row = commands
+        .spawn((
+            Node {
+                width: Val::Percent(60.0),
+                align_items: AlignItems::Center,
+                flex_direction: FlexDirection::Column,
+                margin: UiRect::all(Val::Px(16.0)),
+                ..default()
+            },
+            ChildOf(parent),
+        ))
+        .id();
+
+    let track: Entity = commands
+        .spawn((
+            ScrollArea,
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Px(36.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                border: UiRect::all(Val::Px(1.0)),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(COLOR_TRACK_BG),
+            BorderColor::all(COLOR_ACCENT_GOLD),
+            NumberPicker {
+                min: range.0,
+                max: range.1,
+                value,
+                accum: 0.0,
+                apply,
+            },
+            ChildOf(row),
+        ))
+        .id();
+
+    // cols with numbers
+    for col in 0..COLS {
+        let (text, color) = col_visuals(value, range.0, range.1, col);
+        commands.spawn((
+            Node {
+                width: Val::Percent(STEP),
+                flex_shrink: 0.0,
+                ..default()
+            },
+            TextLayout {
+                justify: Justify::Center,
+                ..default()
+            },
+            Text::new(text),
+            TextFont {
+                font_size: FontSize::Px(18.0),
+                font: FontSource::Handle(fonts.get(language).clone()),
+                ..default()
+            },
+            TextColor(color),
+            Pickable::IGNORE,
+            ChildOf(track),
+        ));
+    }
+
+    // frame for chosen number
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Percent(50.0 - STEP / 2.0),
+            top: Val::Px(0.0),
+            width: Val::Percent(STEP),
+            height: Val::Percent(100.0),
+            border: UiRect::horizontal(Val::Px(1.0)),
+            ..default()
+        },
+        BorderColor::all(COLOR_ACCENT_GOLD),
+        Pickable::IGNORE,
+        ChildOf(track),
+    ));
+
+    // Mouse wheel
+    commands.entity(track).observe(
+        move |mut ev: On<PointerScroll>,
+              nodes: Query<&ComputedNode>,
+              mut pickers: Query<&mut NumberPicker>,
+              children: Query<&Children>,
+              mut cols: Query<(&mut Text, &mut TextColor)>,
+              mut pending: ResMut<PendingGameSetup>| {
+            ev.propagate(false);
+
+            let Ok(node) = nodes.get(track) else {
+                return;
+            };
+            // Line: одна «строка» колеса = один шаг; Pixel: уже логические пиксели
+            let k = match ev.unit {
+                MouseScrollUnit::Line => step_px(node),
+                MouseScrollUnit::Pixel => 1.0,
+            };
+            let delta = (-ev.y + ev.x) * k;
+            scroll_picker(
+                track,
+                &nodes,
+                delta,
+                &mut pickers,
+                &children,
+                &mut cols,
+                &mut pending,
+            );
+        },
+    );
+
+    // Swipe
+    commands.entity(track).observe(
+        move |mut ev: On<PointerDrag>,
+              nodes: Query<&ComputedNode>,
+              mut pickers: Query<&mut NumberPicker>,
+              children: Query<&Children>,
+              mut cols: Query<(&mut Text, &mut TextColor)>,
+              mut pending: ResMut<PendingGameSetup>| {
+            ev.propagate(false);
+            // ev.delta — логические пиксели
+            scroll_picker(
+                track,
+                &nodes,
+                -ev.delta.x,
+                &mut pickers,
+                &children,
+                &mut cols,
+                &mut pending,
+            );
+        },
+    );
+}
+
+/// delta_px (логические пиксели) > 0 увеличивает значение, < 0 уменьшает.
+fn scroll_picker(
+    track: Entity,
+    nodes: &Query<&ComputedNode>,
+    delta_px: f32,
+    pickers: &mut Query<&mut NumberPicker>,
+    children: &Query<&Children>,
+    cols: &mut Query<(&mut Text, &mut TextColor)>,
+    pending: &mut PendingGameSetup,
+) {
+    let Ok(node) = nodes.get(track) else {
+        return;
+    };
+    let step = step_px(node);
+    if step <= 0.0 {
+        return;
+    }
+    let Ok(mut picker) = pickers.get_mut(track) else {
+        return;
+    };
+
+    picker.accum += delta_px;
+    let steps = (picker.accum / step).trunc();
+    if steps == 0.0 {
+        return;
+    }
+    picker.accum -= steps * step;
+
+    let new_value =
+        (picker.value as i32 + steps as i32).clamp(picker.min as i32, picker.max as i32) as u8;
+    if new_value == picker.value {
+        picker.accum = 0.0;
+        return;
+    }
+    picker.value = new_value;
+
+    // Первые COLS детей — колонки, последний — рамка
+    if let Ok(kids) = children.get(track) {
+        for (col, kid) in kids.iter().take(COLS).enumerate() {
+            if let Ok((mut text, mut color)) = cols.get_mut(kid) {
+                let (t, c) = col_visuals(picker.value, picker.min, picker.max, col);
+                text.0 = t;
+                color.0 = c;
+            }
+        }
+    }
+
+    (picker.apply)(pending, picker.value as usize);
+}

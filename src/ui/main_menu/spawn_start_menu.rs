@@ -1,9 +1,10 @@
 use bevy::app::AppExit;
 use bevy::color::Color;
+use bevy::picking::events::PointerClick;
 use bevy::prelude::{
-    BorderColor, BorderRadius, Bundle, Button, ChildOf, Click, Commands, Component, DespawnOnExit,
-    Entity, Font, FontSize, Handle, MessageWriter, NextState, On, Pointer, Query, Res, ResMut,
-    Text, TextColor, TextFont, UiRect,
+    BorderColor, BorderRadius, Bundle, ChildOf, Commands, Component, DespawnOnExit, Entity, Font,
+    FontSize, Handle, MessageWriter, NextState, On, Query, Res, ResMut, Text, TextColor, TextFont,
+    UiRect,
 };
 use bevy::text::FontSource;
 use bevy::ui::{AlignItems, BackgroundColor, FlexDirection, JustifyContent, Node, Val};
@@ -93,7 +94,6 @@ pub(super) fn spawn_main_menu(
 
 fn spawn_main_button_bundle(button_type: MainMenuButtons) -> impl Bundle {
     (
-        Button,
         Node {
             width: Val::Percent(35.0),
             height: Val::Percent(8.0),
@@ -123,7 +123,7 @@ fn spawn_text_bundle(translated_text: &str, font: &Handle<Font>) -> impl Bundle 
 
 fn check_button_clicked(commands: &mut Commands, container: Entity) {
     commands.entity(container).observe(
-        |trigger: On<Pointer<Click>>,
+        |trigger: On<PointerClick>,
          mut next_state: ResMut<NextState<AppState>>,
          button_type: Query<&MainMenuButtons>,
          mut exit: MessageWriter<AppExit>| {

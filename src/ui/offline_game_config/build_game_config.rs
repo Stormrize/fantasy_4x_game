@@ -30,8 +30,7 @@ pub fn start_local_game(
     let mut rng = rand::rng();
     possible_races.shuffle(&mut rng);
 
-    // todo 3 is hardcoded, gotta be fixed, by adding a ui(maybe scrollable) element <bots>
-    let bots_amount = 3;
+    let bots_amount = pending.bots_amount + 1;
 
     let mut selected_races = Vec::with_capacity(bots_amount);
     selected_races.push(chosen_race.clone());

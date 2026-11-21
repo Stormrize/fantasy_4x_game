@@ -1,8 +1,6 @@
-use bevy::{ecs::error::Severity::Debug, prelude::Component};
+use bevy::prelude::Component;
 use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
-
-use crate::io::startup_loading::localization_loader_plugin::Language::De;
 
 pub type Gold = u16;
 pub type Food = u16;
@@ -10,6 +8,7 @@ pub type Science = u16;
 pub type Mana = u16;
 
 pub const CAPITAL_CONTROL_RADIUS: usize = 2;
+pub const BUILDING_SEE_RADIUS: usize = 3;
 
 #[derive(Component, Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PlayerRace(pub SmolStr);
@@ -70,12 +69,6 @@ pub enum MapSize {
     Large = 128,
 }
 
-impl MapSize {
-    pub fn len() -> usize {
-        5
-    }
-}
-
 #[derive(Deserialize, Serialize, Clone, Copy, Debug, Default)]
 #[allow(dead_code)]
 #[repr(u8)]
@@ -85,12 +78,6 @@ pub enum MapShape {
     Jagged,
 }
 
-impl MapShape {
-    pub fn len() -> usize {
-        2
-    }
-}
-
 #[derive(Serialize, Default, Debug, Clone, Copy, PartialEq)]
 pub enum AiDifficulty {
     Easy,
@@ -98,9 +85,4 @@ pub enum AiDifficulty {
     Normal,
     Hard,
     Crazy,
-}
-impl AiDifficulty {
-    pub fn len() -> usize {
-        4
-    }
 }

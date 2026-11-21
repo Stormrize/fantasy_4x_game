@@ -1,6 +1,8 @@
 use bevy::prelude::Component;
 use serde::Deserialize;
 
+#[allow(unused)]
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, Deserialize, Clone)]
 pub enum Buff {
     Heal {
@@ -51,6 +53,8 @@ pub enum Buff {
 #[derive(Component, Deserialize, Debug, Default, Clone)]
 pub struct Buffs(pub Vec<Buff>);
 
+#[allow(unused)]
+#[allow(clippy::enum_variant_names)]
 #[derive(Deserialize, Debug, Clone)]
 pub enum Debuff {
     SustainedDamage {

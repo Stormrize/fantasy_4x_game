@@ -1,11 +1,13 @@
 UnitsData(
     (
         CombatUnitData(
-            unit_type: DamageDealer, // Ледяной Клинок
+            unit_type: DamageDealer, // Ледяной Клинок — стеклянная пушка ближнего боя
             level_economy: LevelCost([
                 Cost(new_level_cost: 50, maintenance: 5),
-                Cost(new_level_cost: 70, maintenance: 10),
+                Cost(new_level_cost: 85, maintenance: 12),
+                Cost(new_level_cost: 150, maintenance: 24),
             ]),
+            current_hp: CurrentHp(115),
             basic_stats: CombatBasicStats(health: 115, defense: 20, attack: 35, range: 1),
             movement_points: MovementPoints(3),
             field_of_view: FieldOfView(2),
@@ -18,7 +20,7 @@ UnitsData(
                 ),
                 UniqueLevelAbility(
                     name: "Glacial Surge",
-                    range: 2, area: 1, damage: 70, mana_amount_needs: 50, cool_down_turns: 3,
+                    range: 2, area: 1, damage: 80, mana_amount_needs: 50, cool_down_turns: 3,
                     buffs: Buffs([]),
                     debuffs: Debuffs([IgnoreDefense])
                 ),
@@ -28,9 +30,10 @@ UnitsData(
             unit_type: Support, // Призыватель Дождя
             level_economy: LevelCost([
                 Cost(new_level_cost: 45, maintenance: 3),
-                Cost(new_level_cost: 65, maintenance: 8),
-                Cost(new_level_cost: 130, maintenance: 30),
+                Cost(new_level_cost: 70, maintenance: 8),
+                Cost(new_level_cost: 140, maintenance: 18),
             ]),
+            current_hp: CurrentHp(140),
             basic_stats: CombatBasicStats(health: 140, defense: 35, attack: 15, range: 2),
             movement_points: MovementPoints(3),
             field_of_view: FieldOfView(2),
@@ -64,8 +67,10 @@ UnitsData(
             unit_type: Skill, // Маг Потока
             level_economy: LevelCost([
                 Cost(new_level_cost: 55, maintenance: 6),
-                Cost(new_level_cost: 75, maintenance: 12),
+                Cost(new_level_cost: 80, maintenance: 12),
+                Cost(new_level_cost: 150, maintenance: 24),
             ]),
+            current_hp: CurrentHp(95),
             basic_stats: CombatBasicStats(health: 95, defense: 25, attack: 25, range: 3),
             movement_points: MovementPoints(4), // Очень мобильный
             field_of_view: FieldOfView(2),

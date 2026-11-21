@@ -1,4 +1,5 @@
 mod camera_plugin;
+pub(crate) mod events;
 mod game_logic_plugin;
 mod renderer;
 

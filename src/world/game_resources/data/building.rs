@@ -23,7 +23,7 @@ impl BuildingLevel {
     }
 }
 
-#[derive(Component, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Component, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BuildingType {
     Capital,
     CapturedCity,
@@ -105,10 +105,25 @@ impl BuildingLevelStats {
     pub fn spawn_capacity(&self) -> u16 {
         self.building_utility.spawn_capacity
     }
+    pub fn gold(&self) -> Gold {
+        self.yields.gold
+    }
+    pub fn food(&self) -> Food {
+        self.yields.food
+    }
+    pub fn science(&self) -> Science {
+        self.yields.science
+    }
 }
 
 #[derive(Component, Deserialize, Debug, Clone)]
 pub struct Levels(pub [BuildingLevelStats; BUILDING_LEVELS]);
+
+impl Levels {
+    pub fn stats(&self, level: BuildingLevel) -> &BuildingLevelStats {
+        &self.0[level as usize]
+    }
+}
 
 #[derive(Bundle, Deserialize, Debug, Clone)]
 pub struct BuildingData {
@@ -119,6 +134,22 @@ pub struct BuildingData {
 impl BuildingData {
     pub fn stats(&self, level: BuildingLevel) -> &BuildingLevelStats {
         &self.levels.0[level as usize]
+    }
+
+    /// Данные здания по его типу. `UniqueRaceBuilding` читается из конфигов расы,
+    /// поэтому здесь недоступен.
+    pub fn from_type(building_type: BuildingType) -> Option<Self> {
+        Some(match building_type {
+            BuildingType::Capital => CAPITAL,
+            BuildingType::CapturedCity => CAPTURED_CITY,
+            BuildingType::BarbarianCity => BARBARIAN_CITY,
+            BuildingType::SpawningBuilding => SPAWNING_BUILDING,
+            BuildingType::House => HOUSE,
+            BuildingType::MediumBuilding => MEDIUM_BUILDING,
+            BuildingType::LargeBuilding => LARGE_BUILDING,
+            BuildingType::ResearchCenter => RESEARCH_CENTER,
+            BuildingType::UniqueRaceBuilding => return None,
+        })
     }
 }
 
@@ -167,39 +198,43 @@ pub struct Building {
 pub const CAPITAL: BuildingData = BuildingData {
     building_type: BuildingType::Capital,
     levels: Levels([
-        level(400, 100, 10, 0, 0, 50, 0, 5, 0),
-        level(650, 250, 25, 0, 0, 80, 0, 10, 0),
-        level(1000, 450, 40, 0, 0, 115, 0, 20, 0),
+        level(400, 100, 10, 10, 2, 50, 0, 5, 0),
+        level(650, 250, 25, 25, 4, 80, 0, 10, 0),
+        level(1000, 450, 40, 25, 8, 115, 0, 20, 0),
     ]),
 };
 
 pub const CAPTURED_CITY: BuildingData = BuildingData {
     building_type: BuildingType::CapturedCity,
     levels: Levels([
-        level(250, 50, 4, 2, 0, 35, 0, 2, 0),
-        level(450, 140, 10, 6, 0, 60, 0, 5, 0),
-        level(700, 260, 20, 12, 0, 90, 0, 10, 0),
+        level(250, 50, 4, 2, 1, 35, 0, 2, 0),
+        level(450, 140, 10, 6, 3, 60, 0, 5, 0),
+        level(700, 260, 20, 12, 5, 90, 0, 10, 0),
     ]),
 };
 
 pub const BARBARIAN_CITY: BuildingData = BuildingData {
     building_type: BuildingType::BarbarianCity,
     levels: Levels([
-        level(300, 60, 5, 0, 0, 40, 0, 0, 0),
-        level(450, 150, 15, 0, 0, 65, 0, 0, 0),
-        level(600, 230, 30, 0, 0, 100, 0, 0, 0),
+        level(300, 60, 5, 0, 0, 35, 0, 0, 0),
+        level(450, 150, 15, 0, 0, 60, 0, 0, 0),
+        level(600, 230, 30, 0, 0, 90, 0, 0, 0),
     ]),
 };
 
 pub const SPAWNING_BUILDING: BuildingData = BuildingData {
     building_type: BuildingType::SpawningBuilding,
     levels: Levels([
+        // можно спавнить Master Unitов
         level(100, 20, 0, 0, 0, 15, 5, 0, 1),
-        level(200, 80, 0, 0, 0, 30, 8, 0, 2),
-        level(400, 200, 0, 0, 0, 55, 15, 0, 3),
+        // можно спавнить Holy юнитов
+        level(200, 80, 0, 0, 0, 30, 8, 0, 1),
+        // можно больше за раз спавнить
+        level(400, 200, 0, 0, 0, 55, 15, 0, 2),
     ]),
 };
 
+// спавнится только на small biome
 pub const HOUSE: BuildingData = BuildingData {
     building_type: BuildingType::House,
     levels: Levels([
@@ -209,6 +244,7 @@ pub const HOUSE: BuildingData = BuildingData {
     ]),
 };
 
+// спавниться только на medium biome
 pub const MEDIUM_BUILDING: BuildingData = BuildingData {
     building_type: BuildingType::MediumBuilding,
     levels: Levels([
@@ -218,6 +254,7 @@ pub const MEDIUM_BUILDING: BuildingData = BuildingData {
     ]),
 };
 
+// спавниться только на large biome
 pub const LARGE_BUILDING: BuildingData = BuildingData {
     building_type: BuildingType::LargeBuilding,
     levels: Levels([
@@ -227,6 +264,7 @@ pub const LARGE_BUILDING: BuildingData = BuildingData {
     ]),
 };
 
+// спавниться на small biome только, можно позже добавить бонус за соседство с large biome
 pub const RESEARCH_CENTER: BuildingData = BuildingData {
     building_type: BuildingType::ResearchCenter,
     levels: Levels([

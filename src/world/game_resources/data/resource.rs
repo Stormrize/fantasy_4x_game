@@ -62,6 +62,7 @@ pub struct CommonResource {
 
 // rare resources
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RareKind {
     ManaScroll,   // + to mana

@@ -4,6 +4,7 @@ mod components;
 mod dropdown;
 mod popup;
 mod race_panel;
+mod scrollable;
 mod sidebar;
 
 use bevy::prelude::{

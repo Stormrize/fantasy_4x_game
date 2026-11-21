@@ -3,10 +3,11 @@
 //! подпись (текст и TranslationKey, чтобы смена языка потом работала
 //! корректно) и пишет значение в [`PendingGameSetup`] через `apply`.
 
+use bevy::ecs::observer::On;
+use bevy::picking::events::{PointerClick, PointerOut, PointerOver};
 use bevy::prelude::{
-    AlignItems, Button, ChildOf, Click, Commands, Component, Display, Entity, FontSize, FontSource,
-    GlobalZIndex, JustifyContent, Node, On, Out, Over, Pointer, PositionType, Query, Res, ResMut,
-    Text, TextColor, TextFont, UiRect,
+    AlignItems, ChildOf, Commands, Component, Display, Entity, FontSize, FontSource, GlobalZIndex,
+    JustifyContent, Node, PositionType, Query, Res, ResMut, Text, TextColor, TextFont, UiRect,
 };
 use bevy::ui::{BackgroundColor, BorderColor, FlexDirection, Val};
 use bevy::utils::default;
@@ -26,6 +27,7 @@ struct DropdownState {
     is_open: bool,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_dropdown<T>(
     commands: &mut Commands,
     parent: Entity,
@@ -53,11 +55,10 @@ pub fn spawn_dropdown<T>(
 
     let button = commands
         .spawn((
-            Button,
             DropdownState { is_open: false },
             Node {
                 width: Val::Percent(100.0),
-                height: Val::Px(36.0),
+                height: Val::Px(40.0),
                 padding: UiRect::horizontal(Val::Px(10.0)),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::FlexStart,
@@ -75,7 +76,7 @@ pub fn spawn_dropdown<T>(
         .spawn((
             Text::new(localization.get(selected_key, language)),
             TextFont {
-                font_size: FontSize::Px(14.0),
+                font_size: FontSize::Px(18.0),
                 font: FontSource::Handle(fonts.get(language).clone()),
                 ..default()
             },
@@ -108,7 +109,7 @@ pub fn spawn_dropdown<T>(
     observe_toggle(commands, button, options_panel);
 
     for (key, value) in options.iter() {
-        let key: &'static str = *key;
+        let key: &'static str = key;
         spawn_option(
             commands,
             options_panel,
@@ -128,7 +129,7 @@ fn observe_toggle(commands: &mut Commands, button: Entity, options_panel: Entity
     commands
         .entity(button)
         .observe(
-            move |_trigger: On<Pointer<Click>>,
+            move |_click: On<PointerClick>,
                   mut states: Query<&mut DropdownState>,
                   mut nodes: Query<&mut Node>| {
                 if let Ok(mut state) = states.get_mut(button) {
@@ -144,14 +145,14 @@ fn observe_toggle(commands: &mut Commands, button: Entity, options_panel: Entity
             },
         )
         .observe(
-            |trigger: On<Pointer<Over>>, mut colors: Query<&mut BackgroundColor>| {
+            |trigger: On<PointerOver>, mut colors: Query<&mut BackgroundColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     color.0 = COLOR_DROPDOWN_HOVER;
                 }
             },
         )
         .observe(
-            |trigger: On<Pointer<Out>>, mut colors: Query<&mut BackgroundColor>| {
+            |trigger: On<PointerOut>, mut colors: Query<&mut BackgroundColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     color.0 = COLOR_DROPDOWN_BG;
                 }
@@ -176,7 +177,6 @@ fn spawn_option<T>(
 {
     let option = commands
         .spawn((
-            Button,
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Px(28.0),
@@ -192,7 +192,7 @@ fn spawn_option<T>(
     commands.spawn((
         Text::new(localization.get(key, language)),
         TextFont {
-            font_size: FontSize::Px(13.0),
+            font_size: FontSize::Px(16.0),
             font: FontSource::Handle(fonts.get(language).clone()),
             ..default()
         },
@@ -204,7 +204,7 @@ fn spawn_option<T>(
     commands
         .entity(option)
         .observe(
-            move |mut event: On<Pointer<Click>>,
+            move |mut event: On<PointerClick>,
                   mut texts: Query<&mut Text>,
                   mut keys: Query<&mut TranslationKey>,
                   mut states: Query<&mut DropdownState>,
@@ -232,14 +232,14 @@ fn spawn_option<T>(
             },
         )
         .observe(
-            |trigger: On<Pointer<Over>>, mut colors: Query<&mut BackgroundColor>| {
+            |trigger: On<PointerOver>, mut colors: Query<&mut BackgroundColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     color.0 = COLOR_ACCENT_GOLD;
                 }
             },
         )
         .observe(
-            |trigger: On<Pointer<Out>>, mut colors: Query<&mut BackgroundColor>| {
+            |trigger: On<PointerOut>, mut colors: Query<&mut BackgroundColor>| {
                 if let Ok(mut color) = colors.get_mut(trigger.entity) {
                     color.0 = COLOR_DROPDOWN_OPTION_BG;
                 }

@@ -7,13 +7,14 @@ use crate::game::game_logic_plugin::components::*;
 use crate::world::game_configs::GameLogicConfig;
 use crate::world::game_resources::WorldMaps;
 
+#[allow(clippy::too_many_arguments)]
 pub fn route_selection(
     world_maps: WorldMaps,
     config: Res<GameLogicConfig>,
     combat_cycle: Res<CombatCycle>,
     already_selected_tile: Res<AlreadySelectedTile>,
     mut tile_clicked: MessageReader<TileClickedEvent>,
-    mut move_cmd: MessageWriter<Move>,
+    mut actions: MessageWriter<Action>,
     mut cycle: MessageWriter<Cycle>,
     mut new_tile: MessageWriter<NewTile>,
     mut clear: MessageWriter<Clear>,
@@ -43,7 +44,7 @@ pub fn route_selection(
                 .is_some(clicked_pos.x as usize, clicked_pos.y as usize),
             !world_maps
                 .fog
-                .is_visible_player(clicked_pos.x as usize, clicked_pos.y as usize),
+                .is_general_visible_player(clicked_pos.x as usize, clicked_pos.y as usize),
         );
 
         let just_selected_tile = JustSelectedTile {

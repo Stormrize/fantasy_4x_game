@@ -11,4 +11,5 @@ pub struct PendingGameSetup {
     pub map_size: MapSize,
     pub map_shape: MapShape,
     pub ai_difficulty: AiDifficulty,
+    pub bots_amount: usize,
 }

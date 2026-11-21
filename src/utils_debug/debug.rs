@@ -1,5 +1,6 @@
 use std::fs;
 
+#[allow(unused)]
 pub fn read_files() -> std::io::Result<()> {
     let path = "./";
     for entry in fs::read_dir(path)? {

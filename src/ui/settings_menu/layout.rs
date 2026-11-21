@@ -189,7 +189,7 @@ fn spawn_footer(
 
     let apply_btn = theme::spawn_button(commands, footer, font, localization, language, "apply", 2);
     commands.entity(apply_btn).observe(
-        |_trigger: On<Pointer<Click>>,
+        |_click: On<PointerClick>,
          mut commands: Commands,
          settings: Res<Persistent<SettingsConfig>>,
          mut pending: ResMut<PendingSettingsChanges>| {
@@ -213,7 +213,7 @@ fn spawn_footer(
         0,
     );
     commands.entity(reset_btn).observe(
-        |_trigger: On<Pointer<Click>>,
+        |_click: On<PointerClick>,
          mut settings: ResMut<Persistent<SettingsConfig>>,
          mut commands: Commands| {
             if let Err(err) = settings.set(SettingsConfig::default()) {
@@ -229,7 +229,7 @@ fn spawn_footer(
 
     let close_btn = theme::spawn_button(commands, footer, font, localization, language, "close", 1);
     commands.entity(close_btn).observe(
-        |_trigger: On<Pointer<Click>>, mut next_state: ResMut<NextState<AppState>>| {
+        |_click: On<PointerClick>, mut next_state: ResMut<NextState<AppState>>| {
             next_state.set(AppState::MainMenu);
         },
     );

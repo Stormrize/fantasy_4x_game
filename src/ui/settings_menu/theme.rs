@@ -93,9 +93,7 @@ pub fn spawn_button(
     key: &'static str,
     color: u8,
 ) -> Entity {
-    let btn = commands
-        .spawn((Button, button_style(color), ChildOf(parent)))
-        .id();
+    let btn = commands.spawn((button_style(color), ChildOf(parent))).id();
 
     commands.spawn((
         Text::new(localization.get(key, language)),
