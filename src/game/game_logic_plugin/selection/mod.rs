@@ -1,9 +1,9 @@
+use crate::app_state::AppState;
 use crate::game::game_logic_plugin::components::AlreadySelectedTile;
 use crate::game::game_logic_plugin::selection::manage_selected_entity::manage_selected_entity;
 use crate::game::game_logic_plugin::selection::{
     click_router::route_selection, tile_clicked::click_to_world,
 };
-use crate::ui::menus::AppState;
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{IntoScheduleConfigs, in_state, resource_changed};
 

@@ -4,6 +4,7 @@ use bevy::prelude::{
 };
 use bevy_persistent::Persistent;
 
+use crate::app_state::AppState;
 use crate::core_rust::generation::map_generation_plugin::{
     GameMapGeneration, MapGenerationLoadingState,
 };
@@ -17,7 +18,7 @@ use crate::io::in_game_loading::units_data_loader_plugin::{
     RacesUnitsData, UnitsDataLoader, UnitsDataLoadingState,
 };
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
-use crate::ui::menus::AppState;
+
 use crate::world::game_configs::{
     CameraConfig, ConfigType, GameLogicConfig, GameModeConfig, PlayerConfig, PlayerData, Players,
     RenderConfig,

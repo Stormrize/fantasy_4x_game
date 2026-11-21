@@ -1,3 +1,4 @@
+use crate::app_state::AppState;
 use crate::game::game_logic_plugin::action::action_systems::action_router;
 use crate::game::game_logic_plugin::action::action_systems::collect_income::collect_income;
 use crate::game::game_logic_plugin::action::action_systems::end_turn::end_turn;
@@ -9,7 +10,6 @@ use crate::game::game_logic_plugin::action::rules::move_rules::{
 use crate::game::game_logic_plugin::action::selection_systems::clear::clear_selection_system;
 use crate::game::game_logic_plugin::action::selection_systems::cycle::cycle_selection_system;
 use crate::game::game_logic_plugin::action::selection_systems::new_tile::new_tile_selection_system;
-use crate::ui::menus::AppState;
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{IntoScheduleConfigs, OnEnter, in_state};
 

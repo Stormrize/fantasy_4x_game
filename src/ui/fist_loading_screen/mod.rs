@@ -1,6 +1,7 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{IntoScheduleConfigs, NextState, OnEnter, Res, ResMut, State, in_state};
 
+use crate::app_state::AppState;
 use crate::io::startup_loading::fonts_loader_plugin::{FontsLoader, FontsLoadingState};
 use crate::io::startup_loading::localization_loader_plugin::{
     LocalizationLoader, LocalizationState,
@@ -8,7 +9,6 @@ use crate::io::startup_loading::localization_loader_plugin::{
 use crate::io::startup_loading::setting_loader_saver_plugin::PlayerSettings;
 use crate::io::startup_loading::ui_assets_loader_plugin::{RaceLoadingState, RaceManifestsLoader};
 use crate::ui::fist_loading_screen::spawn_loading_screen::spawn_loading_screen;
-use crate::ui::menus::AppState;
 
 mod spawn_loading_screen;
 pub(super) struct InitialLoader;

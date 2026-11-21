@@ -1,5 +1,5 @@
+use crate::app_state::AppState;
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
-use crate::ui::menus::AppState;
 use crate::world::components::{GameMode, Id, MapShape, MapSize, PlayerType};
 use crate::world::game_configs::{ConfigType, GameModeConfig, OnlinePlayerConfig, PlayerConfig};
 use crate::world::turn_manager::TurnManager;

@@ -5,11 +5,11 @@ use bevy::app::AppExit;
 use bevy::picking::Pickable;
 use bevy::prelude::*;
 
+use crate::app_state::AppState;
 use crate::io::startup_loading::localization_loader_plugin::Language;
 use crate::ui::UiContext;
 use crate::ui::in_game_ui::state::{HudPart, HudUiState};
 use crate::ui::in_game_ui::theme;
-use crate::ui::menus::AppState;
 
 pub(crate) fn spawn_burger_overlay(commands: &mut Commands, ui: &UiContext, language: Language) {
     let overlay = commands

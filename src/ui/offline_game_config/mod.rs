@@ -15,11 +15,11 @@ use bevy::utils::default;
 use bevy_persistent::Persistent;
 pub use components::PendingGameSetup;
 
+use crate::app_state::AppState;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::ui::UiContext;
 use crate::ui::colors::{COLOR_PANEL_BG, COLOR_SIDEBAR_BG};
-use crate::ui::menus::AppState;
 
 pub struct OfflineGameConfig;
 

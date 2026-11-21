@@ -1,4 +1,4 @@
-use crate::ui::menus::AppState;
+use crate::app_state::AppState;
 use crate::world::game_configs::CameraConfig;
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::math::ops::sqrt;

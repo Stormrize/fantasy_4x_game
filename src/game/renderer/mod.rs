@@ -1,3 +1,4 @@
+use crate::app_state::AppState;
 use crate::game::game_logic_plugin::action::action_systems::action_router;
 use crate::game::renderer::fog_memory::{ChunkSnapshot, FogMemory, update_fog_memory};
 use crate::game::renderer::render_actions::{animate_smooth_move, render_move};
@@ -11,7 +12,6 @@ use crate::game::renderer::{
     terrain_renderer::{SpawnedTerrainMeshes, despawn_terrain_meshes, spawn_terrain_meshes},
     units_renderer::{SpawnedUnitsMeshes, despawn_units_meshes, sync_unit_visuals},
 };
-use crate::ui::menus::AppState;
 use crate::utils_debug::regenerate_world::{RegenerateWorldEvent, handle_input};
 use crate::world::game_configs::RenderConfig;
 use crate::world::game_resources::fog_map::FogMap;

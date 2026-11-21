@@ -18,9 +18,8 @@ pub fn end_turn(
         if !is_players_turn(action.0, turn_manager.current_player) {
             return;
         }
-        // Combat is resolved through the combat cycle; ignore end-turn input
-        // while it is being planned or simulated.
-        if !matches!(combat_cycle.phase, CombatPhase::Idle) {
+
+        if !matches!(turn_manager.combat_phase, CombatPhase::Idle) {
             return;
         }
 

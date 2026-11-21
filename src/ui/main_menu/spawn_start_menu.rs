@@ -12,9 +12,9 @@ use bevy::ui::{AlignItems, BackgroundColor, FlexDirection, JustifyContent, Node,
 use bevy::utils::default;
 use bevy_persistent::Persistent;
 
+use crate::app_state::AppState;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_DANGER_BG, COLOR_PANEL_BG};
-use crate::ui::menus::AppState;
 use crate::ui::{TranslationKey, UiContext};
 
 #[derive(Component)]

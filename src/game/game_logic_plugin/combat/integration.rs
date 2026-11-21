@@ -1,7 +1,7 @@
 use super::ai;
 use super::model::{CombatCommand, CombatOutcome, CombatPlayer, Combatant};
 use super::simulation;
-use crate::ui::menus::AppState;
+use crate::app_state::AppState;
 use crate::world::components::{Id, PlayerType};
 use crate::world::game_configs::{GameLogicConfig, Player, Players};
 use crate::world::game_resources::data::unit::{

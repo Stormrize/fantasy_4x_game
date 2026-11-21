@@ -1,7 +1,8 @@
 use bevy::app::App;
 use bevy::prelude::{OnEnter, Plugin};
 
-use crate::ui::{main_menu::spawn_start_menu::spawn_main_menu, menus::AppState};
+use crate::app_state::AppState;
+use crate::ui::main_menu::spawn_start_menu::spawn_main_menu;
 
 mod spawn_start_menu;
 

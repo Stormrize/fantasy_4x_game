@@ -13,7 +13,7 @@ mod widgets;
 use bevy::prelude::*;
 pub use change_tracking::PendingSettingsChanges;
 
-use crate::ui::menus::AppState;
+use crate::app_state::AppState;
 
 pub(super) struct Settings;
 

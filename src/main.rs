@@ -1,5 +1,6 @@
 extern crate core;
 
+mod app_state;
 mod core_rust;
 mod game;
 mod io;

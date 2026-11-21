@@ -7,6 +7,7 @@
 use bevy::picking::Pickable;
 use bevy::prelude::*;
 
+use crate::app_state::AppState;
 use crate::game::events::action_messages::NewTile;
 use crate::game::game_logic_plugin::combat::integration::{
     CombatCycle, CombatPhase, ResolveCombat,
@@ -21,7 +22,7 @@ use crate::ui::in_game_ui::state::{
     ArmyNav, CombatStatusText, CombatUiState, HudPart, HudUiState, SkillButton,
 };
 use crate::ui::in_game_ui::theme;
-use crate::ui::menus::AppState;
+
 use crate::world::components::Id;
 use crate::world::game_configs::GameLogicConfig;
 use crate::world::game_resources::building_map::BuildingMap;

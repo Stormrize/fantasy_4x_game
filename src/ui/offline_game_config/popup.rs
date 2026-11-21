@@ -12,12 +12,12 @@ use bevy::utils::default;
 use super::build_game_config::start_local_game;
 use super::colors::*;
 use super::components::PendingGameSetup;
+use crate::app_state::AppState;
 use crate::io::startup_loading::fonts_loader_plugin::Fonts;
 use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::ui::TranslationKey;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
-use crate::ui::menus::AppState;
 use crate::world::components::PlayerRace;
 use crate::world::ui_and_graphic_resources::data::ui_race_data::UiRaceData;
 

@@ -4,8 +4,8 @@ use rand::prelude::SliceRandom;
 use rand::random_range;
 
 use super::components::PendingGameSetup;
+use crate::app_state::AppState;
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
-use crate::ui::menus::AppState;
 use crate::world::components::{GameMode, Id, PlayerRace, PlayerType};
 use crate::world::game_configs::{ConfigType, GameModeConfig, LocalPlayerConfig, PlayerConfig};
 use crate::world::turn_manager::TurnManager;

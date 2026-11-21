@@ -5,6 +5,7 @@
 //! one fullscreen root: a fullscreen container would swallow world clicks even
 //! where nothing is drawn.
 
+use crate::app_state::AppState;
 use crate::game::events::action_messages::EndTurn;
 use crate::game::game_logic_plugin::combat::integration::{CombatCycle, CombatPhase};
 use crate::io::startup_loading::localization_loader_plugin::Language;
@@ -19,7 +20,6 @@ use crate::ui::in_game_ui::state::{
     HudPart, HudUiState, ManaFill, ManaValueText, ResourceIncomeKind, ResourceKind, TurnStatusText,
 };
 use crate::ui::in_game_ui::theme;
-use crate::ui::menus::AppState;
 use crate::world::components::Id;
 use crate::world::game_configs::{GameLogicConfig, Players};
 use crate::world::game_resources::building_map::BuildingMap;

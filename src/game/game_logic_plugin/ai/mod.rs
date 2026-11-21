@@ -3,6 +3,7 @@ pub mod perception;
 pub mod planning;
 pub mod profile;
 
+use crate::app_state::AppState;
 use crate::game::events::action_messages::{Action, EndTurn};
 use crate::game::game_logic_plugin::action::action_systems::action_router;
 use crate::game::game_logic_plugin::action::action_systems::end_turn::end_turn;
@@ -10,7 +11,6 @@ use crate::game::game_logic_plugin::ai::memory::{BotMemories, BotMemory};
 use crate::game::game_logic_plugin::ai::perception::build_snapshot;
 use crate::game::game_logic_plugin::ai::planning::plan_bot_turn;
 use crate::game::game_logic_plugin::ai::profile::AiProfile;
-use crate::ui::menus::AppState;
 use crate::world::components::{AiDifficulty, Id};
 use crate::world::game_configs::{GameLogicConfig, Player, Players};
 use crate::world::game_resources::WorldMaps;

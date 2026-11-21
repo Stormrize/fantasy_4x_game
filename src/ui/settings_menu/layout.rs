@@ -12,11 +12,11 @@ use super::tab_content::build_tab_content;
 use super::tabs::SettingsTab;
 use super::theme;
 use super::widgets;
+use crate::app_state::AppState;
 use crate::io::startup_loading::localization_loader_plugin::Language;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::ui::UiContext;
 use crate::ui::colors::{COLOR_PANEL_BG, COLOR_SIDEBAR_BG, COLOR_TAB_ACTIVE_BG, COLOR_TAB_BG};
-use crate::ui::menus::AppState;
 
 fn tab_content_node(display: Display) -> Node {
     Node {

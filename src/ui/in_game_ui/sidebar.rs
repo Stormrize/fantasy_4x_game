@@ -14,6 +14,7 @@ use bevy::prelude::*;
 use bevy::ui_widgets::ScrollArea;
 use bevy_persistent::Persistent;
 
+use crate::app_state::AppState;
 use crate::game::events::action_messages::NewTile;
 use crate::game::game_logic_plugin::action::rules::movement::biome_cost;
 use crate::game::game_logic_plugin::combat::integration::{CombatCycle, CombatOrders, CombatPhase};
@@ -29,7 +30,6 @@ use crate::ui::in_game_ui::state::{
     CombatUiState, HudSidebar, HudUiState, SidebarBody, SidebarSection, SidebarView, UnitTab,
 };
 use crate::ui::in_game_ui::theme;
-use crate::ui::menus::AppState;
 use crate::world::components::{Id, PlayerRace};
 use crate::world::game_configs::{GameLogicConfig, PlayerData, Players};
 use crate::world::game_resources::building_map::BuildingMap;

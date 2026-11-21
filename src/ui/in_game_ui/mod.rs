@@ -10,8 +10,8 @@ mod theme;
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{IntoScheduleConfigs, OnEnter, in_state};
 
+use crate::app_state::AppState;
 use crate::ui::in_game_ui::state::{CombatUiState, HudUiState, SidebarView};
-use crate::ui::menus::AppState;
 
 pub(super) struct InGameMenu;
 

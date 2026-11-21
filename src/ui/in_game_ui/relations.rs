@@ -6,13 +6,14 @@ use bevy::prelude::*;
 use bevy::ui_widgets::ScrollArea;
 use bevy_persistent::Persistent;
 
+use crate::app_state::AppState;
 use crate::io::startup_loading::localization_loader_plugin::Language;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
 use crate::ui::UiContext;
 use crate::ui::in_game_ui::state::{HudPart, HudUiState, RelationsBody};
 use crate::ui::in_game_ui::theme;
-use crate::ui::menus::AppState;
+
 use crate::world::components::Id;
 use crate::world::game_configs::{GameLogicConfig, Players};
 use crate::world::game_resources::building_map::BuildingMap;
