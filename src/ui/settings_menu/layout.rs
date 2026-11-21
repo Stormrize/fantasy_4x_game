@@ -12,9 +12,9 @@ use super::tab_content::build_tab_content;
 use super::tabs::SettingsTab;
 use super::theme;
 use super::widgets;
-use crate::io::startup_loading::fonts_loader_plugin::Fonts;
-use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
+use crate::io::startup_loading::localization_loader_plugin::Language;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
+use crate::ui::UiContext;
 use crate::ui::colors::{COLOR_PANEL_BG, COLOR_SIDEBAR_BG, COLOR_TAB_ACTIVE_BG, COLOR_TAB_BG};
 use crate::ui::menus::AppState;
 
@@ -36,12 +36,11 @@ struct TabEntry {
 
 pub fn spawn_settings_menu(
     mut commands: Commands,
-    fonts: Res<Fonts>,
-    localization: Res<Localization>,
+    ui: UiContext,
     settings: ResMut<Persistent<SettingsConfig>>,
 ) {
     let language = settings.language;
-    let font = fonts.get(language);
+    let font = ui.font(settings.language);
 
     let panel = commands
         .spawn((
@@ -87,8 +86,8 @@ pub fn spawn_settings_menu(
     theme::spawn_section_title(
         &mut commands,
         sidebar,
-        font,
-        &localization,
+        &font,
+        &ui.localization,
         language,
         "settings_menu",
     );
@@ -107,8 +106,8 @@ pub fn spawn_settings_menu(
         build_tab_content(
             &mut commands,
             container,
-            font,
-            &localization,
+            &font,
+            &ui.localization,
             tab,
             &settings,
         );
@@ -125,8 +124,8 @@ pub fn spawn_settings_menu(
         entry.button = widgets::spawn_tab_button(
             &mut commands,
             sidebar,
-            font,
-            &localization,
+            &font,
+            &ui.localization,
             language,
             entry.tab.key(),
             active,
@@ -162,16 +161,10 @@ pub fn spawn_settings_menu(
         );
     }
 
-    spawn_footer(&mut commands, sidebar, font, &localization, language);
+    spawn_footer(&mut commands, sidebar, &ui, language);
 }
 
-fn spawn_footer(
-    commands: &mut Commands,
-    sidebar: Entity,
-    font: &Handle<Font>,
-    localization: &Localization,
-    language: Language,
-) {
+fn spawn_footer(commands: &mut Commands, sidebar: Entity, ui: &UiContext, language: Language) {
     let footer = commands
         .spawn((
             Node {
@@ -187,7 +180,15 @@ fn spawn_footer(
         ))
         .id();
 
-    let apply_btn = theme::spawn_button(commands, footer, font, localization, language, "apply", 2);
+    let apply_btn = theme::spawn_button(
+        commands,
+        footer,
+        &ui.font(language),
+        &ui.localization,
+        language,
+        "apply",
+        2,
+    );
     commands.entity(apply_btn).observe(
         |_click: On<PointerClick>,
          mut commands: Commands,
@@ -206,8 +207,8 @@ fn spawn_footer(
     let reset_btn = theme::spawn_button(
         commands,
         footer,
-        font,
-        localization,
+        &ui.font(language),
+        &ui.localization,
         language,
         "reset_to_default",
         0,
@@ -227,7 +228,15 @@ fn spawn_footer(
         },
     );
 
-    let close_btn = theme::spawn_button(commands, footer, font, localization, language, "close", 1);
+    let close_btn = theme::spawn_button(
+        commands,
+        footer,
+        &ui.font(language),
+        &ui.localization,
+        language,
+        "close",
+        1,
+    );
     commands.entity(close_btn).observe(
         |_click: On<PointerClick>, mut next_state: ResMut<NextState<AppState>>| {
             next_state.set(AppState::MainMenu);

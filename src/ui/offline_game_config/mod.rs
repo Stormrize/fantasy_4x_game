@@ -15,10 +15,9 @@ use bevy::utils::default;
 use bevy_persistent::Persistent;
 pub use components::PendingGameSetup;
 
-use crate::io::startup_loading::fonts_loader_plugin::Fonts;
-use crate::io::startup_loading::localization_loader_plugin::Localization;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::io::startup_loading::ui_assets_loader_plugin::RacesUiRegistry;
+use crate::ui::UiContext;
 use crate::ui::colors::{COLOR_PANEL_BG, COLOR_SIDEBAR_BG};
 use crate::ui::menus::AppState;
 
@@ -33,11 +32,11 @@ impl Plugin for OfflineGameConfig {
 fn spawn_setup_menu(
     mut commands: Commands,
     races_ui_registry: Res<RacesUiRegistry>,
-    localization: Res<Localization>,
-    fonts: Res<Fonts>,
     settings: Res<Persistent<SettingsConfig>>,
+    ui: UiContext,
 ) {
     let language = settings.language;
+    let fonts = &ui.fonts;
 
     commands.insert_resource(PendingGameSetup::default());
 
@@ -83,5 +82,5 @@ fn spawn_setup_menu(
         .id();
 
     race_panel::spawn_race_panel(&mut commands, content, panel, &races_ui_registry.0);
-    sidebar::spawn_sidebar(&mut commands, sidebar, &localization, &fonts, language);
+    sidebar::spawn_sidebar(&mut commands, sidebar, &ui.localization, fonts, language);
 }
