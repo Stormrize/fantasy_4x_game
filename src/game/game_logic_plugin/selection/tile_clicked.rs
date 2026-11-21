@@ -1,4 +1,6 @@
 use bevy::input::ButtonInput;
+use bevy::picking::hover::HoverMap;
+use bevy::picking::pointer::PointerId;
 use bevy::prelude::*;
 use bevy::prelude::{MouseButton, Res};
 
@@ -9,9 +11,22 @@ pub fn click_to_world(
     mouse_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    hover_map: Res<HoverMap>,
+    ui_nodes: Query<(), With<Node>>,
     mut tile_clicked_event: MessageWriter<TileClickedEvent>,
 ) {
     if !mouse_input.just_pressed(MouseButton::Left) {
+        return;
+    }
+
+    // Clicks on HUD panels must not select or move anything on the map.
+    // The world ray is computed from raw cursor input, so UI picking alone
+    // cannot swallow it; the hover map tells us whether the cursor is over a
+    // pickable UI node instead.
+    let pointer_over_ui = hover_map
+        .get(&PointerId::Mouse)
+        .is_some_and(|hits| hits.keys().any(|entity| ui_nodes.contains(*entity)));
+    if pointer_over_ui {
         return;
     }
     let Some(window) = windows.iter().next() else {
