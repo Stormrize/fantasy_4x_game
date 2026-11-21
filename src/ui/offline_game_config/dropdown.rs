@@ -4,10 +4,11 @@
 //! корректно) и пишет значение в [`PendingGameSetup`] через `apply`.
 
 use bevy::ecs::observer::On;
+use bevy::ecs::system::Res;
 use bevy::picking::events::{PointerClick, PointerOut, PointerOver};
 use bevy::prelude::{
     AlignItems, ChildOf, Commands, Component, Display, Entity, FontSize, FontSource, GlobalZIndex,
-    JustifyContent, Node, PositionType, Query, Res, ResMut, Text, TextColor, TextFont, UiRect,
+    JustifyContent, Node, PositionType, Query, ResMut, Text, TextColor, TextFont, UiRect,
 };
 use bevy::ui::{BackgroundColor, BorderColor, FlexDirection, Val};
 use bevy::utils::default;
@@ -17,6 +18,7 @@ use crate::io::startup_loading::fonts_loader_plugin::Fonts;
 use crate::io::startup_loading::localization_loader_plugin::{Language, Localization};
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::ui::TranslationKey;
+use crate::ui::UiContext;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_TEXT_PRIMARY};
 use crate::ui::offline_game_config::PendingGameSetup;
 use crate::ui::offline_game_config::colors::{
@@ -210,13 +212,13 @@ fn spawn_option<T>(
                   mut states: Query<&mut DropdownState>,
                   mut nodes: Query<&mut Node>,
                   mut pending: ResMut<PendingGameSetup>,
-                  localization: Res<Localization>,
+                  ui: UiContext,
                   settings: Res<Persistent<SettingsConfig>>| {
                 event.propagate(false);
                 let language = settings.language;
 
                 if let Ok(mut text) = texts.get_mut(value_label) {
-                    *text = Text::new(localization.get(key, language));
+                    *text = Text::new(ui.localization.get(key, language));
                 }
                 if let Ok(mut translation_key) = keys.get_mut(value_label) {
                     translation_key.0 = key;

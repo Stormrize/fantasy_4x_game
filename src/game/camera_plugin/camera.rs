@@ -2,6 +2,8 @@ use crate::ui::menus::AppState;
 use crate::world::game_configs::CameraConfig;
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::math::ops::sqrt;
+use bevy::picking::hover::HoverMap;
+use bevy::picking::pointer::PointerId;
 use bevy::{camera::ScalingMode, prelude::*};
 
 #[derive(Resource)]
@@ -45,7 +47,7 @@ fn setup_camera(mut commands: Commands, config: Res<CameraConfig>) {
     ));
 
     commands.insert_resource(GlobalAmbientLight {
-        // note можно потом сделать красивей
+        // note: can be made prettier later
         color: Color::WHITE,
         brightness: 400.0,
         ..default()
@@ -65,6 +67,8 @@ fn camera_movement(
     mut camera_q: Query<(&mut Transform, &mut Projection), With<MainCamera>>,
     keyboard: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
+    hover_map: Res<HoverMap>,
+    ui_nodes: Query<(), With<Node>>,
     mut mouse_wheel_reader: MessageReader<MouseWheel>,
     mut target_zoom: ResMut<CameraZoom>,
     config: Res<CameraConfig>,
@@ -72,6 +76,12 @@ fn camera_movement(
     let Ok((mut transform, projection)) = camera_q.single_mut() else {
         return;
     };
+
+    // Do not zoom the map while the cursor is over HUD panels (scrolling a
+    // sidebar list should not move the camera).
+    let pointer_over_ui = hover_map
+        .get(&PointerId::Mouse)
+        .is_some_and(|hits| hits.keys().any(|entity| ui_nodes.contains(*entity)));
 
     let pan_speed = 20.0 * sqrt(target_zoom.zoom) * time.delta_secs() + config.camera_pan_speed;
 
@@ -93,18 +103,24 @@ fn camera_movement(
 
     let zoom_speed = 0.2 + config.camera_zoom_speed;
     if let Projection::Orthographic(_) = *projection {
-        for mouse_wheel in mouse_wheel_reader.read() {
-            let scroll = match mouse_wheel.unit {
-                MouseScrollUnit::Line => mouse_wheel.y * zoom_speed,
-                MouseScrollUnit::Pixel => mouse_wheel.y * zoom_speed * 0.05,
-            };
-            if config.invert_zoom {
-                target_zoom.zoom = (target_zoom.zoom + scroll)
-                    .clamp(config.min_orthographic_scale, config.max_orthographic_scale);
-            } else {
-                target_zoom.zoom = (target_zoom.zoom - scroll)
-                    .clamp(config.min_orthographic_scale, config.max_orthographic_scale);
+        if !pointer_over_ui {
+            for mouse_wheel in mouse_wheel_reader.read() {
+                let scroll = match mouse_wheel.unit {
+                    MouseScrollUnit::Line => mouse_wheel.y * zoom_speed,
+                    MouseScrollUnit::Pixel => mouse_wheel.y * zoom_speed * 0.05,
+                };
+                if config.invert_zoom {
+                    target_zoom.zoom = (target_zoom.zoom + scroll)
+                        .clamp(config.min_orthographic_scale, config.max_orthographic_scale);
+                } else {
+                    target_zoom.zoom = (target_zoom.zoom - scroll)
+                        .clamp(config.min_orthographic_scale, config.max_orthographic_scale);
+                }
             }
+        } else {
+            // Consume the events so the camera does not lurch when the pointer
+            // leaves the panel.
+            mouse_wheel_reader.clear();
         }
     }
 }

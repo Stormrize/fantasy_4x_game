@@ -1,9 +1,10 @@
 use bevy::app::AppExit;
 use bevy::color::Color;
+use bevy::ecs::system::Res;
 use bevy::picking::events::PointerClick;
 use bevy::prelude::{
     BorderColor, BorderRadius, Bundle, ChildOf, Commands, Component, DespawnOnExit, Entity, Font,
-    FontSize, Handle, MessageWriter, NextState, On, Query, Res, ResMut, Text, TextColor, TextFont,
+    FontSize, Handle, MessageWriter, NextState, On, Query, ResMut, Text, TextColor, TextFont,
     UiRect,
 };
 use bevy::text::FontSource;
@@ -11,11 +12,10 @@ use bevy::ui::{AlignItems, BackgroundColor, FlexDirection, JustifyContent, Node,
 use bevy::utils::default;
 use bevy_persistent::Persistent;
 
-use crate::io::startup_loading::fonts_loader_plugin::Fonts;
-use crate::io::startup_loading::localization_loader_plugin::Localization;
 use crate::io::startup_loading::setting_loader_saver_plugin::SettingsConfig;
 use crate::ui::colors::{COLOR_ACCENT_GOLD, COLOR_DANGER_BG, COLOR_PANEL_BG};
 use crate::ui::menus::AppState;
+use crate::ui::{TranslationKey, UiContext};
 
 #[derive(Component)]
 pub(super) enum MainMenuButtons {
@@ -46,10 +46,10 @@ impl MainMenuButtons {
 
 pub(super) fn spawn_main_menu(
     mut commands: Commands,
-    localization: Res<Localization>,
-    fonts: Res<Fonts>,
+    ui: UiContext,
     settings: Res<Persistent<SettingsConfig>>,
 ) {
+    let font = ui.font(settings.language);
     // делаем панель коричневого цвета на весь экран
     let panel = commands
         .spawn((
@@ -81,10 +81,7 @@ pub(super) fn spawn_main_menu(
 
         // создаем текст в контейнере
         commands.spawn((
-            spawn_text_bundle(
-                localization.get(key, settings.language),
-                fonts.get(settings.language),
-            ),
+            spawn_text_bundle(ui.get(settings.language, key), &font, key),
             ChildOf(container),
         ));
     }
@@ -109,7 +106,7 @@ fn spawn_main_button_bundle(button_type: MainMenuButtons) -> impl Bundle {
     )
 }
 
-fn spawn_text_bundle(translated_text: &str, font: &Handle<Font>) -> impl Bundle {
+fn spawn_text_bundle(translated_text: &str, font: &Handle<Font>, key: &'static str) -> impl Bundle {
     (
         Text::new(translated_text),
         TextFont {
@@ -118,6 +115,7 @@ fn spawn_text_bundle(translated_text: &str, font: &Handle<Font>) -> impl Bundle 
             ..default()
         },
         TextColor(Color::WHITE),
+        TranslationKey(key),
     )
 }
 

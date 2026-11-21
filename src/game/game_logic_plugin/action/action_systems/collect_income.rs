@@ -1,5 +1,5 @@
-use crate::game::game_logic_plugin::ai::profile::AiProfile;
 use crate::game::events::action_messages::EndTurn;
+use crate::game::game_logic_plugin::ai::profile::AiProfile;
 use crate::world::components::{Food, GameMode, Gold, Id, Science};
 use crate::world::game_configs::{GameLogicConfig, Players};
 use crate::world::game_resources::building_map::BuildingMap;

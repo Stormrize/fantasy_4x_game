@@ -1,7 +1,5 @@
 use crate::game::events::action_messages::Cycle;
-use crate::game::game_logic_plugin::components::{
-    AlreadySelectedTile, TileLayer,
-};
+use crate::game::game_logic_plugin::components::{AlreadySelectedTile, TileLayer};
 use bevy::prelude::{MessageReader, ResMut};
 
 pub fn cycle_selection_system(

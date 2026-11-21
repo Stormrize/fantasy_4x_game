@@ -1,5 +1,5 @@
 use super::ai;
-use super::model::{CombatOutcome, CombatPlayer, Combatant};
+use super::model::{CombatCommand, CombatOutcome, CombatPlayer, Combatant};
 use super::simulation;
 use crate::ui::menus::AppState;
 use crate::world::components::{Id, PlayerType};
@@ -12,44 +12,80 @@ use crate::world::game_resources::unit_map::UnitsMap;
 use crate::world::turn_manager::TurnManager;
 use bevy::app::{App, Plugin, Update};
 use bevy::math::IVec2;
-use bevy::prelude::{Commands, IntoScheduleConfigs, Query, Res, ResMut, Resource, in_state};
+use bevy::prelude::{
+    Commands, IntoScheduleConfigs, Message, MessageReader, OnEnter, Query, Res, ResMut, Resource,
+    in_state,
+};
 use bevy::tasks::futures_lite::future;
 use bevy::tasks::{AsyncComputeTaskPool, Task};
 use std::collections::{HashMap, HashSet};
 
-/// Состояние боевого цикла (SimulationTime).
-#[derive(Resource, Default)]
+/// State of the combat loop (SimulationTime).
+#[derive(Resource, Debug, Default)]
 pub struct CombatCycle {
     pub phase: CombatPhase,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub enum CombatPhase {
-    /// Бой не идёт.
+    /// No combat is running.
     #[default]
     Idle,
-    /// Бой объявлен, нужно собрать мир и запустить фоновое планирование.
+    /// Combat was declared; the local player queues orders before the simulation.
+    PlayerPlanning,
+    /// Combat declared; the world snapshot must be collected and simulated.
     Planning,
-    /// ИИ ботов думает и симуляция считается в фоне.
+    /// Bot AI is thinking and the simulation is computed in the background.
     Resolving(Task<CombatOutcome>),
 }
+
+/// Orders queued by the local player during [`CombatPhase::PlayerPlanning`].
+/// The UI fills this resource; combat consumes and clears it.
+#[derive(Resource, Default)]
+pub struct CombatOrders(pub Vec<CombatCommand>);
+
+/// Sent by the combat UI when the player wants to resolve the planned round.
+#[derive(Message)]
+pub struct ResolveCombat;
 
 pub struct CombatPlugin;
 
 impl Plugin for CombatPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<CombatCycle>().add_systems(
-            Update,
-            (begin_combat, poll_combat)
-                .chain()
-                .run_if(in_state(AppState::InGameRenderer)),
-        );
+        app.init_resource::<CombatCycle>()
+            .init_resource::<CombatOrders>()
+            .add_message::<ResolveCombat>()
+            .add_systems(OnEnter(AppState::InGameAssetLoading), reset_combat_state)
+            .add_systems(
+                Update,
+                (request_resolution, begin_combat, poll_combat)
+                    .chain()
+                    .run_if(in_state(AppState::InGameRenderer)),
+            );
     }
 }
 
-/// Собирает боевых юнитов и запускает планирование + симуляцию в фоне.
+/// A fresh game must not inherit an unfinished combat or stale orders.
+fn reset_combat_state(mut commands: Commands) {
+    commands.insert_resource(CombatCycle::default());
+    commands.insert_resource(CombatOrders::default());
+}
+
+/// The UI can only request a simulation while the player is still planning.
+fn request_resolution(mut cycle: ResMut<CombatCycle>, mut requests: MessageReader<ResolveCombat>) {
+    if requests.read().count() == 0 {
+        return;
+    }
+    if matches!(cycle.phase, CombatPhase::PlayerPlanning) {
+        cycle.phase = CombatPhase::Planning;
+        println!("[combat] simulation requested by the player");
+    }
+}
+
+/// Gathers combat units and starts planning + simulation in the background.
 fn begin_combat(
     mut cycle: ResMut<CombatCycle>,
+    mut orders: ResMut<CombatOrders>,
     units_map: Res<UnitsMap>,
     fog_map: Res<FogMap>,
     combat_query: Query<(
@@ -63,15 +99,43 @@ fn begin_combat(
     players: Res<Players>,
     game_logic_config: Res<GameLogicConfig>,
 ) {
-    if !matches!(cycle.phase, CombatPhase::Planning) {
-        return;
+    match cycle.phase {
+        CombatPhase::Planning => {}
+        CombatPhase::PlayerPlanning => {
+            // Never stall combat when there is nothing to command: the player
+            // needs at least one combat unit and at least one visible enemy.
+            let local_id = game_logic_config.player.id;
+            let size = units_map.size;
+            let mut has_own = false;
+            let mut has_enemy = false;
+            for (index, slot) in units_map.map.iter().enumerate() {
+                let Some(entity) = *slot else { continue };
+                let Ok((owner, ..)) = combat_query.get(entity) else {
+                    continue;
+                };
+                if *owner == local_id {
+                    has_own = true;
+                } else {
+                    let (row, col) = (index / size, index % size);
+                    if fog_map.debug_full_visibility || fog_map.is_general_visible_player(row, col)
+                    {
+                        has_enemy = true;
+                    }
+                }
+            }
+            if !has_own || !has_enemy {
+                cycle.phase = CombatPhase::Planning;
+            }
+            return;
+        }
+        _ => return,
     }
 
     let combatants = collect_combatants(&units_map, &combat_query);
     let players_state = collect_players(&players);
     let bot_ids: Vec<Id> = game_logic_config.players.iter().map(|p| p.id).collect();
 
-    // Честность: каждый бот видит только врагов в тумане войны (full visibility).
+    // Fairness: each bot only sees enemies through its fog of war (full visibility).
     let local_player_id = game_logic_config.player.id;
     let visible_enemies = collect_visible_enemies(
         &units_map,
@@ -81,13 +145,14 @@ fn begin_combat(
         local_player_id,
     );
 
+    let human_commands = std::mem::take(&mut orders.0);
+
     let task = AsyncComputeTaskPool::get().spawn(async move {
-        // Человек пока не готовит атаки (боевой UI — позже), его команды пусты.
         plan_and_simulate(
             combatants,
             players_state,
             bot_ids,
-            Vec::new(),
+            human_commands,
             visible_enemies,
         )
     });
@@ -95,9 +160,10 @@ fn begin_combat(
     cycle.phase = CombatPhase::Resolving(task);
 }
 
-/// Когда симуляция готова — применяет исход и возвращает ход человеку.
+/// Applies the finished simulation and hands the turn back to the player.
 fn poll_combat(
     mut cycle: ResMut<CombatCycle>,
+    mut orders: ResMut<CombatOrders>,
     mut turn_manager: ResMut<TurnManager>,
     mut units_map: ResMut<UnitsMap>,
     mut current_hp_query: Query<&mut CurrentHp>,
@@ -123,18 +189,19 @@ fn poll_combat(
         &mut commands,
     );
 
-    // Бой окончен — ход возвращается стартовому игроку (человеку).
+    // Combat is over: return the turn to the starting (human) player.
     turn_manager.current_player = Player::new(Id(turn_manager.starting_index), PlayerType::Human);
     cycle.phase = CombatPhase::Idle;
+    orders.0.clear();
     println!("Combat simulation resolved");
 }
 
-/// Боты готовят команды и разрешают бой.
+/// Bots prepare their commands and resolve the round.
 fn plan_and_simulate(
     combatants: Vec<Combatant>,
     players: Vec<CombatPlayer>,
     bot_ids: Vec<Id>,
-    human_commands: Vec<super::model::CombatCommand>,
+    human_commands: Vec<CombatCommand>,
     visible_enemies: HashMap<Id, HashSet<IVec2>>,
 ) -> CombatOutcome {
     let mut commands = human_commands;
@@ -211,7 +278,7 @@ fn collect_players(players: &Players) -> Vec<CombatPlayer> {
         .collect()
 }
 
-/// Для каждого бота — позиции вражеских юнитов, видимые ему (full visibility).
+/// For each bot: positions of enemy units visible to it (full visibility).
 fn collect_visible_enemies(
     units_map: &UnitsMap,
     fog_map: &FogMap,

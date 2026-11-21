@@ -1,8 +1,8 @@
 use bevy::math::IVec2;
 
+use crate::game::events::render_action_messages::RenderGatherEntity;
 use crate::game::game_logic_plugin::action::action_systems::{ActionCtx, tile};
 use crate::game::game_logic_plugin::ai::profile::AiProfile;
-use crate::game::events::render_action_messages::RenderGatherEntity;
 use crate::world::components::{Food, GameMode, Gold, Science};
 use crate::world::game_resources::data::resource::{CommonKind, ResourceType};
 
