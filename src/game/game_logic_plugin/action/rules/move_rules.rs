@@ -1,3 +1,7 @@
+use crate::game::game_logic_plugin::action::rules::movement::{
+    UNREACHABLE, biome_cost, movement_field,
+};
+use crate::game::game_logic_plugin::combat::integration::CombatPhase;
 use crate::world::components::Id;
 use crate::world::game_configs::Player;
 use bevy::math::IVec2;
@@ -5,6 +9,11 @@ use bevy::math::IVec2;
 #[inline]
 pub fn is_players_turn(player: Player, current_player: Player) -> bool {
     player == current_player
+}
+
+#[inline]
+pub fn is_combat(current_combat_phase: &CombatPhase) -> bool {
+    matches!(current_combat_phase, CombatPhase::Idle)
 }
 
 #[inline]

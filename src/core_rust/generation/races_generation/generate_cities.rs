@@ -90,4 +90,12 @@ impl BuildingMapNoBevy {
             size: terrain_size,
         }
     }
+
+    #[inline]
+    pub fn is_some(&self, row: usize, col: usize) -> bool {
+        debug_assert!(row < self.size);
+        debug_assert!(col < self.size);
+
+        self.buildings[row * self.size + col].is_some()
+    }
 }

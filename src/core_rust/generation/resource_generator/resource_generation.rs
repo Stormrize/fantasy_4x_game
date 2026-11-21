@@ -1,15 +1,18 @@
-use rand::{RngExt, SeedableRng};
+use rand::{RngExt, SeedableRng, seq::SliceRandom};
 use rand_chacha::ChaCha8Rng;
 
-use crate::world::{
-    game_configs::GenerationConfig,
-    game_resources::{
-        data::{
-            biome::BiomeType,
-            resource::{CommonKind, CommonResource, RareKind, RareResource, ResourceType},
+use crate::{
+    core_rust::generation::races_generation::generate_cities::BuildingMapNoBevy,
+    world::{
+        game_configs::GenerationConfig,
+        game_resources::{
+            data::{
+                biome::BiomeType,
+                resource::{CommonKind, CommonResource, RareKind, RareResource, ResourceType},
+            },
+            resource_map::ResourceMap,
+            terrain_map::TerrainMap,
         },
-        resource_map::ResourceMap,
-        terrain_map::TerrainMap,
     },
 };
 
@@ -32,15 +35,19 @@ impl RareSpawn {
 }
 
 impl ResourceMap {
-    pub fn new(config: &GenerationConfig, terrain: &TerrainMap) -> Self {
+    pub fn new(
+        config: &GenerationConfig,
+        terrain: &TerrainMap,
+        buildings: &BuildingMapNoBevy,
+    ) -> Self {
         let mut rng = ChaCha8Rng::seed_from_u64(config.seed as u64);
         let size = config.terrain_size;
         let mut map: Vec<Option<ResourceType>> = vec![None; size * size];
 
         // Сначала обычные (порядок вызовов важен для детерминизма seed),
         // потом редкие: они не меняют раскладку обычных.
-        generate_common(&mut map, terrain, size, &mut rng);
-        generate_rare(&mut map, terrain, size, &mut rng);
+        generate_common(&mut map, terrain, buildings, size, &mut rng);
+        generate_rare(&mut map, terrain, buildings, size, &mut rng);
 
         Self { map, size }
     }
@@ -51,6 +58,7 @@ impl ResourceMap {
 fn generate_common(
     map: &mut [Option<ResourceType>],
     terrain: &TerrainMap,
+    buildings: &BuildingMapNoBevy,
     size: usize,
     rng: &mut ChaCha8Rng,
 ) {
@@ -66,7 +74,7 @@ fn generate_common(
             window.push((row, col));
 
             if window.len() == ResourceWindow::COMMON {
-                place_common(map, terrain, size, window, rng);
+                place_common(map, terrain, buildings, size, window, rng);
                 window.clear();
             }
         }
@@ -85,11 +93,20 @@ fn common_kind_for_biome(biome: BiomeType) -> Option<CommonKind> {
 fn place_common(
     map: &mut [Option<ResourceType>],
     terrain: &TerrainMap,
+    buildings: &BuildingMapNoBevy,
     size: usize,
-    window: &[(usize, usize)],
+    window: &mut [(usize, usize)],
     rng: &mut ChaCha8Rng,
 ) {
-    let (row, col) = window[rng.random_range(0..window.len())];
+    window.shuffle(rng);
+
+    let Some((row, col)) = window
+        .iter()
+        .copied()
+        .find(|&(row, col)| buildings.is_some(row, col))
+    else {
+        return;
+    };
 
     // Владелец берётся из биома именно выбранной клетки,
     // поэтому чужие цвета на поле другой расы больше не попадают.
@@ -114,6 +131,7 @@ fn place_common(
 fn generate_rare(
     map: &mut [Option<ResourceType>],
     terrain: &TerrainMap,
+    buildings: &BuildingMapNoBevy,
     size: usize,
     rng: &mut ChaCha8Rng,
 ) {
@@ -126,6 +144,9 @@ fn generate_rare(
         for col in 0..size {
             let biome = terrain.get_biome(row, col);
             if biome.biome_type == BiomeType::Water {
+                continue;
+            }
+            if buildings.is_some(row, col) {
                 continue;
             }
             land_count += 1;

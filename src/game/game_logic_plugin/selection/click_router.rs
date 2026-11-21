@@ -1,17 +1,16 @@
 use bevy::prelude::{MessageReader, MessageWriter, Res};
 
-use crate::game::game_logic_plugin::events_resources_structs::action_messages::{
-    Clear, Cycle, Move, NewTile,
-};
-use crate::game::game_logic_plugin::events_resources_structs::{
-    action_messages::TileClickedEvent, components::*,
-};
+use crate::game::events::action_messages::TileClickedEvent;
+use crate::game::events::action_messages::{Action, Clear, Cycle, NewTile};
+use crate::game::game_logic_plugin::combat::integration::{CombatCycle, CombatPhase};
+use crate::game::game_logic_plugin::components::*;
 use crate::world::game_configs::GameLogicConfig;
 use crate::world::game_resources::WorldMaps;
 
 pub fn route_selection(
     world_maps: WorldMaps,
     config: Res<GameLogicConfig>,
+    combat_cycle: Res<CombatCycle>,
     already_selected_tile: Res<AlreadySelectedTile>,
     mut tile_clicked: MessageReader<TileClickedEvent>,
     mut move_cmd: MessageWriter<Move>,
@@ -62,10 +61,14 @@ pub fn route_selection(
             }
 
             Some(selected_pos) => {
-                move_cmd.write(Move {
-                    entity_pos: selected_pos,
-                    target_pos: clicked_pos,
-                });
+                // Units do not move on the world map during the combat phase;
+                // orders are queued through the combat bar instead.
+                if matches!(combat_cycle.phase, CombatPhase::Idle) {
+                    actions.write(Action::Move {
+                        unit_pos: selected_pos,
+                        target_pos: clicked_pos,
+                    });
+                }
             }
         }
     }

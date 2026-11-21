@@ -1,3 +1,4 @@
+use crate::game::game_logic_plugin::combat::integration::CombatPhase;
 use crate::world::components::{GameMode, Id, PlayerType};
 use crate::world::game_configs::{GameLogicConfig, Player};
 use bevy::prelude::Resource;
@@ -16,6 +17,7 @@ pub struct TurnManager {
     pub game_mode: GameMode,
     pub starting_index: u16,
     pub length: u16,
+    pub combat_phase: CombatPhase,
 }
 
 impl TurnManager {
@@ -25,6 +27,7 @@ impl TurnManager {
             length,
             current_player: Player::new(id, player_type),
             game_mode,
+            combat_phase: CombatPhase::Idle,
         }
     }
 

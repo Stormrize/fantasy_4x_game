@@ -64,7 +64,7 @@ fn generate_map_resources(config: &GenerationConfig) -> GeneratedMapResources {
     let fog = FogMap::new(config, &capitals_pos);
     let buildings = BuildingMapNoBevy::new(config, &capitals_pos, &terrain);
     terrain.update_ids(&buildings);
-    let resources = ResourceMap::new(config, &terrain);
+    let resources = ResourceMap::new(config, &terrain, &buildings);
     let units = UnitsMapNoBevy::new(config, &capitals_pos, &terrain);
 
     GeneratedMapResources {
