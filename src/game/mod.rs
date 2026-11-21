@@ -1,6 +1,6 @@
 mod camera_plugin;
 pub(crate) mod events;
-mod game_logic_plugin;
+pub(crate) mod game_logic_plugin;
 mod renderer;
 
 use bevy::app::App;

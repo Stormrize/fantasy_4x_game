@@ -1,3 +1,4 @@
+use crate::game::events::action_messages::{Action, RevealSource};
 use crate::game::game_logic_plugin::action::rules::movement::{
     UNREACHABLE, movement_field, neighbors, nominal_field,
 };
@@ -6,9 +7,6 @@ use crate::game::game_logic_plugin::ai::perception::{
     OwnBuilding, OwnCombatUnit, OwnHelper, WorldSnapshot,
 };
 use crate::game::game_logic_plugin::ai::profile::AiProfile;
-use crate::game::events::action_messages::{
-    Action, RevealSource,
-};
 use crate::game::game_logic_plugin::components::TileLayer;
 use crate::world::components::Gold;
 use crate::world::game_resources::data::biome::BiomeType;

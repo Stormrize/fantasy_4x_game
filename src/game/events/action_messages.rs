@@ -1,6 +1,4 @@
-use crate::game::game_logic_plugin::components::{
-    JustSelectedTile, TileLayer,
-};
+use crate::game::game_logic_plugin::components::{JustSelectedTile, TileLayer};
 use crate::world::game_configs::Player;
 use crate::world::game_resources::data::building::BuildingType;
 use crate::world::game_resources::data::unit::UnitType;
