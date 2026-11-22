@@ -12,12 +12,14 @@ mod world;
 use bevy::prelude::*;
 
 use crate::game::GamePlugin;
+use crate::io::LoaderPlugin;
 use crate::ui::UiPlugin;
 
 fn main() {
     println!("Start");
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(LoaderPlugin)
         .add_plugins(UiPlugin)
         .add_plugins(GamePlugin)
         //.add_plugins(FrameTimeDiagnosticsPlugin::default())
